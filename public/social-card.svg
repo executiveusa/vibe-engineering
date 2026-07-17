@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#08090b"/>
+  <defs>
+    <radialGradient id="g" cx="80%" cy="15%" r="70%"><stop offset="0" stop-color="#d8ff3e" stop-opacity=".24"/><stop offset="1" stop-color="#08090b" stop-opacity="0"/></radialGradient>
+    <pattern id="p" width="64" height="64" patternUnits="userSpaceOnUse"><path d="M64 0H0V64" fill="none" stroke="#fff" stroke-opacity=".055"/></pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#g)"/>
+  <rect width="1200" height="630" fill="url(#p)"/>
+  <circle cx="94" cy="88" r="36" fill="none" stroke="#d8ff3e" stroke-opacity=".38"/>
+  <path d="M63 60h15l16 42 16-42h15l-25 54H89L63 60Z" fill="#d8ff3e"/>
+  <text x="64" y="250" fill="#f3efe5" font-family="Arial, sans-serif" font-size="94" font-weight="700" letter-spacing="-6">STOP VIBE CODING.</text>
+  <text x="64" y="348" fill="none" stroke="#f3efe5" stroke-opacity=".78" font-family="Arial, sans-serif" font-size="94" font-weight="700" letter-spacing="-6">START ENGINEERING.</text>
+  <text x="67" y="464" fill="#d8ff3e" font-family="Arial, sans-serif" font-size="25" font-weight="700" letter-spacing="5">VERIFY IT BEFORE EVERYTHING.</text>
+  <text x="67" y="548" fill="#9b9b95" font-family="Arial, sans-serif" font-size="20">The speed of AI. The discipline of engineering. The freedom of ownership.</text>
+</svg>
