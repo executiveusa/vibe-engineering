@@ -1,0 +1,39 @@
+# Vibe Engineering
+
+> Verify It Before Everything.
+
+Vibe Engineering is a sovereign AI building methodology developed by The Pauli Effect / Yappyverse for non-technical creators and AI-assisted product teams.
+
+## Core promise
+
+Use AI speed without surrendering judgment, quality, maintainability, or ownership.
+
+## Eight-stage method
+
+1. Vision
+2. Blueprint
+3. Build
+4. Verify
+5. Council
+6. Judge
+7. Ship
+8. Improve
+
+## Release policy
+
+- Vibe Score floor: 8.5/10
+- Hard stops: security, reliability, and ownership must each score at least 7/10
+- Consequential legal, financial, safety, publishing, and relationship decisions require explicit human approval
+
+## Sovereignty pledge
+
+Once a customer buys a deliverable, the agreed code, data, accounts, workflows, access, and documentation belong to that customer. Fees are for human time and compute, not manufactured dependence.
+
+## Repository documents
+
+- README.md — project overview and quick start
+- docs/MANIFESTO.md — principles and moral position
+- docs/METHOD.md — complete eight-stage method
+- docs/GOVERNANCE.md — Council, Judge, approvals, and release gates
+- docs/VIBE-SCORE.md — scoring rubric
+- public/vibe-engineering-foundation-prompt.md — free system prompt
