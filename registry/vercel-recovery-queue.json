@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "source": "Vercel fleet audit supplied 2026-07-17",
+  "policy": {
+    "concurrency": 1,
+    "autoMerge": false,
+    "requireEvidence": true,
+    "requireIndependentReview": true,
+    "deduplicateByRepository": true
+  },
+  "projects": [
+    {"project":"pauli-cloud","repository":"executiveusa/pauli-cloud","branch":"main","url":"https://pauli-cloud.vercel.app","failure":"404","status":"pending"},
+    {"project":"pauli-jarvis-demo","repository":"executiveusa/pauli-jarvis-demo","branch":"main","url":"https://pauli-jarvis-demo.vercel.app","failure":"404","status":"pending"},
+    {"project":"asc3nd-brand-kit","repository":"executiveusa/asc3nd-brand-kit-","branch":"main","url":"https://asc3nd-brand-kit.vercel.app","failure":"404","status":"pending"},
+    {"project":"kupuri-ron-presentation","repository":"executiveusa/kupuri-documentos-interactivos-ron","branch":"main","url":"https://kupuri-ron-presentation-the-pauli-effect.vercel.app","failure":"404","status":"pending"},
+    {"project":"pauli-glot","repository":"executiveusa/pauli-glot","branch":"main","url":"https://pauli-glot.vercel.app","failure":"500","status":"pending"},
+    {"project":"pauli-story-tool-kit","repository":"executiveusa/pauli-story-tool-kit","branch":"main","url":"https://pauli-story-tool-kit-the-pauli-effect.vercel.app","failure":"404","status":"pending"},
+    {"project":"botanical-memories-ilsg","repository":"executiveusa/botanical-memories","branch":"main","url":"https://botanical-memories-ilsg.vercel.app","failure":"timeout","status":"pending"},
+    {"project":"botanical-memories","repository":"executiveusa/botanical-memories","branch":"main","url":"https://botanical-memories-two.vercel.app","failure":"timeout","status":"pending"},
+    {"project":"impact-city-builder-verse-backend","repository":"executiveusa/impact-city-builder-verse","branch":"main","url":"https://impact-city-builder-verse-backend-the-pauli-effect.vercel.app","failure":"404","status":"pending"},
+    {"project":"moreoflessstudios-com","repository":"executiveusa/moreoflessstudios.com","branch":"main","url":"https://moreoflessstudios-com.vercel.app","failure":"404","status":"pending"},
+    {"project":"watcher-factory","repository":"executiveusa/watcher-factory-dashboard","branch":"main","url":"https://watcher-factory-the-pauli-effect.vercel.app","failure":"404","status":"pending"},
+    {"project":"melodia-lingua","repository":"executiveusa/Melodia-lingua","branch":"main","url":"https://melodia-lingua.vercel.app","failure":"404","status":"pending"},
+    {"project":"cosmos-dashboard","repository":null,"branch":null,"url":"https://cosmos-dashboard-flax.vercel.app","failure":"404","status":"blocked","blocker":"CLI-only; no Git repository"},
+    {"project":"pauli-my-brain-is-full-crew-58th","repository":"executiveusa/pauli-my-Brain-Is-Full-Crew","branch":"main","url":"https://pauli-my-brain-is-full-crew-58th-the-pauli-effect.vercel.app","failure":"404","status":"pending"},
+    {"project":"the-watcher","repository":"executiveusa/-lightning-claude-memory-agent","branch":"main","url":"https://the-watcher-three.vercel.app","failure":"timeout","status":"pending"},
+    {"project":"yappyverse-newsletter","repository":"executiveusa/yappyverse-newsletter","branch":"main","url":"https://yappyverse-newsletter-the-pauli-effect.vercel.app","failure":"404","status":"pending"},
+    {"project":"cloudflare-workers-nextjs-saas-template-artist","repository":"executiveusa/cloudflare-workers-nextjs-saas-template-artist","branch":"main","url":"https://cloudflare-workers-nextjs-saas-template-artist-the-pauli-effect.vercel.app","failure":"404","status":"pending"},
+    {"project":"pv-construction-platform","repository":"executiveusa/pv-construction-platform","branch":"main","url":"https://pv-construction-platform-the-pauli-effect.vercel.app","failure":"404","status":"pending"},
+    {"project":"aionui-cowork","repository":"executiveusa/AionUi-cowork","branch":"main","url":"https://aionui-cowork-the-pauli-effect.vercel.app","failure":"404","status":"pending"},
+    {"project":"maxx-craft","repository":"executiveusa/maxx-craft","branch":"main","url":"https://maxx-craft.vercel.app","failure":"404","status":"pending"},
+    {"project":"cult-directory-template","repository":"executiveusa/cult-directory-template","branch":"main","url":"https://cult-directory-template-sooty.vercel.app","failure":"timeout","status":"pending"},
+    {"project":"space-agent","repository":"executiveusa/space-agent","branch":"main","url":"https://space-agent-five.vercel.app","failure":"404","status":"pending"},
+    {"project":"synthia-gateway","repository":null,"branch":null,"url":"https://synthia-gateway.vercel.app","failure":"401","status":"blocked","blocker":"CLI-only; no Git repository"},
+    {"project":"darya-designs","repository":"executiveusa/Darya-designs","branch":"main","url":null,"failure":"no-deployment","status":"pending"},
+    {"project":"speedtolead","repository":"executiveusa/speedtolead","branch":"main","url":null,"failure":"no-deployment","status":"pending"},
+    {"project":"v0-newsletter-template","repository":null,"branch":null,"url":null,"failure":"no-repository","status":"blocked","blocker":"No Git repository"}
+  ]
+}
