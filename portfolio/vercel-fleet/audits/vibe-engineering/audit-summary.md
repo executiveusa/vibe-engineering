@@ -21,13 +21,22 @@
 - Strategic leverage: Very high
 - Immediate revenue relationship: Indirect; enables audit, rescue, delivery, and managed-operations offers
 
+## Founder decision log
+
+### Decision 1 — Primary identity for the next 90 days
+
+**Selected: B — Internal-first service engine.**
+
+Vibe Engineering will operate PAULI STUDIO's own portfolio first while powering paid audits, rescue sprints, and managed operations. It will not be treated as a standalone software platform yet.
+
+**Reasoning:** This creates immediate leverage from assets already owned, supports near-term revenue, and lets any future software product emerge from proven delivery patterns instead of speculative platform building.
+
 ## Material unresolved decisions
 
-1. Is this primarily an internal operating system, a commercial product sold to other builders, or both with a strict internal-first sequence?
-2. Who is the first paying customer and what exact deliverable will prove commercial value?
-3. Which authority level should the factory have during the first 30 days?
-4. What is the smallest founder dashboard required before scaling beyond the first five repositories?
-5. What should be consolidated into this repository versus remaining separate infrastructure repositories?
+1. Who is the first paying customer and what exact deliverable will prove commercial value?
+2. Which authority level should the factory have during the first 30 days?
+3. What is the smallest founder dashboard required before scaling beyond the first five repositories?
+4. What should be consolidated into this repository versus remaining separate infrastructure repositories?
 
 ## Recommendation before implementation
 
@@ -35,4 +44,4 @@ Treat Vibe Engineering as an internal-first studio operating system that also pr
 
 ## Current gate
 
-GRILL_IN_PROGRESS. No additional autonomous factory expansion should begin until the positioning decision is confirmed and the first commercial proof path is named.
+GRILL_IN_PROGRESS. Positioning is confirmed. The next decision is to name the first commercial proof target and exact paid outcome before expanding autonomous execution.
