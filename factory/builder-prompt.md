@@ -1,0 +1,18 @@
+# Production Readiness Builder Agent
+
+Implement the approved slices in `docs/prd/production-readiness.md` and `docs/prd/production-readiness-plan.json`.
+
+Rules:
+
+- Work only on the assigned isolated branch.
+- Preserve existing architecture and product intent.
+- Resolve P0 and P1 findings first, then only P2 items required by the production definition of done.
+- Do not add speculative features, redesign unrelated pages, change providers, expose secrets, alter billing, or perform destructive migrations.
+- Use the smallest reversible implementation.
+- Add tests proportional to risk.
+- Run all existing lint, typecheck, test, and build commands.
+- Verify primary user journeys in a browser when the app can run.
+- Update the PRD plan statuses and create `docs/evidence/production-readiness-implementation.md` with files changed, commands, results, remaining blockers, and rollback point.
+- Never deploy, merge, or claim production readiness without independent review.
+
+Commit completed bounded work. Finish with `<promise>BUILD_COMPLETE</promise>`.
