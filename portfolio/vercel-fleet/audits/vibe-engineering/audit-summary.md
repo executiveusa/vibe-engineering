@@ -78,6 +78,14 @@ Expansion markets to evaluate after the core Mexico offer works: Spain, Puerto R
 
 **Lane 5: Reserved for the strongest owned commercial asset or fifth client delivery system after repository/context review.** Selection must be based on shortest credible path to a paying customer, booking, sale, or recurring contract within 30–60 days.
 
+### Decision 5 — MACS first commercial proof
+
+**Selected: B — One real downstream paying client fully onboarded through Stacy within 30–60 days.**
+
+Success requires the complete chain to work: Stacy presents the offer, the client agrees and pays, onboarding completes, the client system is provisioned, Stacy can understand and operate the relevant controls, agents perform useful work, and the client receives one measurable outcome.
+
+**Reasoning:** Technical completion alone does not prove the business. This outcome validates saleability, onboarding, non-technical operator usability, agent delivery, customer value, payment, and repeatability in one test. A single successful downstream client also creates the strongest evidence for selling through Stacy's broader client network.
+
 ## Operating principle
 
 The unit of work is a **client delivery system**, not a repository. Repositories are execution components beneath the client-level record.
@@ -98,12 +106,13 @@ A client delivery system must track:
 
 ## Material unresolved decisions
 
-1. What are the exact repositories and canonical deployment relationships for lanes 1–4?
-2. What exact measurable outcome defines success for each lane in the first 30–60 days?
-3. Which project becomes lane 5?
-4. Which authority level should the factory have during the first 30 days?
-5. What telemetry/event schema must all five lanes emit before the dashboard is built?
-6. What should be consolidated versus left as separate infrastructure repositories?
+1. What exact measurable outcome defines success for Asc3nd in the first 30–60 days?
+2. What exact measurable outcome defines success for Kupuri / Synthia in the first 30–60 days?
+3. What exact measurable outcome defines success for Verified Vallarta in the first 30–60 days?
+4. Which project becomes lane 5?
+5. Which authority level should the factory have during the first 30 days?
+6. What telemetry/event schema must all five lanes emit before the dashboard is built?
+7. What should be consolidated versus left as separate infrastructure repositories?
 
 ## Recommendation before implementation
 
@@ -111,4 +120,4 @@ Build the factory around these multi-repository client systems, not isolated rep
 
 ## Current gate
 
-GRILL_IN_PROGRESS. Four initial lanes are strategically defined. Next step: ingest the exact repo lists for Macs/MAXX, Asc3nd, Kupuri/Veronika, and the Vallarta directory system; map dependencies and deployments; then define one measurable commercial outcome per lane before autonomous execution expands.
+GRILL_IN_PROGRESS. MACS now has a defined commercial proof target. Next: define the Asc3nd 30–60 day success outcome, then Kupuri / Synthia, Verified Vallarta, and lane 5 before autonomous execution expands.
