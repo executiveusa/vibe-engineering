@@ -53,7 +53,8 @@ jobs:
       - name: Install Sandcastle runtime
         working-directory: target
         run: npm install --no-save @ai-hero/sandcastle@0.6.4 tsx
-      - name: Run audit, PRD, builder, and judge
+      - id: factory
+        name: Run audit, PRD, builder, and judge
         working-directory: target
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -65,9 +66,10 @@ jobs:
         working-directory: target
         env:
           GH_TOKEN: ${{ secrets.FLEET_GITHUB_TOKEN }}
+          SANDCASTLE_BRANCH: ${{ steps.factory.outputs.branch }}
         run: |
-          BRANCH=$(git branch --show-current)
-          git push --set-upstream origin "$BRANCH"
-          gh pr create --base "${{ matrix.branch }}" --head "$BRANCH" \
+          test -n "$SANDCASTLE_BRANCH"
+          git push --set-upstream origin "$SANDCASTLE_BRANCH:$SANDCASTLE_BRANCH"
+          gh pr create --base "${{ matrix.branch }}" --head "$SANDCASTLE_BRANCH" \
             --title "Production readiness: audit, PRD, and bounded execution" \
             --body "Nightly Vibe Engineering run for ${{ matrix.project }}. Includes A2A completion audit, production-readiness PRD, bounded implementation, independent review, Judge evidence, and rollback notes. Merge only when the Judge decision is SHIP and required checks pass."
