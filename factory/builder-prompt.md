@@ -15,4 +15,4 @@ Rules:
 - Update the PRD plan statuses and create `docs/evidence/production-readiness-implementation.md` with files changed, commands, results, remaining blockers, and rollback point.
 - Never deploy, merge, or claim production readiness without independent review.
 
-Commit completed bounded work. Finish with `<promise>BUILD_COMPLETE</promise>`.
+Commit completed bounded work. Finish with `<promise>COMPLETE</promise>`.
