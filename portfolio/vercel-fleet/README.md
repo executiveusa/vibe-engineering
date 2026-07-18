@@ -1,10 +1,6 @@
-# Vercel Fleet Control Folder
+# PAULI STUDIO Vercel Fleet Control
 
-This folder is the source of truth for onboarding the PAULI STUDIO Vercel-connected portfolio into the Vibe Engineering factory.
-
-## Operating rule
-
-Work proceeds in batches of five **unique GitHub repositories**. Vercel deployments are tracked separately because multiple projects often point to the same repository.
+This folder is the governed portfolio workspace for classifying, prioritizing, onboarding, auditing, and dispatching Vercel-connected repositories through the Vibe Engineering factory.
 
 ## Current baseline
 
@@ -15,7 +11,28 @@ Work proceeds in batches of five **unique GitHub repositories**. Vercel deployme
 - Central control-plane repository added: `executiveusa/vibe-engineering`
 - Factory queue size: 102
 - Broken or unverified Vercel projects: 26 reported
-- Source row 83 was truncated and is explicitly marked for verification.
+- Source row 83 was truncated and requires live reconciliation.
+
+## Operating sequence
+
+```text
+Live Vercel reconciliation
+→ canonical repository resolution
+→ read-only repository audit
+→ project summary and confidence matrix
+→ one-question-at-a-time Grill interview
+→ Vibe Project Contract PR
+→ production-readiness PRD
+→ one approved Sandcastle ticket
+→ independent review and SHIP/HOLD decision
+```
+
+## Format standard
+
+- Markdown stores human-readable project truth, policy, decisions, and evidence.
+- YAML stores editable configuration and founder-confirmed state.
+- JSON stores validated audit, queue, and Judge outputs.
+- POML stores executable intake and agent prompts.
 
 ## Files
 
@@ -24,22 +41,41 @@ Work proceeds in batches of five **unique GitHub repositories**. Vercel deployme
 - `repo-batches.md` — unique repository checklist, five per batch.
 - `priority-waves.md` — strategic categories and operating sequence.
 - `sandcastle-queue.json` — machine-readable queue for future Sandcastle dispatch.
+- `audits/` — per-repository audit, confidence, Grill, contract, and evidence records.
+
+## Rules
+
+1. Process repositories, not duplicate Vercel deployment records.
+2. Work in batches of five, ordered by commercial and strategic leverage.
+3. Do not modify target product code during intake.
+4. Inspect evidence before asking the founder a question.
+5. Ask one material Grill question at a time and include an expert recommendation.
+6. Do not dispatch Sandcastle until the project contract and bounded ticket are approved.
+7. Track CLI-only and source-less deployments separately.
+8. Never treat HTTP 200 as production readiness.
+9. Use live Vercel discovery to reconcile the supplied fleet snapshot before autonomous dispatch.
 
 ## Status vocabulary
 
-`MISSING` → no project contract installed  
-`INTAKE_PR_OPEN` → contract proposed  
-`CONTRACTED` → contract merged  
-`AUDITED` → read-only audit complete  
-`PRD_READY` → bounded production PRD exists  
-`IN_SANDCASTLE` → isolated execution running  
-`SHIP` → evidence passes production gate  
-`HOLD` → owner decision, credentials, or unresolved risk required
+- `NOT_STARTED`
+- `AUDITING`
+- `GRILL_IN_PROGRESS`
+- `CONTRACT_PR_OPEN`
+- `CONTRACTED`
+- `PRD_READY`
+- `SANDCASTLE_QUEUED`
+- `IN_EXECUTION`
+- `SHIP_READY`
+- `HOLD`
+- `PARK`
+- `ARCHIVE_CANDIDATE`
 
-## Guardrails
+## First batch
 
-- Never send duplicate Vercel deployments to Sandcastle as separate repositories.
-- Never install project contracts directly on `main`; use an intake PR.
-- Never auto-merge or auto-deploy during initial rollout.
-- Commercial and client-delivery repositories outrank experiments.
-- Forks, templates, generic projects, and unknown-purpose repositories require classification before execution.
+1. `vibe-engineering`
+2. `pauli-cloud`
+3. `pauli-hermes-agent`
+4. `macs-agent-portal`
+5. `maxx-migrations-agentic-systems`
+
+The first audit is active under `audits/vibe-engineering/`.
