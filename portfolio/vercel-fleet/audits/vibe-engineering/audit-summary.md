@@ -54,6 +54,30 @@ The default founder view must answer four questions in under one minute:
 
 **Reasoning:** The control center must reduce founder cognitive load rather than become another dashboard to maintain. We should not build it against invented mock state. First run the five-client model, define the common telemetry/event schema from real execution, then build the interactive HTML dashboard against those signals. The uploaded PAULI Interactive Artifacts skill is the implementation quality standard for that later dashboard, including accessibility, dark-mode-safe UI, agent handoff, explicit loading/error states, and an 8.5/10 UDEC quality floor.
 
+### Decision 4 — Initial client lanes and strategic positioning
+
+**Lane 1: Macs / MAXX suite.** Treat all related repositories, agents, portal, migrations, and operating-system components as one client delivery system. Primary commercial objective: make Stacy successful as a non-technical owner using a working, observable AI-enabled operating system that can support and expand into his existing client network.
+
+**Reasoning:** Stacy is a distribution multiplier. If the system makes him look competent, fast, and differentiated without requiring technical expertise, one successful implementation can open access to multiple downstream clients. This is higher leverage than optimizing one standalone site.
+
+**Lane 2: Asc3nd.** First confirmed paying client. Treat the frontend, interactive document, agentic backend, and related delivery assets as one commercial system. Primary objective: prove that the factory can improve and operate a real paid client engagement with measurable production, lead/engagement, and operational outcomes.
+
+**Reasoning:** Asc3nd is the strongest proof that the studio is not only building internal experiments. Money has already changed hands, so delivery quality, evidence, and client outcomes here become direct commercial proof.
+
+**Lane 3: Kupuri / Veronika studio system.** Do not rebuild from scratch. Audit and extend the existing websites, second-brain assets, agents, onboarding, media, and project systems. Reposition Kupuri from a basic social-media/design service into a bilingual AI-enabled project-management and brand-systems partner for companies, affluent clients, and social-purpose organizations in Mexico and Spanish-speaking markets.
+
+Target positioning direction: Kupuri helps organizations plan, coordinate, launch, and operate brand, media, digital, and AI-enabled projects through one managed delivery system. The language should emphasize project leadership, implementation, coordination, AI systems, brand operations, and social-purpose capability rather than commodity social-media posting.
+
+Expansion markets to evaluate after the core Mexico offer works: Spain, Puerto Rico, and Guam, with localization, pricing, legal, procurement, and market-fit validation before claims are made.
+
+**Reasoning:** Existing assets should be repaired and integrated before new systems are built. Kupuri has a favorable cost base in Mexico, bilingual market access, and a credible path to higher-value work if positioned around project ownership and managed outcomes rather than low-margin creative tasks.
+
+**Lane 4: Verified Vallarta directory / local lead-generation system.** Treat the monorepo and generated client microsites as one local-market acquisition and trust platform. Primary objective: use verified local relationships and structured business data to generate qualified leads, referrals, and microsite clients.
+
+**Reasoning:** The directory can become distribution infrastructure rather than merely a listing site. Trust, verified relationships, local data, and repeatable microsite deployment create a compounding acquisition asset for multiple local services.
+
+**Lane 5: Reserved for the strongest owned commercial asset or fifth client delivery system after repository/context review.** Selection must be based on shortest credible path to a paying customer, booking, sale, or recurring contract within 30–60 days.
+
 ## Operating principle
 
 The unit of work is a **client delivery system**, not a repository. Repositories are execution components beneath the client-level record.
@@ -74,16 +98,17 @@ A client delivery system must track:
 
 ## Material unresolved decisions
 
-1. Which five revenue-generating client delivery systems form the first cohort?
-2. What exact outcome makes each cohort member commercially successful?
-3. Which authority level should the factory have during the first 30 days?
-4. What telemetry/event schema must all five lanes emit before the dashboard is built?
-5. What should be consolidated into this repository versus remaining separate infrastructure repositories?
+1. What are the exact repositories and canonical deployment relationships for lanes 1–4?
+2. What exact measurable outcome defines success for each lane in the first 30–60 days?
+3. Which project becomes lane 5?
+4. Which authority level should the factory have during the first 30 days?
+5. What telemetry/event schema must all five lanes emit before the dashboard is built?
+6. What should be consolidated versus left as separate infrastructure repositories?
 
 ## Recommendation before implementation
 
-Build the factory around a five-lane concurrent client cohort from the start. Use one shared operating model, one observability contract, and isolated execution per client. Do not create five bespoke workflows. The same intake, audit, PRD, ticket, build, review, evidence, and Judge pipeline should operate across all five.
+Build the factory around these multi-repository client systems, not isolated repos. Inventory each lane first, resolve duplicates and canonical repos, preserve working systems, and only repair or extend what is necessary to reach the defined commercial outcome. Reuse before rebuild.
 
 ## Current gate
 
-GRILL_IN_PROGRESS. Positioning, minimum concurrency, and the future interactive control-center requirement are confirmed. The next decision is to name the first five revenue-generating client delivery systems and define one measurable commercial outcome for each before autonomous execution expands.
+GRILL_IN_PROGRESS. Four initial lanes are strategically defined. Next step: ingest the exact repo lists for Macs/MAXX, Asc3nd, Kupuri/Veronika, and the Vallarta directory system; map dependencies and deployments; then define one measurable commercial outcome per lane before autonomous execution expands.
