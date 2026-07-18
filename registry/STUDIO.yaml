@@ -1,0 +1,45 @@
+studio:
+  name: PAULI STUDIO
+  operating_system: Vibe Engineering
+  prime_directive: Verify It Before Everything
+  commercial_directive: Cash before more code
+  portfolio_limit: 3
+  repository_owner: executiveusa
+  inventory:
+    verified_owner_repository_count: 100
+    verified_at: 2026-07-17
+    source: GitHub connector owner inventory
+    status: intake_in_progress
+
+active_workstreams:
+  - slot: revenue
+    classification: SELL
+    name: Vibe Audit and Vibe Rescue Sprint
+    objective: Secure and deliver the first paid Vibe Audit
+    issue: https://github.com/executiveusa/vibe-engineering/issues/7
+    proof: Paid invoice or payment confirmation and a named customer
+
+  - slot: platform
+    classification: USE
+    name: Vibe Engineering and Studio Registry
+    objective: Govern and classify the GitHub portfolio
+    issue: https://github.com/executiveusa/vibe-engineering/issues/6
+    proof: All owner repositories inventoried and routed through intake
+
+  - slot: experiment
+    classification: USE
+    name: Sandcastle governed delivery
+    objective: Complete one isolated implementer and independent reviewer run
+    issue: https://github.com/executiveusa/vibe-engineering/issues/4
+    proof: Sandbox, branch, evidence, review, checks, and rollback verified
+
+portfolio_policy:
+  default_status: PARKED
+  allowed_classifications:
+    - SELL
+    - USE
+    - MERGE
+    - PARK
+    - ARCHIVE
+  intake_status: INTAKE
+  rule: Repository names are not evidence. Inspect before classification.
