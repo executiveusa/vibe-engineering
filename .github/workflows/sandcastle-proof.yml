@@ -1,0 +1,57 @@
+name: Sandcastle Proof
+
+on:
+  pull_request:
+    paths:
+      - '.sandcastle/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/sandcastle-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+
+      - name: Validate Sandcastle package import
+        run: npm run sandcastle:validate
+
+      - name: Run existing tests
+        run: npm test
+
+      - name: Build product
+        run: npm run build
+
+      - name: Build governed sandbox image
+        run: docker build -f .sandcastle/Dockerfile -t sandcastle:vibe-engineering .
+
+      - name: Scan tracked files for common secret patterns
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git grep -nE '(sk-[A-Za-z0-9_-]{20,}|gh[pousr]_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY)' -- ':!*.lock' ':!.sandcastle/.env.example'; then
+            echo 'Potential secret detected.'
+            exit 1
+          fi
+          echo 'No common committed secret patterns found.'
+
+      - name: Record proof boundary
+        run: |
+          echo 'Static Sandcastle validation completed.'
+          echo 'A credentialed Codex agent run is intentionally excluded from pull-request CI.'
