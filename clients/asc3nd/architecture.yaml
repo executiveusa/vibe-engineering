@@ -1,0 +1,94 @@
+client_system: asc3nd
+architecture_version: 1
+status: AUDIT_DERIVED_UNVERIFIED_AT_RUNTIME
+
+layers:
+  public_experience:
+    primary_repo: executiveusa/asc3nd-frontend-website-
+    expected_responsibilities:
+      - mission_and_program_discovery
+      - bilingual_public_content
+      - donation_and_get_involved_paths
+      - volunteer_parent_donor_partner_forms
+      - events_stories_contact
+      - acquisition_attribution
+    observed_state:
+      - production_alias_returns_200
+      - english_and_spanish_routes_exist
+      - public_experience_contains_placeholder_or_generic_external_links
+      - metadata_contains_localhost_urls
+      - english_spanish_feature_parity_is_inconsistent
+      - latest_preview_branch_fails_vercel_root_directory_initialization
+
+  interactive_strategy_workbook:
+    primary_repo: executiveusa/asce3nd-interactive-document
+    expected_responsibilities:
+      - collaborative_strategy_workbook
+      - bilingual_workshop_state
+      - persistence_and_cross_device_sync
+      - client_save_notification
+    observed_state:
+      - local_storage_persistence
+      - supabase_rpc_cloud_save
+      - cross_device_latest_submission_load
+      - mailer_webhook_on_save
+      - stale_readme_and_schema_docs_conflict_with_current_code
+
+  backend_agentic_os:
+    primary_repo: executiveusa/ascend-social-purpose-agentic-systems-
+    expected_responsibilities:
+      - operations_console
+      - crm_and_pipeline
+      - public_form_bridge
+      - approvals_and_audit
+      - agent_and_workflow_runtime
+      - integrations
+      - durable_data
+    observed_state:
+      - demo_api_and_scaffolds_exist
+      - json_state_remains_default_in_documented_current_state
+      - postgres_runtime_not_yet_proven_live
+      - integration_adapters_are_partly_stubbed
+      - real_agent_execution_is_deferred_or_unproven
+      - multi_tenant_operator_auth_is_deferred
+
+  data_and_integration:
+    components:
+      - name: api.thepaulieffect.com/supabase/rest/v1/rpc
+        role: workbook_rpc_proxy
+        status: active_in_browser_code
+      - name: api.thepaulieffect.com/mailer/webhook/submission
+        role: workbook_save_email_notification
+        status: active_in_browser_code
+      - name: Supabase_work_schema
+        role: workbook_submissions
+        status: production_mapping_unresolved
+      - name: Postgres
+        role: intended_backend_production_store
+        status: documented_but_not_proven_as_live_backend_store
+
+intended_primary_journey:
+  - discover_asc3nd
+  - understand_mission
+  - select_meaningful_action
+  - submit_interest_or_engagement
+  - persist_with_consent_and_privacy
+  - create_staff_visible_record
+  - notify_or_queue_staff_follow_up
+  - record_follow_up_status
+  - attribute_source_and_outcome
+
+release_gate:
+  technical_ready_requires:
+    - build_and_test_evidence
+    - browser_journey_evidence
+    - data_persistence_evidence
+    - privacy_security_review
+    - rollback_point
+  public_ready_requires:
+    - founder_cofounder_design_review
+    - content_and_copy_review
+    - bilingual_parity_review
+    - real_links_and_contact_paths
+    - measurable_engagement_loop
+    - explicit_PUBLIC_APPROVED_event
