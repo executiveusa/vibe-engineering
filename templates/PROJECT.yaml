@@ -1,0 +1,35 @@
+project:
+  id: ""
+  name: ""
+  mode: greenfield
+  status: intake
+  classification: PARK
+  owner: ""
+  business_goal: ""
+  revenue_model: ""
+  target_customer: ""
+  commercial_offer: ""
+  repository: ""
+  production_branch: main
+  production_url: ""
+  current_release: ""
+  current_objective: ""
+  approved_stack: []
+  active_tasks: []
+  blocked_tasks: []
+  dependencies: []
+  acceptance_tests: []
+  required_approvals: []
+  last_verified_at: ""
+  rollback_point: ""
+
+commercial:
+  price: ""
+  prospects_contacted: 0
+  audits_booked: 0
+  proposals_sent: 0
+  customers_paid: 0
+  revenue_collected: 0
+  monthly_recurring_revenue: 0
+  delivery_cost: 0
+  next_sales_action: ""
