@@ -1,0 +1,50 @@
+project:
+  id: vibe-engineering
+  name: Vibe Engineering
+  mode: brownfield
+  status: building
+  classification: USE
+  owner: The Pauli Effect
+  business_goal: Convert existing code into verified owner-controlled customer outcomes and revenue.
+  revenue_model: Vibe Audit, Vibe Rescue Sprint, Sovereign Launch, MAXX Operations
+  repository: executiveusa/vibe-engineering
+  production_branch: main
+  production_url: https://vibe-engineering-the-pauli-effect.vercel.app
+  current_release: 03871376c1bff7d1cd132472783fa8d9dda39b57
+  current_objective: Prove one sequential Sandcastle implementation and independent review run.
+  approved_stack:
+    - React
+    - Vite
+    - Node.js 22
+    - GitHub Actions
+    - Sandcastle with Docker and Codex
+  active_tasks:
+    - https://github.com/executiveusa/vibe-engineering/issues/4
+  blocked_tasks: []
+  dependencies:
+    - GitHub
+    - Docker
+    - Codex authentication
+  acceptance_tests:
+    - npm run check
+    - npm audit --audit-level=high
+  required_approvals:
+    - merge
+    - production deployment
+    - paid sandbox usage
+  last_verified_at: "2026-07-17"
+  rollback_point: 03871376c1bff7d1cd132472783fa8d9dda39b57
+
+commercial:
+  target_customer: Organizations with broken, unfinished, or builder-dependent digital products
+  problem: Fragile systems, missing proof, and loss of owner control
+  offer: Vibe Audit and Vibe Rescue Sprint
+  price: Founding offer not yet validated by a paid customer
+  prospects_contacted: 0
+  audits_booked: 0
+  proposals_sent: 0
+  customers_paid: 0
+  revenue_collected: 0
+  monthly_recurring_revenue: 0
+  delivery_cost: 0
+  next_sales_action: Identify and contact the first ten qualified prospects
