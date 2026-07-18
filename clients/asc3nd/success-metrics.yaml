@@ -1,0 +1,51 @@
+client_system: asc3nd
+measurement_window_days: 60
+
+primary_outcome:
+  name: verified_acquisition_to_engagement_loop
+  definition: >-
+    One real person discovers Asc3nd, understands the mission, takes a meaningful
+    action, the action is captured safely and correctly, Asc3nd staff can follow up
+    without developer intervention, and the resulting engagement is measurable.
+
+required_evidence:
+  - public_entry_point
+  - attributable_source
+  - meaningful_action_completed
+  - persisted_record
+  - privacy_and_consent_controls_verified
+  - staff_visibility_verified
+  - follow_up_path_verified
+  - measurable_result_recorded
+
+technical_supporting_metrics:
+  - canonical_repos_resolved
+  - duplicate_deployments_resolved
+  - production_domain_resolved
+  - critical_build_failures_closed
+  - bilingual_parity_passed
+  - public_cta_links_verified
+  - form_submission_browser_test_passed
+  - data_persistence_test_passed
+  - privacy_security_review_passed
+  - public_review_approved
+
+not_success_by_itself:
+  - http_200
+  - green_build
+  - deployed_page
+  - form_rendered
+  - agent_generated_content
+  - high_traffic_without_engagement
+
+candidate_first_loops:
+  - volunteer_interest
+  - parent_or_program_interest
+  - mentor_interest
+  - donor_or_sponsor_inquiry
+  - partner_inquiry
+  - event_participation
+
+selection_rule: >-
+  Choose the first loop by shortest safe path to a real measurable result,
+  not by implementation novelty.
