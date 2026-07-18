@@ -29,4 +29,4 @@ The judge JSON must include:
 
 `SHIP` requires score >= 85, zero unresolved P0/P1 findings, all checks PASS, and reproducible evidence. Otherwise return HOLD. You may correct small defects on the branch, but must rerun checks and document changes. Never merge or deploy.
 
-Finish with `<promise>REVIEW_COMPLETE</promise>`.
+Finish with `<promise>COMPLETE</promise>`.
