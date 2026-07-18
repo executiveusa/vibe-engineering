@@ -31,17 +31,44 @@ Vibe Engineering will operate PAULI STUDIO's own portfolio first while powering 
 
 **Reasoning:** This creates immediate leverage from assets already owned, supports near-term revenue, and lets any future software product emerge from proven delivery patterns instead of speculative platform building.
 
+### Decision 2 — Commercial proof model
+
+**Selected: Five concurrent revenue-generating client delivery systems in isolated sandboxes with built-in observability.**
+
+The minimum target is five concurrent client delivery systems, not one client at a time. A client delivery system may contain multiple repositories. Each client runs in an isolated sandbox with shared factory governance, evidence capture, telemetry, cost tracking, agent activity, blockers, PR status, and SHIP/HOLD decisions visible from the central control plane.
+
+**Reasoning:** Proving only one client at a time validates quality but does not validate the operating model. The commercial system must demonstrate controlled concurrency, repeatability, observability, and low founder overhead from the beginning. Five is the minimum useful stress test because it exposes orchestration, prioritization, collision, capacity, and handoff problems early while still remaining bounded enough for human review.
+
+## Operating principle
+
+The unit of work is a **client delivery system**, not a repository. Repositories are execution components beneath the client-level record.
+
+A client delivery system must track:
+
+- client and commercial outcome;
+- all related repositories and deployments;
+- isolated Sandcastle workspace(s);
+- current bounded ticket;
+- agent and tool activity;
+- build/test/browser/deployment evidence;
+- cost and runtime;
+- blockers and owner decisions;
+- SHIP/HOLD state;
+- rollback point;
+- measurable revenue or mission outcome.
+
 ## Material unresolved decisions
 
-1. Who is the first paying customer and what exact deliverable will prove commercial value?
-2. Which authority level should the factory have during the first 30 days?
-3. What is the smallest founder dashboard required before scaling beyond the first five repositories?
-4. What should be consolidated into this repository versus remaining separate infrastructure repositories?
+1. Which five revenue-generating client delivery systems form the first cohort?
+2. What exact outcome makes each cohort member commercially successful?
+3. Which authority level should the factory have during the first 30 days?
+4. What is the smallest observability/control dashboard required before the cohort runs concurrently?
+5. What should be consolidated into this repository versus remaining separate infrastructure repositories?
 
 ## Recommendation before implementation
 
-Treat Vibe Engineering as an internal-first studio operating system that also produces a sellable service: the Vibe Production Audit and Rescue Sprint. Prove it on PAULI STUDIO and one active client before packaging it as a standalone platform.
+Build the factory around a five-lane concurrent client cohort from the start. Use one shared operating model, one observability contract, and isolated execution per client. Do not create five bespoke workflows. The same intake, audit, PRD, ticket, build, review, evidence, and Judge pipeline should operate across all five.
 
 ## Current gate
 
-GRILL_IN_PROGRESS. Positioning is confirmed. The next decision is to name the first commercial proof target and exact paid outcome before expanding autonomous execution.
+GRILL_IN_PROGRESS. Positioning and minimum concurrency are confirmed. The next decision is to name the first five revenue-generating client delivery systems and define one measurable commercial outcome for each before autonomous execution expands.
