@@ -1,0 +1,94 @@
+client_system: asc3nd
+status: READ_ONLY_AUDIT_IN_PROGRESS
+
+repositories:
+  - repo: executiveusa/asc3nd-frontend-website-
+    classification: CANONICAL_COMPONENT
+    role: public_frontend_and_acquisition
+    default_branch: main
+    notes:
+      - Public Asc3nd website and current public-facing experience.
+      - Repository also contains substantial Social Purpose OS/backend scaffolding, creating boundary overlap that requires audit before consolidation decisions.
+
+  - repo: executiveusa/asce3nd-interactive-document
+    classification: CANONICAL_COMPONENT
+    role: interactive_strategy_workbook
+    default_branch: main
+    notes:
+      - Current implementation uses local storage plus Supabase-backed RPC persistence and webhook notification.
+      - README and sql/schema.sql still describe older zero-database behavior and are stale relative to current main.
+
+  - repo: executiveusa/ascend-social-purpose-agentic-systems-
+    classification: CANONICAL_COMPONENT
+    role: backend_agentic_operating_system
+    default_branch: main
+    notes:
+      - Reusable Social Purpose OS / Mission OS architecture.
+      - Production-gap docs state Postgres runtime, real integrations, multi-tenant auth, and live agent execution remain incomplete.
+
+vercel_projects:
+  - name: asc3nd-frontend-website
+    project_id: prj_0MLyBEnhrRChPaGd1P5wkArwpqpe
+    repo: executiveusa/asc3nd-frontend-website-
+    classification: CANONICAL_DEPLOYMENT_RECORD
+    production_domain: https://asc3nd-frontend-website.vercel.app
+    current_observation:
+      production_alias_http: 200
+      latest_deployment_state: ERROR
+      latest_failure: 'NOW_SANDBOX_WORKER_ROOTDIR_NOT_EXIST: configured Root Directory apps/site does not exist on preview/static-client-preview'
+      note: 'Production remains on an older READY deployment while newer preview work is not deployable under current Vercel root-directory configuration.'
+
+  - name: asce3nd-interactive-document
+    project_id: prj_dhKFGWXEBU0yxoHAwFG4WR1TmJMj
+    repo: executiveusa/asce3nd-interactive-document
+    classification: DUPLICATE_DEPLOYMENT_CANDIDATE
+    latest_known_commit: f84437557479f3b6db5f57eced56cb4fcb78050d
+    latest_state: READY
+    target: production
+    source: cli
+
+  - name: asc3nd-interactive-document
+    project_id: prj_9jk2ti63lLOesif9LKKhWJAl6aAr
+    repo: executiveusa/asce3nd-interactive-document
+    classification: DUPLICATE_DEPLOYMENT_CANDIDATE
+    latest_known_commit: f84437557479f3b6db5f57eced56cb4fcb78050d
+    latest_state: READY
+    target: production
+    source: git
+    canonical_public_domain_candidate: https://asc3nd-interactive-document.vercel.app
+
+  - name: ascend-social-purpose-agentic-systems-
+    project_id: prj_J6uZAbedbXWcT60F0ltQjBKdUbCF
+    repo: executiveusa/ascend-social-purpose-agentic-systems-
+    classification: DUPLICATE_DEPLOYMENT_CANDIDATE
+    latest_observed_commit: 68260375d992538e1a2a90ab09cefaff5d2e42aa
+    latest_state: READY
+    latest_target: preview
+
+  - name: ascend-social-purpose-agentic-systems-site
+    project_id: prj_Ecq4kFmtURMcSgE8lcMeDCCnc1MH
+    repo: executiveusa/ascend-social-purpose-agentic-systems-
+    classification: DUPLICATE_DEPLOYMENT_CANDIDATE
+    latest_observed_commit: 68260375d992538e1a2a90ab09cefaff5d2e42aa
+    latest_state: READY
+    latest_target: preview
+
+external_dependencies:
+  - system: api.thepaulieffect.com
+    role: proxy/API surface used by workbook for Supabase RPC and mailer webhook
+    status: NEEDS_OWNERSHIP_AND_SECURITY_VERIFICATION
+
+  - system: Supabase
+    role: workbook persistence via work schema RPCs
+    status: ACTIVE_IN_CURRENT_CODE_BUT_DIRECT_PROJECT_MAPPING_UNRESOLVED
+
+  - system: Vercel
+    role: frontend, workbook, and preview deployments
+    status: ACTIVE
+
+unresolved:
+  - Determine canonical Vercel project for the duplicate interactive-document pair.
+  - Determine canonical Vercel project for the duplicate agentic-system pair.
+  - Resolve why the frontend repository and backend repository contain overlapping Social Purpose OS architecture.
+  - Identify the production database/project behind api.thepaulieffect.com and verify RPC permissions/RLS/tenant scoping.
+  - Resolve the canonical public production domain (asc3nd.org vs Vercel aliases) and DNS ownership.
