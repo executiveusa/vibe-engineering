@@ -1,0 +1,10 @@
+inventory:
+  owner: "executiveusa"
+  generated_at: ""
+  repository_count: 0
+  independently_verified_repository_count: 100
+  source: pending GitHub REST API sync
+  mode: read_only_metadata
+  release_status: HOLD
+  blocker: Run the registry sync and verify the generated count equals 100.
+repositories: []
