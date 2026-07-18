@@ -1,0 +1,44 @@
+vibe_contract:
+  version: 1
+  prompt_runtime: poml
+  installed_from: executiveusa/vibe-engineering
+
+project:
+  id: ""
+  name: ""
+  repository: ""
+  portfolio: unknown
+  lifecycle: intake
+  canonical: null
+  owner: executiveusa
+
+commercial:
+  target_customer: ""
+  problem: ""
+  offer: ""
+  price: ""
+  mission_value: ""
+  next_measurable_outcome: ""
+
+autonomy:
+  audit: allowed
+  create_contract_pr: allowed
+  create_prd: approval_required
+  implement_ticket: approval_required
+  merge: prohibited
+  deploy: prohibited
+
+verification:
+  install: ""
+  lint: ""
+  typecheck: ""
+  test: ""
+  build: ""
+  browser_journeys: []
+
+factory:
+  intake_status: not_started
+  audit_status: not_started
+  grill_status: not_started
+  prd_status: not_started
+  sandcastle_status: not_queued
