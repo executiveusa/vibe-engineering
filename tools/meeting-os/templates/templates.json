@@ -1,0 +1,187 @@
+[
+  {
+    "id": "asc3nd",
+    "label": "Asc3nd — Event Readiness Call",
+    "default_duration": 20,
+    "default_title": "Asc3nd event readiness call",
+    "default_project": "asc3nd",
+    "default_client": "asc3nd",
+    "default_objective": "Lock event facts, capacity, RSVP rules, supply gaps, promotion boundaries, and founder interview readiness.",
+    "required_keys": ["event_changes","eligibility","confirmed_partners","barber_count","cuts_per_barber","service_model","supply_capacity","supply_guarantee","food_capacity","staffing","rsvp_meaning","rsvp_notification","rsvp_owner","top_supply_gaps","dropoff","online_donation","first_distribution"],
+    "phases": [
+      {
+        "title": "1. Open and frame",
+        "range": "0–2",
+        "say": "I want this first event to go well more than I want it to look big. We already have the event page and workbook moving, but before we promote anything harder, I want to make sure we understand exactly how many families you can realistically serve. My goal today is simple: lock the event facts, understand capacity, prepare the RSVP flow, and get you ready for Friday's interview with the cameraman.",
+        "qs": []
+      },
+      {
+        "title": "2. Share the workbook",
+        "range": "2–4",
+        "say": "I want to show you one thing before we go through the questions. This workbook is becoming the place where we keep the strategy, the event plan, the RSVP and readiness information, and later the real results.",
+        "qs": [
+          ["show_ch1","Show Chapter 1 and confirm their original answers are preserved.","check"],
+          ["show_ch2","Show Chapter 2 as the Event Operating System.","check"],
+          ["show_case","Explain that results and lessons later become the case study.","check"]
+        ]
+      },
+      {
+        "title": "3. Lock confirmed event facts",
+        "range": "4–7",
+        "say": "Let me read back what we have so we know exactly what is confirmed. Stop me anywhere something has changed.",
+        "facts": [
+          "Community Cuts for Kids / Back-to-School Bash",
+          "Sunday, August 30, 2026",
+          "12:00 PM–3:00 PM",
+          "Tangles & Locs, 7425 Hardeson Rd, Everett, WA 98203",
+          "Supplies for Success collection: July 15–August 15, 2026",
+          "Founder interview: Friday, July 24, 2026 at 6:00 PM"
+        ],
+        "qs": [
+          ["event_changes","Has anything in that list changed?"],
+          ["eligibility","Are there any age or eligibility rules for the haircuts?"],
+          ["confirmed_partners","Which partners or sponsors are confirmed enough that we may name them publicly?"]
+        ]
+      },
+      {
+        "title": "4. Capacity and RSVP",
+        "range": "7–13",
+        "say": "The biggest thing I want to avoid is promoting this harder than the event can actually handle. So I need to understand the real limits first.",
+        "qs": [
+          ["barber_count","How many barbers or stylists are definitely confirmed?"],
+          ["cuts_per_barber","Roughly how many cuts can each realistically do in three hours?"],
+          ["service_model","Are haircuts first-come, appointment-based, RSVP-priority, or something else?"],
+          ["supply_capacity","How many backpacks or supply kits do you realistically have or expect?"],
+          ["supply_guarantee","Are supplies guaranteed, or should we say 'while supplies last'?"],
+          ["food_capacity","What food is actually confirmed and about how many people can it serve?"],
+          ["staffing","How many people are confirmed for check-in, lines, supplies, food, consent, and cleanup?"],
+          ["rsvp_meaning","When someone RSVPs, are we promising them a haircut, or are we simply telling you that they plan to attend?"],
+          ["rsvp_notification","Who should receive an email every time someone RSVPs?"],
+          ["rsvp_owner","Who owns the RSVP list and decides who is confirmed or waitlisted?"]
+        ]
+      },
+      {
+        "title": "5. Supplies and controlled promotion",
+        "range": "13–17",
+        "say": "For this first event, I recommend we start with the people you already know and the partners already connected to you.",
+        "qs": [
+          ["top_supply_gaps","What are the three things you are most worried you will not have enough of by August 30?"],
+          ["dropoff","Where can people physically drop off supplies?"],
+          ["online_donation","Is there an approved online donation method right now?"],
+          ["first_distribution","Who should get the flyer first — your contacts, Tangles & Locs, churches, coaches, mentors, partners?"]
+        ]
+      },
+      {
+        "title": "6. Prepare July 24 founder interview",
+        "range": "17–21",
+        "say": "Friday's interview is not mainly an event commercial. This is our chance to capture your real founder story once and use it for the website, social, sponsors, grants, and future campaigns.",
+        "qs": [
+          ["prep_origin","Remind them: Why did you create Asc3nd?","check"],
+          ["prep_mentor","Remind them: Who believed in or mentored you when you were young, and what did they actually do that mattered?","check"],
+          ["prep_feeling","Remind them: What do you want a young person or parent to feel when they encounter Asc3nd?","check"],
+          ["prep_event","Remind them: Why start with Community Cuts for Kids?","check"],
+          ["prep_sentence","Remind them: Finish 'Asc3nd exists because…'","check"],
+          ["personal_artifacts","Ask whether they have old sports photos, mentorship photos, awards, memorabilia, or meaningful artifacts."]
+        ]
+      },
+      {
+        "title": "7. Close with decisions",
+        "range": "21–25",
+        "say": "Let me make sure I have this right. Here is what I heard, and here is what we are going to build next.",
+        "qs": [
+          ["close_facts","Event facts confirmed or corrected.","check"],
+          ["close_capacity","Barber/haircut capacity understood.","check"],
+          ["close_supply","Supply and food limits understood.","check"],
+          ["close_rsvp","RSVP meaning decided.","check"],
+          ["close_owner","RSVP owner + notification email identified.","check"],
+          ["close_gaps","Priority supply needs identified.","check"],
+          ["close_dist","Initial flyer distribution audience agreed.","check"],
+          ["close_interview","July 24 interview expectations understood.","check"]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "generic",
+    "label": "Generic Client Decision Call",
+    "default_duration": 20,
+    "default_title": "Client decision call",
+    "default_project": "general",
+    "default_client": "",
+    "default_objective": "Leave with confirmed facts, one decision set, risks, owners, and next actions.",
+    "required_keys": ["goal","current_reality","decision","constraints","owner","deadline"],
+    "phases": [
+      {
+        "title": "1. Frame the decision",
+        "range": "0–2",
+        "say": "I want to use this call to leave with the few decisions we actually need, not create more work.",
+        "qs": []
+      },
+      {
+        "title": "2. Current reality",
+        "range": "2–7",
+        "say": "Before we solve it, I want to make sure I understand what is true today.",
+        "qs": [
+          ["goal","What outcome matters most from this work?"],
+          ["current_reality","What is already working, and what is not?"],
+          ["constraints","What constraints are real — time, money, people, approvals, capacity?"]
+        ]
+      },
+      {
+        "title": "3. Decisions",
+        "range": "7–15",
+        "say": "Here is the decision I think we actually need to make.",
+        "qs": [
+          ["decision","What exact decision are we making today?"],
+          ["owner","Who owns the next action?"],
+          ["deadline","What is the real deadline?"]
+        ]
+      },
+      {
+        "title": "4. Read back and close",
+        "range": "15–20",
+        "say": "Let me read back what I heard and what happens next.",
+        "qs": []
+      }
+    ]
+  },
+  {
+    "id": "podcast",
+    "label": "Podcast / Recorded Interview",
+    "default_duration": 25,
+    "default_title": "Recorded interview",
+    "default_project": "general",
+    "default_client": "",
+    "default_objective": "Capture a clear story, usable quotes, factual context, and follow-up questions.",
+    "required_keys": ["guest","core_story","specific_example","lesson","next_step"],
+    "phases": [
+      {
+        "title": "1. Set context",
+        "range": "0–3",
+        "say": "I want this to feel like a conversation. We will start with your story, get specific, then close with what people should understand or do next.",
+        "qs": [["guest","Guest name, role, and how they want to be introduced?"]]
+      },
+      {
+        "title": "2. Core story",
+        "range": "3–13",
+        "say": "Take me back to the moment this became real for you.",
+        "qs": [
+          ["core_story","What is the story only you can tell about this?"],
+          ["specific_example","What specific moment or example makes that real?"]
+        ]
+      },
+      {
+        "title": "3. Meaning and lesson",
+        "range": "13–21",
+        "say": "Now I want to understand what you learned, not just what happened.",
+        "qs": [["lesson","What did you learn that changed how you think or act?"]]
+      },
+      {
+        "title": "4. Close",
+        "range": "21–25",
+        "say": "Let's leave people with one useful next step.",
+        "qs": [["next_step","What should someone do, question, or notice after hearing this?"]]
+      }
+    ]
+  }
+]
