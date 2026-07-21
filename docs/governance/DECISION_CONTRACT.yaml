@@ -1,0 +1,98 @@
+# Vibe Engineering Decision Contract
+# Schema version: 1.0.0
+# Canonical location: docs/governance/DECISION_CONTRACT.yaml
+#
+# Use this schema to document any MEDIUM or HIGH-consequence decision.
+# LOW-consequence decisions may use the abbreviated form.
+# File new records in DECISIONS/ADR-NNN-<slug>.md
+#
+# Consequence levels: LOW | MEDIUM | HIGH
+# See CONSEQUENCE_DOCTRINE.md for classification criteria.
+
+decision:
+  # ── REQUIRED FOR ALL LEVELS ─────────────────────────────────────────────
+  id: ""                         # ADR-NNN
+  title: ""                      # Short human-readable title
+  date: ""                       # ISO 8601: YYYY-MM-DD
+  consequence_level: ""          # LOW | MEDIUM | HIGH
+  status: ""                     # proposed | approved | superseded | deprecated
+  author: ""                     # Agent or human who authored the record
+  approver: ""                   # Human or Council role that approved
+
+  summary: ""
+  # One or two sentences: what was decided and why.
+
+  # ── REQUIRED FOR MEDIUM AND HIGH ────────────────────────────────────────
+  context: ""
+  # What situation, constraint, or need drove this decision?
+
+  options_considered:
+    - option: ""
+      pros: []
+      cons: []
+      rejected_reason: ""
+
+  decision_rationale: ""
+  # Why was this option chosen over the alternatives?
+
+  impact_graph:
+    direct_effects: []
+    second_order_effects: []
+    third_order_effects: []
+    reversibility: ""            # full | partial | irreversible
+    reversal_cost: ""
+    inheritors: []               # Who operates this in 6–12 months?
+
+  blast_radius:
+    modules_affected: []
+    boundaries_crossed: []
+    stakeholders_affected: []
+    data_affected: false
+    security_surface_changed: false
+    cost_impact: ""              # none | minor | recurring | unknown
+
+  # ── REQUIRED FOR HIGH ONLY ──────────────────────────────────────────────
+  future_state_test:
+    question: >
+      Six months from now, if this fails at the worst possible time,
+      would a new engineer understand what was built, why, and how to recover?
+    answer: ""                   # yes | no | partial
+    justification: ""
+
+  council_reviews:
+    - role: ""                   # Architect | Breaker | Operator | Systems Steward | Commercial Steward | Security Guardian | Sovereignty Guardian
+      result: ""                 # PASS | PASS_WITH_NOTES | FAIL
+      findings: []
+      required_actions: []
+
+  human_approval:
+    required: false
+    approved_by: ""
+    approved_at: ""
+    approval_evidence: ""
+
+  rollback:
+    strategy: ""
+    rollback_point: ""
+    recovery_time_estimate: ""
+    recovery_owner: ""
+
+  sovereignty_check:
+    owner_retains_control: true
+    lock_in_disclosed: false
+    lock_in_justification: ""
+    export_path_documented: false
+
+  # ── OPTIONAL (ALL LEVELS) ───────────────────────────────────────────────
+  related_decisions: []          # ADR IDs this supersedes or relates to
+  related_specs: []              # docs/specs/ references
+  related_tickets: []            # GitHub issue numbers
+  evidence: []                   # Links to test results, logs, screenshots
+
+  system_impact_summary: ""
+  # For completion packets and Judge schema: one sentence on system-level effect.
+
+  second_order_risks: []
+  # Explicit list of known second-order risks accepted with this decision.
+
+  notes: ""

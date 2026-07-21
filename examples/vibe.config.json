@@ -1,0 +1,34 @@
+{
+  "version": "1.0",
+  "releaseFloor": 8.5,
+  "hardStops": {
+    "security": 7,
+    "reliability": 7,
+    "ownership": 7
+  },
+  "council": [
+    "architect",
+    "breaker",
+    "operator",
+    "user-advocate",
+    "taste-judge",
+    "sovereignty-steward"
+  ],
+  "humanApproval": [
+    "financial",
+    "legal",
+    "public-publishing",
+    "destructive-production-change",
+    "credential-permission-change",
+    "medical-legal-financial-safety",
+    "consent",
+    "irreversible-action"
+  ],
+  "requiredEvidence": [
+    "tests",
+    "production-build",
+    "failure-states",
+    "rollback",
+    "ownership-inventory"
+  ]
+}
