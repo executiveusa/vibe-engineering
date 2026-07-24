@@ -1,0 +1,20 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Hard Blocker Schema"
+type: "object"
+required: ["phase_id", "failure_class", "attempts_exhausted", "attempt_history", "safe_recovery_point", "human_input_required"]
+properties:
+  phase_id:
+    type: "string"
+  failure_class:
+    type: "string"
+  attempts_exhausted:
+    type: "integer"
+    minimum: 5
+  attempt_history:
+    type: "array"
+    items:
+      type: "object"
+  safe_recovery_point:
+    type: "string"
+  human_input_required:
+    type: "string"

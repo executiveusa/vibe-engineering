@@ -1,0 +1,14 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Judge Verdict Schema"
+type: "object"
+required: ["phase_id", "verdict", "findings"]
+properties:
+  phase_id:
+    type: "string"
+  verdict:
+    type: "string"
+    enum: ["PASS", "PASS_WITH_NONBLOCKING_FINDINGS", "CORRECTION_REQUIRED", "ARCHITECT_REVIEW_REQUIRED", "HARD_BLOCKER"]
+  findings:
+    type: "array"
+    items:
+      $ref: "judge-finding.schema.yaml"

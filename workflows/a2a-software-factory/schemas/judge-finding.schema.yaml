@@ -1,0 +1,17 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Judge Finding Schema"
+type: "object"
+required: ["finding_id", "severity", "category", "description", "blocking"]
+properties:
+  finding_id:
+    type: "string"
+  severity:
+    type: "string"
+    enum: ["P0", "P1", "P2", "P3"]
+  category:
+    type: "string"
+    enum: ["SPEC_VIOLATION", "SECURITY_DEFECT", "DATA_INTEGRITY_DEFECT", "CRITICAL_REGRESSION", "BROKEN_PRIMARY_USER_JOURNEY", "MISSING_REQUIRED_EVIDENCE", "MATERIAL_ARCHITECTURE_VIOLATION", "NIT"]
+  description:
+    type: "string"
+  blocking:
+    type: "boolean"

@@ -1,0 +1,14 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Decision Schema"
+type: "object"
+required: ["decision_id", "consequence_level", "objective", "system_impact"]
+properties:
+  decision_id:
+    type: "string"
+  consequence_level:
+    type: "string"
+    enum: ["LOW", "MEDIUM", "HIGH"]
+  objective:
+    type: "string"
+  system_impact:
+    type: "object"

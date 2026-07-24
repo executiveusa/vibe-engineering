@@ -1,0 +1,21 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Phase Receipt Schema"
+type: "object"
+required: ["phase_id", "status", "base_sha", "final_sha", "verification_results", "files_changed"]
+properties:
+  phase_id:
+    type: "string"
+  status:
+    type: "string"
+    enum: ["COMPLETE", "FAILED", "PARTIAL"]
+  base_sha:
+    type: "string"
+  final_sha:
+    type: "string"
+  files_changed:
+    type: "array"
+    items:
+      type: "string"
+  verification_results:
+    type: "object"
+    required: ["tests_passed", "build_passed"]

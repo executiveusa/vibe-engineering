@@ -1,0 +1,21 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Project Blueprint Schema"
+type: "object"
+required: ["project", "objectives", "architecture", "phases", "risk_tier"]
+properties:
+  project:
+    type: "string"
+  objectives:
+    type: "array"
+    items:
+      type: "string"
+  architecture:
+    type: "object"
+  phases:
+    type: "array"
+    items:
+      type: "object"
+      required: ["phase_id", "title", "consequence_level"]
+  risk_tier:
+    type: "string"
+    enum: ["LOW", "MEDIUM", "HIGH"]
