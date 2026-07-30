@@ -119,7 +119,13 @@ export async function createWorkspace(options, sourceRoot) {
       PROJECT_DOMAIN: options.domain,
       PROJECT_AUDIENCE: options.audience,
       CREATED_AT: new Date().toISOString(),
+      PROJECT_NAME_YAML: JSON.stringify(options.name.trim()),
+      PROJECT_SLUG_YAML: JSON.stringify(slug),
+      PROJECT_MODE_YAML: JSON.stringify(options.mode),
+      PROJECT_DOMAIN_YAML: JSON.stringify(options.domain),
+      PROJECT_AUDIENCE_YAML: JSON.stringify(options.audience),
     };
+    replacements.CREATED_AT_YAML = JSON.stringify(replacements.CREATED_AT);
     await replaceTokens(temporaryTarget, replacements);
 
     for (const stage of REQUIRED_STAGES) {
