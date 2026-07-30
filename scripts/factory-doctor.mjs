@@ -81,7 +81,9 @@ export async function inspectWorkspace(rootPath) {
 
       const context = await readFile(contextPath, 'utf8');
       for (const section of REQUIRED_STAGE_SECTIONS) {
-        if (!context.includes(section)) {
+        const escapedSection = section.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const headingPattern = new RegExp(`^${escapedSection}\\s*$`, 'm');
+        if (!headingPattern.test(context)) {
           errors.push(`Stage ${stage} is missing section: ${section}`);
         }
       }
@@ -99,7 +101,7 @@ export async function inspectWorkspace(rootPath) {
     try {
       const state = JSON.parse(await readFile(statePath, 'utf8'));
       if (state.schemaVersion !== 1) {
-        warnings.push('Unknown factory state schema version. Expected schemaVersion: 1.');
+        errors.push(`Unsupported factory state schema version: ${state.schemaVersion}. Expected 1.`);
       }
       if (!state.project?.name || !state.project?.slug) {
         errors.push('.factory/state.json is missing project.name or project.slug');
