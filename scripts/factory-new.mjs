@@ -114,7 +114,9 @@ export async function createWorkspace(options, sourceRoot) {
   await replaceTokens(target, replacements);
 
   for (const stage of REQUIRED_STAGES) {
-    await mkdir(path.join(target, 'stages', stage, 'output'), { recursive: true });
+    const outputDirectory = path.join(target, 'stages', stage, 'output');
+    await mkdir(outputDirectory, { recursive: true });
+    await writeFile(path.join(outputDirectory, '.gitkeep'), '', 'utf8');
   }
 
   await mkdir(path.join(target, '.factory'), { recursive: true });
