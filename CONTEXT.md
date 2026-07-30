@@ -37,9 +37,9 @@ stages/*/output                   Layer 4: working artifacts in generated projec
 
 ## Source-of-truth order
 
-1. Human-approved project contract and legal/financial decisions.
-2. `docs/STUDIO-SYSTEM-PROMPT.md` and repository governance.
-3. `PROJECT.yaml`, accepted specs, and ADRs.
+1. `AGENTS.md`, `docs/STUDIO-SYSTEM-PROMPT.md`, and other applicable Layer 0 repository policies.
+2. Human-approved project contracts and legal, financial, medical, safety, publishing, destructive, or production decisions. These are authoritative within their approved scope but cannot override applicable Layer 0 policy.
+3. `PROJECT.yaml`, accepted specifications, and architecture decision records.
 4. Current stage `CONTEXT.md`.
 5. Stable Layer 3 reference files.
 6. Current Layer 4 working artifacts.
