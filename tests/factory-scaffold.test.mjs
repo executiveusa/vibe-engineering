@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { access, mkdir, mkdtemp, readdir, rm, unlink } from 'node:fs/promises';
+import { access, mkdir, mkdtemp, readdir, rm, unlink, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -40,6 +40,12 @@ test('one-click factory creates and validates an ICM workspace safely', async ()
     const verified = run(doctorScript, [target]);
     assert.equal(verified.status, 0, verified.stderr);
     assert.match(verified.stdout, /Vibe Factory Doctor: PASS/);
+
+    await unlink(path.join(target, 'references', 'README.md'));
+    const missingReferences = run(doctorScript, [target]);
+    assert.notEqual(missingReferences.status, 0);
+    assert.match(missingReferences.stderr, /Missing required file: references\/README.md/);
+    await writeFile(path.join(target, 'references', 'README.md'), '# Project references\n', 'utf8');
 
     const overwriteAttempt = run(createScript, [
       '--name', 'Neighborhood Health Guide',
