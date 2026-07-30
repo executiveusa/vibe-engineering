@@ -21,6 +21,13 @@ npm run factory:new -- \
   --target ./workspaces/neighborhood-health-guide
 ```
 
+### Modes
+
+- `greenfield` creates the control workspace for a new product.
+- `brownfield` creates a separate control workspace for inspecting and governing an existing product.
+
+Brownfield mode does **not** copy into, overwrite, or reorganize the existing source repository. The original repository is linked and inspected during Intake and Blueprint after the human confirms its location and ownership. This preserves the brownfield rule: inspect before changing.
+
 ## Verify the structure
 
 ```bash
