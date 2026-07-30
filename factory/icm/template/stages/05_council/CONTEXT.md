@@ -8,21 +8,22 @@
 
 ## Process
 
-Run independent reviews for user value, architecture, failure modes, security/privacy, accessibility/taste, and sovereignty/ownership. Reviewers challenge the work; they do not merely summarize it.
+Run six independently attributable reviews: user value, architecture, failure modes, security/privacy, accessibility/taste, and sovereignty/ownership. Each review names its reviewer or governed review role, evidence examined, findings, and disposition. Reviewers challenge the work; they do not merely summarize it.
 
 ## Outputs
 
 - `user-value-review.md` -> `output/`
 - `architecture-review.md` -> `output/`
-- `failure-security-review.md` -> `output/`
+- `failure-modes-review.md` -> `output/`
+- `security-privacy-review.md` -> `output/`
 - `accessibility-taste-review.md` -> `output/`
-- `sovereignty-review.md` -> `output/`
+- `sovereignty-ownership-review.md` -> `output/`
 - `plain-language-summary.md` -> `output/`
 
 ## Human gate
 
-Any review may issue a documented HOLD. Conflicts are escalated to Judge with evidence.
+Any of the six reviews may issue a documented HOLD. Conflicts are escalated to Judge with evidence.
 
 ## Plain-language proof
 
-Show what six different responsible people would worry about before trusting this product with their time, money, privacy, safety, or community reputation.
+Show what six separately accountable reviewers would worry about before trusting this product with their time, money, privacy, safety, access, ownership, or community reputation.
