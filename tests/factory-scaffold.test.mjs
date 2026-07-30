@@ -43,6 +43,26 @@ test('one-click factory creates and validates an ICM workspace safely', async ()
     assert.equal(verified.status, 0, verified.stderr);
     assert.match(verified.stdout, /Vibe Factory Doctor: PASS/);
 
+    const projectControlPath = path.join(target, 'PROJECT.yaml');
+    const originalProjectControl = await readFile(projectControlPath, 'utf8');
+    await writeFile(
+      projectControlPath,
+      originalProjectControl.replace('  status: discovery', '  status: structure_ready'),
+      'utf8',
+    );
+    const invalidProjectStatus = run(doctorScript, [target]);
+    assert.notEqual(invalidProjectStatus.status, 0);
+    assert.match(invalidProjectStatus.stderr, /unsupported project.status: structure_ready/);
+    await writeFile(projectControlPath, originalProjectControl, 'utf8');
+
+    const securityPath = path.join(target, 'SECURITY.md');
+    const originalSecurity = await readFile(securityPath, 'utf8');
+    await unlink(securityPath);
+    const missingSecurity = run(doctorScript, [target]);
+    assert.notEqual(missingSecurity.status, 0);
+    assert.match(missingSecurity.stderr, /Missing required file: SECURITY.md/);
+    await writeFile(securityPath, originalSecurity, 'utf8');
+
     const statePath = path.join(target, '.factory', 'state.json');
     const originalState = await readFile(statePath, 'utf8');
     await writeFile(statePath, '{not-valid-json', 'utf8');
