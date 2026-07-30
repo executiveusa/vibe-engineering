@@ -43,6 +43,34 @@ test('one-click factory creates and validates an ICM workspace safely', async ()
     assert.equal(verified.status, 0, verified.stderr);
     assert.match(verified.stdout, /Vibe Factory Doctor: PASS/);
 
+    const statePath = path.join(target, '.factory', 'state.json');
+    const originalState = await readFile(statePath, 'utf8');
+    await writeFile(statePath, '{not-valid-json', 'utf8');
+    const malformedState = run(doctorScript, [target]);
+    assert.notEqual(malformedState.status, 0);
+    assert.match(malformedState.stderr, /Invalid JSON in \.factory\/state.json/);
+
+    await writeFile(statePath, `${JSON.stringify({
+      schemaVersion: 2,
+      project: { name: 'Neighborhood Health Guide', slug: 'neighborhood-health-guide' },
+    })}\n`, 'utf8');
+    const unsupportedState = run(doctorScript, [target]);
+    assert.notEqual(unsupportedState.status, 0);
+    assert.match(unsupportedState.stderr, /Unsupported factory state schema version: 2/);
+    await writeFile(statePath, originalState, 'utf8');
+
+    const visionPath = path.join(target, 'stages', '01_vision', 'CONTEXT.md');
+    const originalVision = await readFile(visionPath, 'utf8');
+    await writeFile(
+      visionPath,
+      originalVision.replace(/^## Inputs$/m, 'This sentence mentions ## Inputs but is not a heading.'),
+      'utf8',
+    );
+    const unanchoredHeading = run(doctorScript, [target]);
+    assert.notEqual(unanchoredHeading.status, 0);
+    assert.match(unanchoredHeading.stderr, /Stage 01_vision is missing section: ## Inputs/);
+    await writeFile(visionPath, originalVision, 'utf8');
+
     await unlink(path.join(target, 'references', 'README.md'));
     const missingReferences = run(doctorScript, [target]);
     assert.notEqual(missingReferences.status, 0);
