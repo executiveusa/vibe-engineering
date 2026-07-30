@@ -72,6 +72,27 @@ test('one-click factory creates and validates an ICM workspace safely', async ()
     assert.match(missingProjectMapping.stderr, /top-level project mapping/);
     await writeFile(projectControlPath, originalProjectControl, 'utf8');
 
+    await writeFile(
+      projectControlPath,
+      originalProjectControl.replace(/^  id:.*$/m, '  id: null # confirm during intake'),
+      'utf8',
+    );
+    const nullProjectId = run(doctorScript, [target]);
+    assert.notEqual(nullProjectId.status, 0);
+    assert.match(nullProjectId.stderr, /project.id must be a string/);
+    assert.match(nullProjectId.stderr, /project.id must be a non-placeholder value/);
+    await writeFile(projectControlPath, originalProjectControl, 'utf8');
+
+    await writeFile(
+      projectControlPath,
+      originalProjectControl.replace('  approved_stack: []', '  approved_stack: react'),
+      'utf8',
+    );
+    const scalarApprovedStack = run(doctorScript, [target]);
+    assert.notEqual(scalarApprovedStack.status, 0);
+    assert.match(scalarApprovedStack.stderr, /project.approved_stack must be a list/);
+    await writeFile(projectControlPath, originalProjectControl, 'utf8');
+
     const securityPath = path.join(target, 'SECURITY.md');
     const originalSecurity = await readFile(securityPath, 'utf8');
     await writeFile(securityPath, '', 'utf8');
@@ -116,9 +137,18 @@ test('one-click factory creates and validates an ICM workspace safely', async ()
       `${originalVision.replace(/^## Inputs$/m, '')}\n\`\`\`markdown\n\`\`\` trailing text\n## Inputs\n\`\`\`\n`,
       'utf8',
     );
-    const fencedHeading = run(doctorScript, [target]);
-    assert.notEqual(fencedHeading.status, 0);
-    assert.match(fencedHeading.stderr, /Stage 01_vision is missing section: ## Inputs/);
+    const trailingFenceText = run(doctorScript, [target]);
+    assert.notEqual(trailingFenceText.status, 0);
+    assert.match(trailingFenceText.stderr, /Stage 01_vision is missing section: ## Inputs/);
+
+    await writeFile(
+      visionPath,
+      `${originalVision.replace(/^## Inputs$/m, '')}\n\`\`\`markdown\n    \`\`\`\n## Inputs\n\`\`\`\n`,
+      'utf8',
+    );
+    const overIndentedFence = run(doctorScript, [target]);
+    assert.notEqual(overIndentedFence.status, 0);
+    assert.match(overIndentedFence.stderr, /Stage 01_vision is missing section: ## Inputs/);
     await writeFile(visionPath, originalVision, 'utf8');
 
     await unlink(path.join(target, 'references', 'README.md'));
