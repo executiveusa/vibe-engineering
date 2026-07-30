@@ -2,7 +2,9 @@
 
 ## Inputs
 
-- Layer 4: `../00_intake/output/`.
+- Layer 4: `../00_intake/output/project-contract.md`.
+- Layer 4: `../00_intake/output/baseline.md`.
+- Layer 4: `../00_intake/output/plain-language-summary.md`.
 - Layer 3: `../../_config/mission.md`.
 - Layer 3: `../../shared/PLAIN_LANGUAGE_STANDARD.md`.
 
