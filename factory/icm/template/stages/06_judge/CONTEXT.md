@@ -9,7 +9,7 @@
 
 ## Process
 
-Score user value, architecture, reliability, security, accessibility/taste, ownership, rollback, evidence, and commercial alignment. Apply hard stops. Return SHIP, HOLD, or BLOCKED without changing the work being judged.
+Score user value, architecture, reliability, security, accessibility/taste, ownership, rollback, evidence, and commercial alignment. Apply hard stops. Return only SHIP or HOLD without changing the work being judged. Missing evidence, failed hard stops, or unresolved blockers produce HOLD with the blockers recorded.
 
 ## Outputs
 
@@ -20,7 +20,7 @@ Score user value, architecture, reliability, security, accessibility/taste, owne
 
 ## Human gate
 
-A Judge pass permits release preparation, not automatic production release. Required human approvals remain explicit.
+A Judge SHIP verdict permits release preparation, not automatic production release. Required human approvals remain explicit.
 
 ## Plain-language proof
 
