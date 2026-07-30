@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
-import { access, mkdtemp, rm, unlink } from 'node:fs/promises';
+import { access, mkdir, mkdtemp, readdir, rm, unlink } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { createWorkspace } from '../scripts/factory-new.mjs';
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '..');
@@ -51,6 +52,28 @@ test('one-click factory creates and validates an ICM workspace safely', async ()
     const broken = run(doctorScript, [target]);
     assert.notEqual(broken.status, 0);
     assert.match(broken.stderr, /Missing stage contract: stages\/04_verify\/CONTEXT.md/);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('failed scaffold is transactional and preserves an existing empty target', async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'vibe-factory-transaction-'));
+  const target = path.join(tempRoot, 'empty-target');
+  const brokenSource = path.join(tempRoot, 'missing-source');
+
+  try {
+    await mkdir(target, { recursive: true });
+    await assert.rejects(
+      createWorkspace({
+        name: 'Broken Factory Example',
+        target,
+        mode: 'greenfield',
+        domain: 'science',
+        audience: 'urban youth and seniors',
+      }, brokenSource),
+    );
+    assert.deepEqual(await readdir(target), []);
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
