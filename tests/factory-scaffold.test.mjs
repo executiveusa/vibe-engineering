@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { access, mkdir, mkdtemp, readdir, rm, unlink, writeFile } from 'node:fs/promises';
+import { access, mkdir, mkdtemp, readFile, readdir, rm, unlink, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -25,7 +25,7 @@ test('one-click factory creates and validates an ICM workspace safely', async ()
 
   try {
     const created = run(createScript, [
-      '--name', 'Neighborhood Health Guide',
+      '--name', 'Neighborhood "Health" Guide',
       '--target', target,
       '--mode', 'greenfield',
       '--domain', 'health and ecology',
@@ -36,6 +36,8 @@ test('one-click factory creates and validates an ICM workspace safely', async ()
     assert.match(created.stdout, /Next stage: stages\/00_intake\/CONTEXT.md/);
 
     await access(path.join(target, 'stages', '04_verify', 'output', '.gitkeep'));
+    const projectYaml = await readFile(path.join(target, 'PROJECT.yaml'), 'utf8');
+    assert.match(projectYaml, /name: "Neighborhood \\"Health\\" Guide"/);
 
     const verified = run(doctorScript, [target]);
     assert.equal(verified.status, 0, verified.stderr);
