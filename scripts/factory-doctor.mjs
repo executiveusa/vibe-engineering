@@ -20,6 +20,13 @@ const REQUIRED_FILES = [
   'AGENTS.md',
   'CONTEXT.md',
   'PROJECT.yaml',
+  'ARCHITECTURE.md',
+  'RUNBOOK.md',
+  'SECURITY.md',
+  'DECISIONS/README.md',
+  'docs/specs/README.md',
+  'docs/evidence/README.md',
+  'docs/handoffs/README.md',
   '_config/mission.md',
   '_config/quality-gates.yaml',
   'shared/PLAIN_LANGUAGE_STANDARD.md',
@@ -35,6 +42,40 @@ const REQUIRED_STAGE_SECTIONS = [
   '## Plain-language proof',
 ];
 
+const REQUIRED_PROJECT_KEYS = [
+  'id',
+  'name',
+  'mode',
+  'status',
+  'owner',
+  'business_goal',
+  'revenue_model',
+  'repository',
+  'production_branch',
+  'production_url',
+  'current_release',
+  'current_objective',
+  'approved_stack',
+  'active_tasks',
+  'blocked_tasks',
+  'dependencies',
+  'acceptance_tests',
+  'required_approvals',
+  'last_verified_at',
+  'rollback_point',
+];
+
+const ALLOWED_MODES = new Set(['greenfield', 'brownfield']);
+const ALLOWED_STATUSES = new Set([
+  'discovery',
+  'specified',
+  'building',
+  'verifying',
+  'hold',
+  'production',
+  'parked',
+]);
+
 async function getStats(filePath) {
   try {
     return await stat(filePath);
@@ -42,6 +83,21 @@ async function getStats(filePath) {
     if (error.code === 'ENOENT') return null;
     throw error;
   }
+}
+
+function getProjectScalar(content, key) {
+  const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = content.match(new RegExp(`^  ${escapedKey}:\\s*(.*?)\\s*$`, 'm'));
+  if (!match) return null;
+  const raw = match[1].trim();
+  if (raw.startsWith('"')) {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return raw;
+    }
+  }
+  return raw;
 }
 
 export async function inspectWorkspace(rootPath) {
@@ -53,6 +109,36 @@ export async function inspectWorkspace(rootPath) {
     const fileStats = await getStats(path.join(root, relativePath));
     if (!fileStats?.isFile()) {
       errors.push(`Missing required file: ${relativePath}`);
+    }
+  }
+
+  const projectPath = path.join(root, 'PROJECT.yaml');
+  const projectStats = await getStats(projectPath);
+  if (projectStats?.isFile()) {
+    const projectControl = await readFile(projectPath, 'utf8');
+    for (const key of REQUIRED_PROJECT_KEYS) {
+      if (getProjectScalar(projectControl, key) === null) {
+        errors.push(`PROJECT.yaml is missing required project key: ${key}`);
+      }
+    }
+
+    const mode = getProjectScalar(projectControl, 'mode');
+    if (mode !== null && !ALLOWED_MODES.has(mode)) {
+      errors.push(`PROJECT.yaml has unsupported project.mode: ${mode}`);
+    }
+
+    const status = getProjectScalar(projectControl, 'status');
+    if (status !== null && !ALLOWED_STATUSES.has(status)) {
+      errors.push(`PROJECT.yaml has unsupported project.status: ${status}`);
+    }
+
+    const projectId = getProjectScalar(projectControl, 'id');
+    const projectName = getProjectScalar(projectControl, 'name');
+    if (!projectId || projectId === 'TO_CONFIRM') {
+      errors.push('PROJECT.yaml project.id must be a non-placeholder value');
+    }
+    if (!projectName || projectName === 'TO_CONFIRM') {
+      errors.push('PROJECT.yaml project.name must be a non-placeholder value');
     }
   }
 
