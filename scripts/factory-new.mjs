@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { copyFile, mkdir, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, readdir, rename, rm, rmdir, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { inspectWorkspace, REQUIRED_STAGES } from './factory-doctor.mjs';
@@ -75,7 +75,15 @@ async function copyDirectory(source, destination) {
   }
 }
 
+function buildTokenPattern(replacements) {
+  const alternatives = Object.keys(replacements)
+    .map((token) => `\\{\\{${token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\}\\}`)
+    .join('|');
+  return new RegExp(alternatives, 'g');
+}
+
 async function replaceTokens(root, replacements) {
+  const tokenPattern = buildTokenPattern(replacements);
   const entries = await readdir(root, { withFileTypes: true });
   for (const entry of entries) {
     const currentPath = path.join(root, entry.name);
@@ -85,15 +93,16 @@ async function replaceTokens(root, replacements) {
     }
     if (!entry.isFile() || !TEXT_EXTENSIONS.has(path.extname(entry.name))) continue;
 
-    let content = await readFile(currentPath, 'utf8');
-    for (const [token, value] of Object.entries(replacements)) {
-      content = content.replaceAll(`{{${token}}}`, () => String(value));
-    }
-    await writeFile(currentPath, content, 'utf8');
+    const content = await readFile(currentPath, 'utf8');
+    const replaced = content.replace(tokenPattern, (placeholder) => {
+      const token = placeholder.slice(2, -2);
+      return String(replacements[token]);
+    });
+    await writeFile(currentPath, replaced, 'utf8');
   }
 }
 
-export async function createWorkspace(options, sourceRoot) {
+export async function createWorkspace(options, sourceRoot, hooks = {}) {
   const slug = slugify(options.name);
   const target = path.resolve(options.target ?? path.join(process.cwd(), 'workspaces', slug));
   const existingEntries = await directoryEntries(target);
@@ -163,8 +172,12 @@ export async function createWorkspace(options, sourceRoot) {
       throw new Error(`Generated workspace failed doctor: ${report.errors.join('; ')}`);
     }
 
+    await hooks.beforeCommit?.({ target, temporaryTarget });
+
     if (targetExisted) {
-      await rm(target, { recursive: true });
+      // Non-recursive by design: this fails if another process wrote into the
+      // destination after the initial emptiness check.
+      await rmdir(target);
     }
     await rename(temporaryTarget, target);
 
