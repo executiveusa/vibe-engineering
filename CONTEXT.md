@@ -14,7 +14,7 @@ This repository contains the public Vibe Engineering method, governance, determi
 | Understand studio law | `docs/STUDIO-SYSTEM-PROMPT.md`, `docs/GOVERNANCE.md` |
 | Create a new governed project | `factory/icm/README.md`, then `npm run factory:new` |
 | Run an autonomous delivery phase | `workflows/a2a-software-factory/WORKFLOW.md` |
-| Review a completed change | `04_verify`, Council, Judge, and the configured code-review workflow |
+| Review a completed repository change | `factory/icm/template/stages/04_verify/CONTEXT.md`, `workflows/a2a-software-factory/README.md`, and the configured pull-request review workflow |
 | Score a release | `docs/VIBE-SCORE.md`, `src/vibe-score.mjs` |
 | Work on the public site | `src/` and the approved product specification |
 | Inspect commercial status | `PROJECT.yaml` and the active SELL issue |
