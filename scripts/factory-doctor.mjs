@@ -100,6 +100,27 @@ function getProjectScalar(content, key) {
   return raw;
 }
 
+function stripFencedCode(content) {
+  const lines = content.split(/\r?\n/);
+  let fence = null;
+
+  return lines.map((line) => {
+    const markerMatch = line.match(/^\s*(`{3,}|~{3,})/);
+    if (markerMatch) {
+      const marker = markerMatch[1];
+      if (!fence) {
+        fence = { character: marker[0], length: marker.length };
+        return '';
+      }
+      if (marker[0] === fence.character && marker.length >= fence.length) {
+        fence = null;
+        return '';
+      }
+    }
+    return fence ? '' : line;
+  }).join('\n');
+}
+
 export async function inspectWorkspace(rootPath) {
   const root = path.resolve(rootPath);
   const errors = [];
@@ -165,7 +186,7 @@ export async function inspectWorkspace(rootPath) {
         continue;
       }
 
-      const context = await readFile(contextPath, 'utf8');
+      const context = stripFencedCode(await readFile(contextPath, 'utf8'));
       for (const section of REQUIRED_STAGE_SECTIONS) {
         const escapedSection = section.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const headingPattern = new RegExp(`^${escapedSection}\\s*$`, 'm');
@@ -191,6 +212,9 @@ export async function inspectWorkspace(rootPath) {
       }
       if (!state.project?.name || !state.project?.slug) {
         errors.push('.factory/state.json is missing project.name or project.slug');
+      }
+      if (!REQUIRED_STAGES.includes(state.currentStage)) {
+        errors.push(`.factory/state.json has unsupported currentStage: ${state.currentStage}`);
       }
     } catch (error) {
       errors.push(`Invalid JSON in .factory/state.json: ${error.message}`);
