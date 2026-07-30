@@ -34,6 +34,10 @@ const REQUIRED_FILES = [
   '.factory/state.json',
 ];
 
+const REQUIRED_NONEMPTY_FILES = new Set(
+  REQUIRED_FILES.filter((relativePath) => relativePath !== '.factory/state.json'),
+);
+
 const REQUIRED_STAGE_SECTIONS = [
   '## Inputs',
   '## Process',
@@ -85,19 +89,65 @@ async function getStats(filePath) {
   }
 }
 
-function getProjectScalar(content, key) {
-  const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const match = content.match(new RegExp(`^  ${escapedKey}:\\s*(.*?)\\s*$`, 'm'));
-  if (!match) return null;
-  const raw = match[1].trim();
-  if (raw.startsWith('"')) {
-    try {
-      return JSON.parse(raw);
-    } catch {
-      return raw;
-    }
+function parseYamlScalar(raw) {
+  const value = raw.trim();
+  if (value === '') return undefined;
+  if (value === '[]') return [];
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  if (/^-?\d+(?:\.\d+)?$/.test(value)) return Number(value);
+  if (value.startsWith('"')) return JSON.parse(value);
+  if (value.startsWith("'") && value.endsWith("'")) {
+    return value.slice(1, -1).replace(/''/g, "'");
   }
-  return raw;
+  return value;
+}
+
+function parseProjectControl(content) {
+  const root = {};
+  let currentTopLevel = null;
+  let currentNestedKey = null;
+
+  for (const [index, rawLine] of content.split(/\r?\n/).entries()) {
+    if (!rawLine.trim() || rawLine.trimStart().startsWith('#')) continue;
+
+    const topLevel = rawLine.match(/^([A-Za-z0-9_]+):\s*(.*?)\s*$/);
+    if (topLevel) {
+      const [, key, rawValue] = topLevel;
+      if (rawValue === '') {
+        root[key] = {};
+        currentTopLevel = key;
+        currentNestedKey = null;
+      } else {
+        root[key] = parseYamlScalar(rawValue);
+        currentTopLevel = null;
+        currentNestedKey = null;
+      }
+      continue;
+    }
+
+    const nested = rawLine.match(/^  ([A-Za-z0-9_]+):\s*(.*?)\s*$/);
+    if (nested && currentTopLevel) {
+      const [, key, rawValue] = nested;
+      root[currentTopLevel][key] = rawValue === '' ? [] : parseYamlScalar(rawValue);
+      currentNestedKey = key;
+      continue;
+    }
+
+    const listItem = rawLine.match(/^    -\s+(.*?)\s*$/);
+    if (listItem && currentTopLevel && currentNestedKey) {
+      const currentValue = root[currentTopLevel][currentNestedKey];
+      if (!Array.isArray(currentValue)) {
+        throw new Error(`Line ${index + 1} adds a list item to a non-list key`);
+      }
+      currentValue.push(parseYamlScalar(listItem[1]));
+      continue;
+    }
+
+    throw new Error(`Unsupported PROJECT.yaml structure at line ${index + 1}`);
+  }
+
+  return root;
 }
 
 function stripFencedCode(content) {
@@ -105,19 +155,19 @@ function stripFencedCode(content) {
   let fence = null;
 
   return lines.map((line) => {
-    const markerMatch = line.match(/^\s*(`{3,}|~{3,})/);
-    if (markerMatch) {
-      const marker = markerMatch[1];
-      if (!fence) {
+    if (!fence) {
+      const opening = line.match(/^\s*(`{3,}|~{3,})(.*)$/);
+      if (opening) {
+        const marker = opening[1];
         fence = { character: marker[0], length: marker.length };
         return '';
       }
-      if (marker[0] === fence.character && marker.length >= fence.length) {
-        fence = null;
-        return '';
-      }
+      return line;
     }
-    return fence ? '' : line;
+
+    const closingPattern = new RegExp(`^\\s*${fence.character}{${fence.length},}\\s*$`);
+    if (closingPattern.test(line)) fence = null;
+    return '';
   }).join('\n');
 }
 
@@ -127,39 +177,52 @@ export async function inspectWorkspace(rootPath) {
   const warnings = [];
 
   for (const relativePath of REQUIRED_FILES) {
-    const fileStats = await getStats(path.join(root, relativePath));
+    const absolutePath = path.join(root, relativePath);
+    const fileStats = await getStats(absolutePath);
     if (!fileStats?.isFile()) {
       errors.push(`Missing required file: ${relativePath}`);
+      continue;
+    }
+    if (REQUIRED_NONEMPTY_FILES.has(relativePath)) {
+      const content = await readFile(absolutePath, 'utf8');
+      if (!content.trim()) {
+        errors.push(`Required control file is empty: ${relativePath}`);
+      }
     }
   }
 
   const projectPath = path.join(root, 'PROJECT.yaml');
   const projectStats = await getStats(projectPath);
   if (projectStats?.isFile()) {
-    const projectControl = await readFile(projectPath, 'utf8');
-    for (const key of REQUIRED_PROJECT_KEYS) {
-      if (getProjectScalar(projectControl, key) === null) {
-        errors.push(`PROJECT.yaml is missing required project key: ${key}`);
+    try {
+      const projectDocument = parseProjectControl(await readFile(projectPath, 'utf8'));
+      if (!projectDocument.project || typeof projectDocument.project !== 'object' || Array.isArray(projectDocument.project)) {
+        errors.push('PROJECT.yaml must contain a top-level project mapping');
+      } else {
+        const project = projectDocument.project;
+        for (const key of REQUIRED_PROJECT_KEYS) {
+          if (!Object.prototype.hasOwnProperty.call(project, key)) {
+            errors.push(`PROJECT.yaml is missing required project key: ${key}`);
+          }
+        }
+
+        if (project.mode !== undefined && !ALLOWED_MODES.has(project.mode)) {
+          errors.push(`PROJECT.yaml has unsupported project.mode: ${project.mode}`);
+        }
+
+        if (project.status !== undefined && !ALLOWED_STATUSES.has(project.status)) {
+          errors.push(`PROJECT.yaml has unsupported project.status: ${project.status}`);
+        }
+
+        if (!project.id || project.id === 'TO_CONFIRM') {
+          errors.push('PROJECT.yaml project.id must be a non-placeholder value');
+        }
+        if (!project.name || project.name === 'TO_CONFIRM') {
+          errors.push('PROJECT.yaml project.name must be a non-placeholder value');
+        }
       }
-    }
-
-    const mode = getProjectScalar(projectControl, 'mode');
-    if (mode !== null && !ALLOWED_MODES.has(mode)) {
-      errors.push(`PROJECT.yaml has unsupported project.mode: ${mode}`);
-    }
-
-    const status = getProjectScalar(projectControl, 'status');
-    if (status !== null && !ALLOWED_STATUSES.has(status)) {
-      errors.push(`PROJECT.yaml has unsupported project.status: ${status}`);
-    }
-
-    const projectId = getProjectScalar(projectControl, 'id');
-    const projectName = getProjectScalar(projectControl, 'name');
-    if (!projectId || projectId === 'TO_CONFIRM') {
-      errors.push('PROJECT.yaml project.id must be a non-placeholder value');
-    }
-    if (!projectName || projectName === 'TO_CONFIRM') {
-      errors.push('PROJECT.yaml project.name must be a non-placeholder value');
+    } catch (error) {
+      errors.push(`Invalid PROJECT.yaml: ${error.message}`);
     }
   }
 
@@ -235,12 +298,8 @@ function printReport(report) {
   console.log(`Workspace: ${report.root}`);
   console.log(`Stages checked: ${report.checkedStages}`);
 
-  for (const warning of report.warnings) {
-    console.log(`WARNING: ${warning}`);
-  }
-  for (const error of report.errors) {
-    console.error(`ERROR: ${error}`);
-  }
+  for (const warning of report.warnings) console.log(`WARNING: ${warning}`);
+  for (const error of report.errors) console.error(`ERROR: ${error}`);
 
   if (report.status === 'PASS') {
     console.log('Structure verified. This does not prove application behavior, security, deployment, or customer value.');
