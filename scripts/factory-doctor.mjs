@@ -69,6 +69,19 @@ const REQUIRED_PROJECT_KEYS = [
   'rollback_point',
 ];
 
+const PROJECT_ARRAY_KEYS = new Set([
+  'approved_stack',
+  'active_tasks',
+  'blocked_tasks',
+  'dependencies',
+  'acceptance_tests',
+  'required_approvals',
+]);
+
+const PROJECT_STRING_KEYS = new Set(
+  REQUIRED_PROJECT_KEYS.filter((key) => !PROJECT_ARRAY_KEYS.has(key)),
+);
+
 const ALLOWED_MODES = new Set(['greenfield', 'brownfield']);
 const ALLOWED_STATUSES = new Set([
   'discovery',
@@ -89,9 +102,49 @@ async function getStats(filePath) {
   }
 }
 
+function stripYamlComment(raw) {
+  let inSingleQuote = false;
+  let inDoubleQuote = false;
+  let escaped = false;
+
+  for (let index = 0; index < raw.length; index += 1) {
+    const character = raw[index];
+
+    if (inDoubleQuote) {
+      if (escaped) {
+        escaped = false;
+      } else if (character === '\\') {
+        escaped = true;
+      } else if (character === '"') {
+        inDoubleQuote = false;
+      }
+      continue;
+    }
+
+    if (inSingleQuote) {
+      if (character === "'" && raw[index + 1] === "'") {
+        index += 1;
+      } else if (character === "'") {
+        inSingleQuote = false;
+      }
+      continue;
+    }
+
+    if (character === '"') {
+      inDoubleQuote = true;
+    } else if (character === "'") {
+      inSingleQuote = true;
+    } else if (character === '#' && (index === 0 || /\s/.test(raw[index - 1]))) {
+      return raw.slice(0, index);
+    }
+  }
+
+  return raw;
+}
+
 function parseYamlScalar(raw) {
-  const value = raw.trim();
-  if (value === '') return undefined;
+  const value = stripYamlComment(raw).trim();
+  if (value === '' || /^(?:null|~)$/i.test(value)) return null;
   if (value === '[]') return [];
   if (value === 'true') return true;
   if (value === 'false') return false;
@@ -109,9 +162,10 @@ function parseProjectControl(content) {
   let currentNestedKey = null;
 
   for (const [index, rawLine] of content.split(/\r?\n/).entries()) {
-    if (!rawLine.trim() || rawLine.trimStart().startsWith('#')) continue;
+    const line = stripYamlComment(rawLine);
+    if (!line.trim()) continue;
 
-    const topLevel = rawLine.match(/^([A-Za-z0-9_]+):\s*(.*?)\s*$/);
+    const topLevel = line.match(/^([A-Za-z0-9_]+):\s*(.*?)\s*$/);
     if (topLevel) {
       const [, key, rawValue] = topLevel;
       if (rawValue === '') {
@@ -126,7 +180,7 @@ function parseProjectControl(content) {
       continue;
     }
 
-    const nested = rawLine.match(/^  ([A-Za-z0-9_]+):\s*(.*?)\s*$/);
+    const nested = line.match(/^  ([A-Za-z0-9_]+):\s*(.*?)\s*$/);
     if (nested && currentTopLevel) {
       const [, key, rawValue] = nested;
       root[currentTopLevel][key] = rawValue === '' ? [] : parseYamlScalar(rawValue);
@@ -134,7 +188,7 @@ function parseProjectControl(content) {
       continue;
     }
 
-    const listItem = rawLine.match(/^    -\s+(.*?)\s*$/);
+    const listItem = line.match(/^    -\s+(.*?)\s*$/);
     if (listItem && currentTopLevel && currentNestedKey) {
       const currentValue = root[currentTopLevel][currentNestedKey];
       if (!Array.isArray(currentValue)) {
@@ -156,7 +210,7 @@ function stripFencedCode(content) {
 
   return lines.map((line) => {
     if (!fence) {
-      const opening = line.match(/^\s*(`{3,}|~{3,})(.*)$/);
+      const opening = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
       if (opening) {
         const marker = opening[1];
         fence = { character: marker[0], length: marker.length };
@@ -165,7 +219,7 @@ function stripFencedCode(content) {
       return line;
     }
 
-    const closingPattern = new RegExp(`^\\s*${fence.character}{${fence.length},}\\s*$`);
+    const closingPattern = new RegExp(`^ {0,3}${fence.character}{${fence.length},}\\s*$`);
     if (closingPattern.test(line)) fence = null;
     return '';
   }).join('\n');
@@ -206,18 +260,29 @@ export async function inspectWorkspace(rootPath) {
           }
         }
 
-        if (project.mode !== undefined && !ALLOWED_MODES.has(project.mode)) {
+        for (const key of PROJECT_STRING_KEYS) {
+          if (Object.prototype.hasOwnProperty.call(project, key) && typeof project[key] !== 'string') {
+            errors.push(`PROJECT.yaml project.${key} must be a string`);
+          }
+        }
+        for (const key of PROJECT_ARRAY_KEYS) {
+          if (Object.prototype.hasOwnProperty.call(project, key) && !Array.isArray(project[key])) {
+            errors.push(`PROJECT.yaml project.${key} must be a list`);
+          }
+        }
+
+        if (typeof project.mode === 'string' && !ALLOWED_MODES.has(project.mode)) {
           errors.push(`PROJECT.yaml has unsupported project.mode: ${project.mode}`);
         }
 
-        if (project.status !== undefined && !ALLOWED_STATUSES.has(project.status)) {
+        if (typeof project.status === 'string' && !ALLOWED_STATUSES.has(project.status)) {
           errors.push(`PROJECT.yaml has unsupported project.status: ${project.status}`);
         }
 
-        if (!project.id || project.id === 'TO_CONFIRM') {
+        if (typeof project.id !== 'string' || !project.id || project.id === 'TO_CONFIRM') {
           errors.push('PROJECT.yaml project.id must be a non-placeholder value');
         }
-        if (!project.name || project.name === 'TO_CONFIRM') {
+        if (typeof project.name !== 'string' || !project.name || project.name === 'TO_CONFIRM') {
           errors.push('PROJECT.yaml project.name must be a non-placeholder value');
         }
       }
