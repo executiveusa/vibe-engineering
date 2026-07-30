@@ -25,7 +25,7 @@ test('one-click factory creates and validates an ICM workspace safely', async ()
 
   try {
     const created = run(createScript, [
-      '--name', 'Neighborhood "Health" Guide',
+      '--name', 'Neighborhood "Health" $& Guide',
       '--target', target,
       '--mode', 'greenfield',
       '--domain', 'health and ecology',
@@ -37,11 +37,18 @@ test('one-click factory creates and validates an ICM workspace safely', async ()
 
     await access(path.join(target, 'stages', '04_verify', 'output', '.gitkeep'));
     const projectYaml = await readFile(path.join(target, 'PROJECT.yaml'), 'utf8');
-    assert.match(projectYaml, /name: "Neighborhood \\"Health\\" Guide"/);
+    assert.match(projectYaml, /name: "Neighborhood \\"Health\\" \$& Guide"/);
+    const generatedReadme = await readFile(path.join(target, 'README.md'), 'utf8');
+    assert.match(generatedReadme, /# Neighborhood "Health" \$& Guide/);
+    assert.doesNotMatch(generatedReadme, /\{\{PROJECT_NAME\}\}/);
 
     const verified = run(doctorScript, [target]);
     assert.equal(verified.status, 0, verified.stderr);
     assert.match(verified.stdout, /Vibe Factory Doctor: PASS/);
+
+    const judgeContract = await readFile(path.join(target, 'stages', '06_judge', 'CONTEXT.md'), 'utf8');
+    assert.match(judgeContract, /Return only SHIP or HOLD/);
+    assert.doesNotMatch(judgeContract, /SHIP, HOLD, or BLOCKED/);
 
     const projectControlPath = path.join(target, 'PROJECT.yaml');
     const originalProjectControl = await readFile(projectControlPath, 'utf8');
@@ -77,18 +84,25 @@ test('one-click factory creates and validates an ICM workspace safely', async ()
     const unsupportedState = run(doctorScript, [target]);
     assert.notEqual(unsupportedState.status, 0);
     assert.match(unsupportedState.stderr, /Unsupported factory state schema version: 2/);
+
+    const invalidStageState = JSON.parse(originalState);
+    invalidStageState.currentStage = '99_missing';
+    await writeFile(statePath, `${JSON.stringify(invalidStageState, null, 2)}\n`, 'utf8');
+    const unsupportedCurrentStage = run(doctorScript, [target]);
+    assert.notEqual(unsupportedCurrentStage.status, 0);
+    assert.match(unsupportedCurrentStage.stderr, /unsupported currentStage: 99_missing/);
     await writeFile(statePath, originalState, 'utf8');
 
     const visionPath = path.join(target, 'stages', '01_vision', 'CONTEXT.md');
     const originalVision = await readFile(visionPath, 'utf8');
     await writeFile(
       visionPath,
-      originalVision.replace(/^## Inputs$/m, 'This sentence mentions ## Inputs but is not a heading.'),
+      `${originalVision.replace(/^## Inputs$/m, '')}\n\`\`\`markdown\n## Inputs\n\`\`\`\n`,
       'utf8',
     );
-    const unanchoredHeading = run(doctorScript, [target]);
-    assert.notEqual(unanchoredHeading.status, 0);
-    assert.match(unanchoredHeading.stderr, /Stage 01_vision is missing section: ## Inputs/);
+    const fencedHeading = run(doctorScript, [target]);
+    assert.notEqual(fencedHeading.status, 0);
+    assert.match(fencedHeading.stderr, /Stage 01_vision is missing section: ## Inputs/);
     await writeFile(visionPath, originalVision, 'utf8');
 
     await unlink(path.join(target, 'references', 'README.md'));
@@ -96,6 +110,16 @@ test('one-click factory creates and validates an ICM workspace safely', async ()
     assert.notEqual(missingReferences.status, 0);
     assert.match(missingReferences.stderr, /Missing required file: references\/README.md/);
     await writeFile(path.join(target, 'references', 'README.md'), '# Project references\n', 'utf8');
+
+    const typoTarget = path.join(tempRoot, 'typo-target');
+    const unknownOption = run(createScript, [
+      '--name', 'Typo Guard',
+      '--target', typoTarget,
+      '--mod', 'brownfield',
+    ]);
+    assert.notEqual(unknownOption.status, 0);
+    assert.match(unknownOption.stderr, /Unknown option: --mod/);
+    await assert.rejects(access(typoTarget));
 
     const overwriteAttempt = run(createScript, [
       '--name', 'Neighborhood Health Guide',
