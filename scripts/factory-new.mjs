@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { copyFile, mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { inspectWorkspace, REQUIRED_STAGES } from './factory-doctor.mjs';
@@ -91,58 +91,79 @@ export async function createWorkspace(options, sourceRoot) {
   const slug = slugify(options.name);
   const target = path.resolve(options.target ?? path.join(process.cwd(), 'workspaces', slug));
   const existingEntries = await directoryEntries(target);
+  const targetExisted = existingEntries !== null;
   if (existingEntries && existingEntries.length > 0) {
     throw new Error(`Refusing to overwrite non-empty target: ${target}`);
   }
 
-  const templateRoot = path.join(sourceRoot, 'factory', 'icm', 'template');
-  await copyDirectory(templateRoot, target);
-  await mkdir(path.join(target, 'scripts'), { recursive: true });
-  await copyFile(
-    path.join(sourceRoot, 'scripts', 'factory-doctor.mjs'),
-    path.join(target, 'scripts', 'factory-doctor.mjs'),
+  const targetParent = path.dirname(target);
+  const temporaryTarget = path.join(
+    targetParent,
+    `.${path.basename(target)}.vibe-tmp-${process.pid}-${Date.now()}`,
   );
+  await mkdir(targetParent, { recursive: true });
 
-  const replacements = {
-    PROJECT_NAME: options.name.trim(),
-    PROJECT_SLUG: slug,
-    PROJECT_MODE: options.mode,
-    PROJECT_DOMAIN: options.domain,
-    PROJECT_AUDIENCE: options.audience,
-    CREATED_AT: new Date().toISOString(),
-  };
-  await replaceTokens(target, replacements);
+  try {
+    const templateRoot = path.join(sourceRoot, 'factory', 'icm', 'template');
+    await copyDirectory(templateRoot, temporaryTarget);
+    await mkdir(path.join(temporaryTarget, 'scripts'), { recursive: true });
+    await copyFile(
+      path.join(sourceRoot, 'scripts', 'factory-doctor.mjs'),
+      path.join(temporaryTarget, 'scripts', 'factory-doctor.mjs'),
+    );
 
-  for (const stage of REQUIRED_STAGES) {
-    const outputDirectory = path.join(target, 'stages', stage, 'output');
-    await mkdir(outputDirectory, { recursive: true });
-    await writeFile(path.join(outputDirectory, '.gitkeep'), '', 'utf8');
+    const replacements = {
+      PROJECT_NAME: options.name.trim(),
+      PROJECT_SLUG: slug,
+      PROJECT_MODE: options.mode,
+      PROJECT_DOMAIN: options.domain,
+      PROJECT_AUDIENCE: options.audience,
+      CREATED_AT: new Date().toISOString(),
+    };
+    await replaceTokens(temporaryTarget, replacements);
+
+    for (const stage of REQUIRED_STAGES) {
+      const outputDirectory = path.join(temporaryTarget, 'stages', stage, 'output');
+      await mkdir(outputDirectory, { recursive: true });
+      await writeFile(path.join(outputDirectory, '.gitkeep'), '', 'utf8');
+    }
+
+    await mkdir(path.join(temporaryTarget, '.factory'), { recursive: true });
+    await writeFile(path.join(temporaryTarget, '.factory', 'state.json'), `${JSON.stringify({
+      schemaVersion: 1,
+      factoryVersion: '1.0.0',
+      createdAt: replacements.CREATED_AT,
+      source: 'executiveusa/vibe-engineering',
+      project: {
+        name: replacements.PROJECT_NAME,
+        slug,
+        mode: options.mode,
+        domain: options.domain,
+        audience: options.audience,
+      },
+      status: 'created',
+      currentStage: '00_intake',
+      completedStages: [],
+    }, null, 2)}\n`, 'utf8');
+
+    const report = await inspectWorkspace(temporaryTarget);
+    if (report.status !== 'PASS') {
+      throw new Error(`Generated workspace failed doctor: ${report.errors.join('; ')}`);
+    }
+
+    if (targetExisted) {
+      await rm(target, { recursive: true });
+    }
+    await rename(temporaryTarget, target);
+
+    return { target, slug, report: { ...report, root: target } };
+  } catch (error) {
+    await rm(temporaryTarget, { recursive: true, force: true });
+    if (targetExisted && await directoryEntries(target) === null) {
+      await mkdir(target, { recursive: true });
+    }
+    throw error;
   }
-
-  await mkdir(path.join(target, '.factory'), { recursive: true });
-  await writeFile(path.join(target, '.factory', 'state.json'), `${JSON.stringify({
-    schemaVersion: 1,
-    factoryVersion: '1.0.0',
-    createdAt: replacements.CREATED_AT,
-    source: 'executiveusa/vibe-engineering',
-    project: {
-      name: replacements.PROJECT_NAME,
-      slug,
-      mode: options.mode,
-      domain: options.domain,
-      audience: options.audience,
-    },
-    status: 'created',
-    currentStage: '00_intake',
-    completedStages: [],
-  }, null, 2)}\n`, 'utf8');
-
-  const report = await inspectWorkspace(target);
-  if (report.status !== 'PASS') {
-    throw new Error(`Generated workspace failed doctor: ${report.errors.join('; ')}`);
-  }
-
-  return { target, slug, report };
 }
 
 async function main() {
