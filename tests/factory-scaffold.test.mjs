@@ -62,8 +62,24 @@ test('one-click factory creates and validates an ICM workspace safely', async ()
     assert.match(invalidProjectStatus.stderr, /unsupported project.status: structure_ready/);
     await writeFile(projectControlPath, originalProjectControl, 'utf8');
 
+    await writeFile(
+      projectControlPath,
+      originalProjectControl.replace(/^project:/m, 'portfolio:'),
+      'utf8',
+    );
+    const missingProjectMapping = run(doctorScript, [target]);
+    assert.notEqual(missingProjectMapping.status, 0);
+    assert.match(missingProjectMapping.stderr, /top-level project mapping/);
+    await writeFile(projectControlPath, originalProjectControl, 'utf8');
+
     const securityPath = path.join(target, 'SECURITY.md');
     const originalSecurity = await readFile(securityPath, 'utf8');
+    await writeFile(securityPath, '', 'utf8');
+    const emptySecurity = run(doctorScript, [target]);
+    assert.notEqual(emptySecurity.status, 0);
+    assert.match(emptySecurity.stderr, /Required control file is empty: SECURITY.md/);
+    await writeFile(securityPath, originalSecurity, 'utf8');
+
     await unlink(securityPath);
     const missingSecurity = run(doctorScript, [target]);
     assert.notEqual(missingSecurity.status, 0);
@@ -97,7 +113,7 @@ test('one-click factory creates and validates an ICM workspace safely', async ()
     const originalVision = await readFile(visionPath, 'utf8');
     await writeFile(
       visionPath,
-      `${originalVision.replace(/^## Inputs$/m, '')}\n\`\`\`markdown\n## Inputs\n\`\`\`\n`,
+      `${originalVision.replace(/^## Inputs$/m, '')}\n\`\`\`markdown\n\`\`\` trailing text\n## Inputs\n\`\`\`\n`,
       'utf8',
     );
     const fencedHeading = run(doctorScript, [target]);
@@ -110,6 +126,18 @@ test('one-click factory creates and validates an ICM workspace safely', async ()
     assert.notEqual(missingReferences.status, 0);
     assert.match(missingReferences.stderr, /Missing required file: references\/README.md/);
     await writeFile(path.join(target, 'references', 'README.md'), '# Project references\n', 'utf8');
+
+    const tokenTarget = path.join(tempRoot, 'token-target');
+    const nonCascading = run(createScript, [
+      '--name', 'Use {{PROJECT_SLUG}} Now',
+      '--target', tokenTarget,
+    ]);
+    assert.equal(nonCascading.status, 0, nonCascading.stderr);
+    const tokenReadme = await readFile(path.join(tokenTarget, 'README.md'), 'utf8');
+    assert.match(tokenReadme, /^# Use \{\{PROJECT_SLUG\}\} Now$/m);
+    assert.doesNotMatch(tokenReadme, /# Use use-project-slug-now Now/);
+    const tokenProjectYaml = await readFile(path.join(tokenTarget, 'PROJECT.yaml'), 'utf8');
+    assert.match(tokenProjectYaml, /name: "Use \{\{PROJECT_SLUG\}\} Now"/);
 
     const typoTarget = path.join(tempRoot, 'typo-target');
     const unknownOption = run(createScript, [
@@ -154,6 +182,33 @@ test('failed scaffold is transactional and preserves an existing empty target', 
       }, brokenSource),
     );
     assert.deepEqual(await readdir(target), []);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('concurrent writes to an initially empty target are preserved', async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'vibe-factory-race-'));
+  const target = path.join(tempRoot, 'empty-target');
+  const sentinelPath = path.join(target, 'do-not-delete.txt');
+
+  try {
+    await mkdir(target, { recursive: true });
+    await assert.rejects(
+      createWorkspace({
+        name: 'Concurrent Write Guard',
+        target,
+        mode: 'greenfield',
+        domain: 'science',
+        audience: 'urban youth and seniors',
+      }, repoRoot, {
+        beforeCommit: async () => {
+          await writeFile(sentinelPath, 'owned by another process\n', 'utf8');
+        },
+      }),
+    );
+    assert.equal(await readFile(sentinelPath, 'utf8'), 'owned by another process\n');
+    assert.deepEqual(await readdir(target), ['do-not-delete.txt']);
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
