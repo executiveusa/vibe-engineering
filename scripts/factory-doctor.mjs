@@ -23,6 +23,7 @@ const REQUIRED_FILES = [
   '_config/mission.md',
   '_config/quality-gates.yaml',
   'shared/PLAIN_LANGUAGE_STANDARD.md',
+  'references/README.md',
   '.factory/state.json',
 ];
 
