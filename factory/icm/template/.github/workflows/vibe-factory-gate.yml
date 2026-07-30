@@ -19,5 +19,15 @@ jobs:
           node-version: 22
       - name: Verify ICM factory structure
         run: node scripts/factory-doctor.mjs .
+      - name: Install declared dependencies
+        shell: bash
+        run: |
+          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+            npm ci
+          elif [ -f package.json ]; then
+            npm install --no-audit --no-fund
+          else
+            echo "No package manifest found; skipping dependency installation."
+          fi
       - name: Run project checks when declared
         run: npm run check --if-present
