@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { inspectWorkspace, REQUIRED_STAGES } from './factory-doctor.mjs';
 
 const TEXT_EXTENSIONS = new Set(['.md', '.json', '.yaml', '.yml', '.mjs', '.js', '.txt']);
+const SUPPORTED_OPTIONS = new Set(['name', 'mode', 'domain', 'audience', 'target']);
 
 function parseArgs(argv) {
   const options = {
@@ -15,8 +16,13 @@ function parseArgs(argv) {
 
   for (let index = 0; index < argv.length; index += 1) {
     const token = argv[index];
-    if (!token.startsWith('--')) continue;
+    if (!token.startsWith('--')) {
+      throw new Error(`Unexpected positional argument: ${token}`);
+    }
     const key = token.slice(2);
+    if (!SUPPORTED_OPTIONS.has(key)) {
+      throw new Error(`Unknown option: --${key}`);
+    }
     const value = argv[index + 1];
     if (!value || value.startsWith('--')) {
       throw new Error(`Missing value for --${key}`);
@@ -81,7 +87,7 @@ async function replaceTokens(root, replacements) {
 
     let content = await readFile(currentPath, 'utf8');
     for (const [token, value] of Object.entries(replacements)) {
-      content = content.replaceAll(`{{${token}}}`, value);
+      content = content.replaceAll(`{{${token}}}`, () => String(value));
     }
     await writeFile(currentPath, content, 'utf8');
   }
