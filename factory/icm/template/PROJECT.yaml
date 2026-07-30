@@ -1,0 +1,22 @@
+project:
+  name: "{{PROJECT_NAME}}"
+  slug: "{{PROJECT_SLUG}}"
+  mode: "{{PROJECT_MODE}}"
+  domain: "{{PROJECT_DOMAIN}}"
+  audience: "{{PROJECT_AUDIENCE}}"
+  status: structure_ready
+  classification: INTAKE
+  current_stage: 00_intake
+  production_verified: false
+  created_at: "{{CREATED_AT}}"
+ownership:
+  code: TO_CONFIRM
+  data: TO_CONFIRM
+  domain: TO_CONFIRM
+  hosting: TO_CONFIRM
+  database: TO_CONFIRM
+  credentials: TO_CONFIRM
+commercial:
+  value_path: "Vibe Audit -> Vibe Rescue Sprint -> Sovereign Launch -> MAXX Operations"
+  paid_customer: false
+  revenue_verified: false
