@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm, unlink } from 'node:fs/promises';
+import { access, mkdtemp, rm, unlink } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -33,6 +33,8 @@ test('one-click factory creates and validates an ICM workspace safely', async ()
     assert.equal(created.status, 0, created.stderr);
     assert.match(created.stdout, /Factory Doctor: PASS/);
     assert.match(created.stdout, /Next stage: stages\/00_intake\/CONTEXT.md/);
+
+    await access(path.join(target, 'stages', '04_verify', 'output', '.gitkeep'));
 
     const verified = run(doctorScript, [target]);
     assert.equal(verified.status, 0, verified.stderr);
