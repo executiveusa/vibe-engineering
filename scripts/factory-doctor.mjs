@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-import { access, readFile, readdir } from 'node:fs/promises';
-import { constants } from 'node:fs';
+import { readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -17,8 +16,10 @@ export const REQUIRED_STAGES = [
 ];
 
 const REQUIRED_FILES = [
+  'README.md',
   'AGENTS.md',
   'CONTEXT.md',
+  'PROJECT.yaml',
   '_config/mission.md',
   '_config/quality-gates.yaml',
   'shared/PLAIN_LANGUAGE_STANDARD.md',
@@ -33,12 +34,12 @@ const REQUIRED_STAGE_SECTIONS = [
   '## Plain-language proof',
 ];
 
-async function exists(filePath) {
+async function getStats(filePath) {
   try {
-    await access(filePath, constants.F_OK);
-    return true;
-  } catch {
-    return false;
+    return await stat(filePath);
+  } catch (error) {
+    if (error.code === 'ENOENT') return null;
+    throw error;
   }
 }
 
@@ -48,16 +49,22 @@ export async function inspectWorkspace(rootPath) {
   const warnings = [];
 
   for (const relativePath of REQUIRED_FILES) {
-    if (!await exists(path.join(root, relativePath))) {
+    const fileStats = await getStats(path.join(root, relativePath));
+    if (!fileStats?.isFile()) {
       errors.push(`Missing required file: ${relativePath}`);
     }
   }
 
   const stagesRoot = path.join(root, 'stages');
-  if (!await exists(stagesRoot)) {
+  const stagesStats = await getStats(stagesRoot);
+  if (!stagesStats?.isDirectory()) {
     errors.push('Missing required directory: stages');
   } else {
-    const actualStages = new Set(await readdir(stagesRoot));
+    const stageEntries = await readdir(stagesRoot, { withFileTypes: true });
+    const actualStages = new Set(
+      stageEntries.filter((entry) => entry.isDirectory()).map((entry) => entry.name),
+    );
+
     for (const stage of REQUIRED_STAGES) {
       if (!actualStages.has(stage)) {
         errors.push(`Missing required stage: stages/${stage}`);
@@ -65,7 +72,8 @@ export async function inspectWorkspace(rootPath) {
       }
 
       const contextPath = path.join(stagesRoot, stage, 'CONTEXT.md');
-      if (!await exists(contextPath)) {
+      const contextStats = await getStats(contextPath);
+      if (!contextStats?.isFile()) {
         errors.push(`Missing stage contract: stages/${stage}/CONTEXT.md`);
         continue;
       }
@@ -77,14 +85,16 @@ export async function inspectWorkspace(rootPath) {
         }
       }
 
-      if (!await exists(path.join(stagesRoot, stage, 'output'))) {
+      const outputStats = await getStats(path.join(stagesRoot, stage, 'output'));
+      if (!outputStats?.isDirectory()) {
         errors.push(`Missing working output directory: stages/${stage}/output`);
       }
     }
   }
 
   const statePath = path.join(root, '.factory', 'state.json');
-  if (await exists(statePath)) {
+  const stateStats = await getStats(statePath);
+  if (stateStats?.isFile()) {
     try {
       const state = JSON.parse(await readFile(statePath, 'utf8'));
       if (state.schemaVersion !== 1) {
