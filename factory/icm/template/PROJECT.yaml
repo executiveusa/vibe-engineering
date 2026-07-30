@@ -1,14 +1,14 @@
 project:
-  name: "{{PROJECT_NAME}}"
-  slug: "{{PROJECT_SLUG}}"
-  mode: "{{PROJECT_MODE}}"
-  domain: "{{PROJECT_DOMAIN}}"
-  audience: "{{PROJECT_AUDIENCE}}"
+  name: {{PROJECT_NAME_YAML}}
+  slug: {{PROJECT_SLUG_YAML}}
+  mode: {{PROJECT_MODE_YAML}}
+  domain: {{PROJECT_DOMAIN_YAML}}
+  audience: {{PROJECT_AUDIENCE_YAML}}
   status: structure_ready
   classification: INTAKE
   current_stage: 00_intake
   production_verified: false
-  created_at: "{{CREATED_AT}}"
+  created_at: {{CREATED_AT_YAML}}
 ownership:
   code: TO_CONFIRM
   data: TO_CONFIRM
