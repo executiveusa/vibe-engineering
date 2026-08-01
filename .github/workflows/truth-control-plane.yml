@@ -1,0 +1,69 @@
+name: Truth Control Plane
+
+on:
+  pull_request:
+    paths:
+      - 'truth/**'
+      - 'src/truth/**'
+      - 'scripts/truth-*.mjs'
+      - 'scripts/vibe.mjs'
+      - 'packages/truth-sdk/**'
+      - 'openapi/**'
+      - 'tests/truth-*.test.mjs'
+      - 'package.json'
+      - '.github/workflows/truth-control-plane.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'truth/**'
+      - 'src/truth/**'
+      - 'scripts/truth-*.mjs'
+      - 'scripts/vibe.mjs'
+      - 'packages/truth-sdk/**'
+      - 'openapi/**'
+      - 'tests/truth-*.test.mjs'
+      - 'package.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth-control-plane-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Verify canonical sources
+        run: npm run truth:source-check
+      - name: Compile deterministic truth bundle
+        run: npm run truth:compile
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+      - name: Run tests
+        run: npm test
+      - name: Build existing application
+        run: npm run build
+      - name: Recompile and compare deterministic output
+        shell: bash
+        run: |
+          cp dist/truth/truth-bundle.json /tmp/truth-bundle.json
+          cp dist/truth/truth-manifest.json /tmp/truth-manifest.json
+          npm run truth:compile
+          cmp /tmp/truth-bundle.json dist/truth/truth-bundle.json
+          cmp /tmp/truth-manifest.json dist/truth/truth-manifest.json
+      - name: Upload compiled truth evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: truth-bundle-${{ github.sha }}
+          path: dist/truth/
+          if-no-files-found: error
+          retention-days: 14
