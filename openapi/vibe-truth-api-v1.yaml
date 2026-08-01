@@ -1,0 +1,110 @@
+openapi: 3.1.0
+info:
+  title: Vibe Truth API
+  version: 1.0.0
+  description: Read-only, versioned interface to approved Vibe Engineering truth.
+servers:
+  - url: /api/v1
+paths:
+  /manifest:
+    get:
+      operationId: getManifest
+      responses:
+        '200':
+          description: Approved truth manifest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Manifest'
+  /truth/{id}:
+    get:
+      operationId: getTruth
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Approved truth artifact }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /workflows/{id}:
+    get:
+      operationId: getWorkflow
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Approved workflow artifact }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /resolve-context:
+    post:
+      operationId: resolveContext
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContextRequest'
+      responses:
+        '200': { description: Resolved work contract }
+        '400': { $ref: '#/components/responses/BadRequest' }
+components:
+  schemas:
+    ArtifactSummary:
+      type: object
+      additionalProperties: false
+      required: [id, kind, version, status, precedence, title, sourcePath, summary, contentHash]
+      properties:
+        id: { type: string }
+        kind: { type: string }
+        version: { type: string }
+        status: { type: string, enum: [approved] }
+        precedence: { type: integer, minimum: 0 }
+        title: { type: string }
+        sourcePath: { type: string }
+        summary: { type: string }
+        contentHash: { type: string, pattern: '^[a-f0-9]{64}$' }
+    Manifest:
+      type: object
+      required: [schemaVersion, compilerVersion, sourceCommit, bundleHash, artifacts]
+      properties:
+        schemaVersion: { type: string }
+        compilerVersion: { type: string }
+        sourceCommit: { type: string }
+        bundleHash: { type: string, pattern: '^[a-f0-9]{64}$' }
+        artifacts:
+          type: array
+          items: { $ref: '#/components/schemas/ArtifactSummary' }
+    ContextRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        agent:
+          type: object
+          additionalProperties: true
+        project:
+          type: object
+          additionalProperties: false
+          properties:
+            repository: { type: string, pattern: '^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$' }
+            mode: { type: string, enum: [greenfield, brownfield, discovery, recovery, public-release] }
+        task:
+          type: object
+          additionalProperties: false
+          properties:
+            type: { type: string, maxLength: 100 }
+            requestedAction: { type: string, enum: [inspect, software-change, public-release, destructive-change, content-change, security-review] }
+            consequenceLevel: { type: string, enum: [low, medium, high] }
+        scope:
+          type: object
+          additionalProperties: false
+          properties:
+            allowed: { type: array, items: { type: string } }
+            prohibited: { type: array, items: { type: string } }
+  responses:
+    NotFound:
+      description: Resource not found
+    BadRequest:
+      description: Invalid request
