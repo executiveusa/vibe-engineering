@@ -12,6 +12,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "truth:compile": "node scripts/truth-compile.mjs",
+    "truth:api": "npm run truth:compile && node scripts/truth-api.mjs",
+    "vibe": "node scripts/vibe.mjs",
     "check": "npm run truth:compile && npm run test && npm run build",
     "factory:new": "node scripts/factory-new.mjs",
     "factory:one-click": "node scripts/factory-new.mjs",
