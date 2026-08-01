@@ -1,4 +1,4 @@
-import { validateContextRequest } from './request-schema.mjs';
+import { validateContextRequest } from './request-validation.mjs';
 
 export const MAX_CONTEXT_BODY_BYTES = 32 * 1024;
 
@@ -37,12 +37,12 @@ async function parseContextRequest(request) {
     }) };
   }
   const validation = validateContextRequest(body);
-  return validation.ok
-    ? { body: validation.value }
+  return validation.valid
+    ? { body }
     : { error: toResponse({
       status: 400,
       headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
-      body: { error: 'INVALID_CONTEXT_REQUEST', issues: validation.issues },
+      body: { error: 'INVALID_CONTEXT_REQUEST', issues: validation.errors },
     }) };
 }
 
