@@ -1,0 +1,33 @@
+name: Vibe Factory Gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  structure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify ICM factory structure
+        run: node scripts/factory-doctor.mjs .
+      - name: Install declared dependencies
+        shell: bash
+        run: |
+          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+            npm ci
+          elif [ -f package.json ]; then
+            npm install --no-audit --no-fund
+          else
+            echo "No package manifest found; skipping dependency installation."
+          fi
+      - name: Run project checks when declared
+        run: npm run check --if-present

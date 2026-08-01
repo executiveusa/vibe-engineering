@@ -1,0 +1,13 @@
+{
+  "name": "{{PROJECT_SLUG}}",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "factory:doctor": "node scripts/factory-doctor.mjs .",
+    "check": "npm run factory:doctor"
+  }
+}

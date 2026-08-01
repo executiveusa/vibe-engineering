@@ -1,0 +1,21 @@
+version: 1
+release_floor: 8.5
+hard_stops:
+  security_minimum: 7
+  reliability_minimum: 7
+  ownership_minimum: 7
+required_evidence:
+  - native_checks
+  - code_review
+  - accessibility_review
+  - plain_language_explanation
+  - rollback
+  - ownership_receipt
+  - target_environment_verification
+human_approval_required_for:
+  - legal
+  - financial
+  - medical_or_health_claims
+  - safety
+  - destructive_actions
+  - production_release

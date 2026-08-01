@@ -1,0 +1,43 @@
+project:
+  id: {{PROJECT_SLUG_YAML}}
+  name: {{PROJECT_NAME_YAML}}
+  mode: {{PROJECT_MODE_YAML}}
+  status: discovery
+  owner: "TO_CONFIRM"
+  business_goal: "Define and deliver the smallest verified outcome for the intended audience."
+  revenue_model: "TO_CONFIRM"
+  repository: "TO_CONFIRM"
+  production_branch: "TO_CONFIRM"
+  production_url: ""
+  current_release: ""
+  current_objective: "Complete Stage 00 Intake and confirm the project contract."
+  approved_stack: []
+  active_tasks:
+    - "Complete stages/00_intake/CONTEXT.md"
+  blocked_tasks: []
+  dependencies: []
+  acceptance_tests:
+    - "npm run factory:doctor"
+  required_approvals:
+    - "Human approval before production release"
+  last_verified_at: ""
+  rollback_point: ""
+factory:
+  schema_version: 1
+  structure_status: ready
+  current_stage: 00_intake
+  production_verified: false
+  domain: {{PROJECT_DOMAIN_YAML}}
+  audience: {{PROJECT_AUDIENCE_YAML}}
+  created_at: {{CREATED_AT_YAML}}
+ownership:
+  code: "TO_CONFIRM"
+  data: "TO_CONFIRM"
+  domain: "TO_CONFIRM"
+  hosting: "TO_CONFIRM"
+  database: "TO_CONFIRM"
+  credentials: "TO_CONFIRM"
+commercial:
+  value_path: "Vibe Audit -> Vibe Rescue Sprint -> Sovereign Launch -> MAXX Operations"
+  paid_customer: false
+  revenue_verified: false
