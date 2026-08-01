@@ -35,6 +35,8 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      GITHUB_SHA: ${{ github.sha }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -46,8 +48,6 @@ jobs:
         run: npm run truth:source-check
       - name: Compile deterministic truth bundle
         run: npm run truth:compile
-        env:
-          GITHUB_SHA: ${{ github.sha }}
       - name: Run tests
         run: npm test
       - name: Build existing application
