@@ -11,7 +11,8 @@
     "test": "node --test tests/*.test.mjs",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "npm run test && npm run build",
+    "truth:compile": "node scripts/truth-compile.mjs",
+    "check": "npm run truth:compile && npm run test && npm run build",
     "factory:new": "node scripts/factory-new.mjs",
     "factory:one-click": "node scripts/factory-new.mjs",
     "factory:doctor": "node scripts/factory-doctor.mjs"
