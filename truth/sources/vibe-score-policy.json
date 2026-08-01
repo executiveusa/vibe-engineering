@@ -1,0 +1,17 @@
+{
+  "id": "policy.vibe-score-release",
+  "kind": "policy",
+  "version": "1.0.0",
+  "status": "approved",
+  "precedence": 800,
+  "title": "Vibe Score Release Policy",
+  "sourcePath": "src/vibe-score.mjs",
+  "summary": "Deterministic SHIP or HOLD release policy.",
+  "rules": {
+    "releaseFloor": 8.5,
+    "hardStopFloor": 7,
+    "hardStopDimensions": ["security", "reliability", "ownership"],
+    "dimensions": ["clarity", "reliability", "security", "maintainability", "taste", "ownership"],
+    "allowedVerdicts": ["SHIP", "HOLD"]
+  }
+}
