@@ -1,0 +1,24 @@
+{
+  "id": "constitution.vibe-engineering",
+  "kind": "constitution",
+  "version": "1.0.0",
+  "status": "approved",
+  "precedence": 1000,
+  "title": "Vibe Engineering Constitution",
+  "sourcePath": "docs/STUDIO-SYSTEM-PROMPT.md",
+  "summary": "Non-negotiable operating laws for sovereign AI-assisted software work.",
+  "laws": [
+    { "id": "verify-before-everything", "text": "Verify It Before Everything." },
+    { "id": "cash-before-code", "text": "Cash before more code." },
+    { "id": "inspect-before-changing", "text": "Inspect before changing." },
+    { "id": "reuse-before-adding", "text": "Reuse before adding." },
+    { "id": "specify-before-building", "text": "Specify before building." },
+    { "id": "one-verifiable-slice", "text": "Build one verifiable slice at a time." },
+    { "id": "prove-before-claiming", "text": "Prove before claiming." },
+    { "id": "independent-approval", "text": "Builders cannot approve themselves." },
+    { "id": "ship-with-rollback", "text": "Ship only with rollback." },
+    { "id": "preserve-owner-control", "text": "Preserve owner control of code, domain, hosting, database, credentials, and data." },
+    { "id": "production-needs-proof", "text": "A build, CI pass, or deployment request is not verified production." },
+    { "id": "never-expose-secrets", "text": "Never expose secrets." }
+  ]
+}
