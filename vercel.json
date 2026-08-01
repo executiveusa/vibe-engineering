@@ -5,6 +5,11 @@
   "outputDirectory": "dist",
   "installCommand": "npm install --no-audit --no-fund",
   "cleanUrls": true,
+  "functions": {
+    "api/**/*.mjs": {
+      "maxDuration": 10
+    }
+  },
   "headers": [
     {
       "source": "/(.*)",

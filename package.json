@@ -9,13 +9,14 @@
   "scripts": {
     "dev": "vite",
     "test": "node --test tests/*.test.mjs",
-    "build": "vite build",
+    "build": "vite build && npm run truth:compile",
     "preview": "vite preview",
     "truth:compile": "node scripts/truth-compile.mjs",
     "truth:source-check": "node scripts/truth-source-check.mjs",
     "truth:api": "npm run truth:compile && node scripts/truth-api.mjs",
+    "truth:preview-verify": "node scripts/truth-preview-verify.mjs",
     "vibe": "node scripts/vibe.mjs",
-    "check": "npm run truth:source-check && npm run truth:compile && npm run test && npm run build",
+    "check": "npm run truth:source-check && npm run test && npm run build",
     "factory:new": "node scripts/factory-new.mjs",
     "factory:one-click": "node scripts/factory-new.mjs",
     "factory:doctor": "node scripts/factory-doctor.mjs"

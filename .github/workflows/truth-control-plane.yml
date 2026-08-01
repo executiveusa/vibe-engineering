@@ -5,24 +5,30 @@ on:
     paths:
       - 'truth/**'
       - 'src/truth/**'
+      - 'api/**'
+      - 'adapters/**'
       - 'scripts/truth-*.mjs'
       - 'scripts/vibe.mjs'
       - 'packages/truth-sdk/**'
       - 'openapi/**'
       - 'tests/truth-*.test.mjs'
       - 'package.json'
+      - 'vercel.json'
       - '.github/workflows/truth-control-plane.yml'
   push:
     branches: [main]
     paths:
       - 'truth/**'
       - 'src/truth/**'
+      - 'api/**'
+      - 'adapters/**'
       - 'scripts/truth-*.mjs'
       - 'scripts/vibe.mjs'
       - 'packages/truth-sdk/**'
       - 'openapi/**'
       - 'tests/truth-*.test.mjs'
       - 'package.json'
+      - 'vercel.json'
 
 permissions:
   contents: read
@@ -48,10 +54,8 @@ jobs:
         run: npm run truth:source-check
       - name: Run tests
         run: npm test
-      - name: Build existing application
+      - name: Build application and truth bundle
         run: npm run build
-      - name: Compile deterministic truth bundle
-        run: npm run truth:compile
       - name: Recompile and compare deterministic output
         shell: bash
         run: |
