@@ -46,12 +46,12 @@ jobs:
       - run: npm ci
       - name: Verify canonical sources
         run: npm run truth:source-check
-      - name: Compile deterministic truth bundle
-        run: npm run truth:compile
       - name: Run tests
         run: npm test
       - name: Build existing application
         run: npm run build
+      - name: Compile deterministic truth bundle
+        run: npm run truth:compile
       - name: Recompile and compare deterministic output
         shell: bash
         run: |
