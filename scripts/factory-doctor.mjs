@@ -31,6 +31,7 @@ const REQUIRED_FILES = [
   '_config/quality-gates.yaml',
   'shared/PLAIN_LANGUAGE_STANDARD.md',
   'references/README.md',
+  'references/ENGINEERING-WORKFLOW.md',
   '.factory/state.json',
 ];
 
@@ -92,6 +93,56 @@ const ALLOWED_STATUSES = new Set([
   'production',
   'parked',
 ]);
+
+const WORKFLOW_INVARIANTS = [
+  {
+    file: 'references/ENGINEERING-WORKFLOW.md',
+    checks: [
+      ['canonical Agent Skills source', /executiveusa\/pauli-agent-skills-2026/],
+      ['engineering lifecycle', /DEFINE\s*→\s*PLAN\s*→\s*BUILD\s*→\s*VERIFY\s*→\s*REVIEW\s*→\s*SHIP/],
+      ['classification gate', /SELL[\s\S]{0,120}USE[\s\S]{0,120}MERGE[\s\S]{0,120}PARK[\s\S]{0,120}ARCHIVE/],
+      ['greenfield/brownfield mode gate', /greenfield[\s\S]{0,120}brownfield|brownfield[\s\S]{0,120}greenfield/],
+      ['specification gate', /approved specification|specification before implementation|confirm the approved specification/i],
+      ['one-slice gate', /one independently verifiable slice|one verifiable slice/i],
+      ['rollback release boundary', /rollback/i],
+      ['independent release authority', /Council\/Judge|Judge or authorized human|builder cannot approve/i],
+    ],
+  },
+  {
+    file: 'AGENTS.md',
+    checks: [
+      ['canonical Agent Skills source', /executiveusa\/pauli-agent-skills-2026/],
+      ['mandatory engineering lifecycle', /DEFINE\s*→\s*PLAN\s*→\s*BUILD\s*→\s*VERIFY\s*→\s*REVIEW\s*→\s*SHIP/],
+      ['specification before implementation', /approved specification|Specify before building/i],
+      ['release authority separation', /builder cannot approve|builder cannot approve its own work/i],
+    ],
+  },
+  {
+    file: 'stages/03_build/CONTEXT.md',
+    checks: [
+      ['workflow reference', /references\/ENGINEERING-WORKFLOW\.md/],
+      ['skill routing before implementation', /route the slice through the applicable skills|applicable skills/i],
+      ['brownfield baseline gate', /brownfield[\s\S]{0,180}baseline/i],
+      ['greenfield pre-build gate', /greenfield[\s\S]{0,220}(approved|specification|tickets)/i],
+    ],
+  },
+  {
+    file: 'stages/04_verify/CONTEXT.md',
+    checks: [
+      ['workflow reference', /references\/ENGINEERING-WORKFLOW\.md/],
+      ['verification skill routing', /verification\/review skills|applicable verification/i],
+      ['live-production proof boundary', /not live-production proof|not.*production proof/i],
+      ['independent review boundary', /builder cannot approve its own implementation|builder cannot approve/i],
+    ],
+  },
+  {
+    file: 'RUNBOOK.md',
+    checks: [
+      ['rollback section', /^## .*rollback/im],
+      ['tested rollback requirement', /rollback[\s\S]{0,180}tested|tested[\s\S]{0,180}rollback/i],
+    ],
+  },
+];
 
 async function getStats(filePath) {
   try {
@@ -225,6 +276,21 @@ function stripFencedCode(content) {
   }).join('\n');
 }
 
+async function validateWorkflowInvariants(root, errors) {
+  for (const invariant of WORKFLOW_INVARIANTS) {
+    const absolutePath = path.join(root, invariant.file);
+    const fileStats = await getStats(absolutePath);
+    if (!fileStats?.isFile()) continue;
+
+    const content = stripFencedCode(await readFile(absolutePath, 'utf8'));
+    for (const [label, pattern] of invariant.checks) {
+      if (!pattern.test(content)) {
+        errors.push(`Mandatory workflow invariant missing in ${invariant.file}: ${label}`);
+      }
+    }
+  }
+}
+
 export async function inspectWorkspace(rootPath) {
   const root = path.resolve(rootPath);
   const errors = [];
@@ -244,6 +310,8 @@ export async function inspectWorkspace(rootPath) {
       }
     }
   }
+
+  await validateWorkflowInvariants(root, errors);
 
   const projectPath = path.join(root, 'PROJECT.yaml');
   const projectStats = await getStats(projectPath);
@@ -367,7 +435,7 @@ function printReport(report) {
   for (const error of report.errors) console.error(`ERROR: ${error}`);
 
   if (report.status === 'PASS') {
-    console.log('Structure verified. This does not prove application behavior, security, deployment, or customer value.');
+    console.log('Structure and mandatory engineering workflow verified. This does not prove application behavior, security, deployment, or customer value.');
   }
 }
 
