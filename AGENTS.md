@@ -11,14 +11,29 @@ Develop and prove the Vibe Engineering method, governance package, one-click ICM
 Before substantial work, read:
 
 1. `docs/STUDIO-SYSTEM-PROMPT.md`
-2. `CONTEXT.md`
-3. `PROJECT.yaml`
-4. `ARCHITECTURE.md`
-5. `RUNBOOK.md`
-6. `SECURITY.md`
-7. the approved GitHub issue or specification
-8. `skills/VIBE-SKILLS-REFERENCE.md`
-9. `factory/icm/README.md` for factory or project-scaffolding work
+2. `docs/governance/ENGINEERING-WORKFLOW.md`
+3. `CONTEXT.md`
+4. `PROJECT.yaml`
+5. `ARCHITECTURE.md`
+6. `RUNBOOK.md`
+7. `SECURITY.md`
+8. the approved GitHub issue or specification
+9. `skills/VIBE-SKILLS-REFERENCE.md`
+10. `factory/icm/README.md` for factory or project-scaffolding work
+
+## Mandatory engineering procedure
+
+`executiveusa/pauli-agent-skills-2026` is the canonical engineering procedure library for software produced by this factory.
+
+Vibe Engineering and ICM govern **what, why, whether, and authority**. The Agent Skills workflow governs **how engineering work is executed**.
+
+For software work, use the lifecycle:
+
+`DEFINE → PLAN → BUILD → VERIFY → REVIEW → SHIP`
+
+Do not jump directly to implementation. Apply the commercial/classification gate, determine greenfield or brownfield mode, define outcome/target/constraints/proof/commercial value, specify the work, then build one verifiable slice at a time. Follow `docs/governance/ENGINEERING-WORKFLOW.md` for skill routing and release boundaries.
+
+This applies to every factory-created software product and every supported runtime, including Polyspace. Tool or model substitution is allowed; weakening governance is not.
 
 ## Commands
 
@@ -53,6 +68,7 @@ npm run factory:doctor -- ./workspaces/project-name
 - Do not overwrite a non-empty project destination with the factory scaffold.
 - Do not merge, deploy, publish, or close issues without required evidence and authority.
 - Do not claim live production verification from local, scaffold, build, review, or CI results.
+- Do not bypass an applicable mandatory engineering skill merely because direct implementation appears faster.
 
 ## Sandcastle and A2A rule
 
