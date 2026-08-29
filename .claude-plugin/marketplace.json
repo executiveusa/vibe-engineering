@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "vibe-engineering",
+  "description": "Verify It Before Everything: the Pauli Effect method for human-directed AI product and software work.",
+  "owner": {
+    "name": "The Pauli Effect"
+  },
+  "plugins": [
+    {
+      "name": "vibe-engineering",
+      "source": "./",
+      "skills": ["./skills/vibe-engineering"],
+      "description": "Use Vibe Engineering for intake, product thinking, architecture, implementation, verification, anti-slop quality, Council review, release, ownership, and learning through one ICM-governed workflow.",
+      "category": "development"
+    }
+  ]
+}

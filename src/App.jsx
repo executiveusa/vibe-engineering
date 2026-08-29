@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { comparison, council, faqs, offers, stages, system } from './content';
+import { council, faqs, journey, qualityLayers, stages } from './content';
 import { calculateVibeScore, RELEASE_FLOOR, SCORE_DIMENSIONS } from './vibe-score.mjs';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -24,8 +24,140 @@ function Mark({ compact = false }) {
   );
 }
 
-function Arrow() {
-  return <span aria-hidden="true">↗</span>;
+function SoundControl() {
+  const trackUrl = (import.meta.env.VITE_VIBE_SOUNDTRACK_URL || '').trim();
+  const youtubeMatch = trackUrl.match(/youtube\.com\/embed\/([A-Za-z0-9_-]+)/);
+  const youtubeId = youtubeMatch?.[1] || '';
+  const audioRef = useRef(null);
+  const synthRef = useRef(null);
+  const [playing, setPlaying] = useState(false);
+
+  useEffect(() => () => {
+    if (synthRef.current?.context) synthRef.current.context.close();
+  }, []);
+
+  const startPulse = () => {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return false;
+
+    const context = new AudioContext();
+    const master = context.createGain();
+    const filter = context.createBiquadFilter();
+    const low = context.createOscillator();
+    const high = context.createOscillator();
+    const drift = context.createOscillator();
+    const driftGain = context.createGain();
+
+    low.type = 'sine';
+    low.frequency.value = 110;
+    high.type = 'sine';
+    high.frequency.value = 164.81;
+    drift.type = 'sine';
+    drift.frequency.value = 0.11;
+    driftGain.gain.value = 0.008;
+    filter.type = 'lowpass';
+    filter.frequency.value = 540;
+    filter.Q.value = 0.8;
+    master.gain.value = 0.0001;
+
+    drift.connect(driftGain);
+    driftGain.connect(master.gain);
+    low.connect(filter);
+    high.connect(filter);
+    filter.connect(master);
+    master.connect(context.destination);
+
+    low.start();
+    high.start();
+    drift.start();
+    master.gain.exponentialRampToValueAtTime(0.032, context.currentTime + 0.9);
+
+    synthRef.current = { context, master };
+    return true;
+  };
+
+  const stopPulse = async () => {
+    const synth = synthRef.current;
+    if (!synth) return;
+    synth.master.gain.cancelScheduledValues(synth.context.currentTime);
+    synth.master.gain.setValueAtTime(Math.max(synth.master.gain.value, 0.0001), synth.context.currentTime);
+    synth.master.gain.exponentialRampToValueAtTime(0.0001, synth.context.currentTime + 0.3);
+    window.setTimeout(() => synth.context.close(), 360);
+    synthRef.current = null;
+  };
+
+  const toggle = async () => {
+    if (playing) {
+      if (!youtubeId && trackUrl && audioRef.current) audioRef.current.pause();
+      else if (!youtubeId) await stopPulse();
+      setPlaying(false);
+      return;
+    }
+
+    if (youtubeId) {
+      setPlaying(true);
+      return;
+    }
+
+    if (trackUrl && audioRef.current) {
+      audioRef.current.volume = 0.42;
+      try {
+        await audioRef.current.play();
+        setPlaying(true);
+      } catch {
+        setPlaying(false);
+      }
+      return;
+    }
+
+    if (startPulse()) setPlaying(true);
+  };
+
+  const youtubeSrc = youtubeId
+    ? `https://www.youtube.com/embed/${youtubeId}?autoplay=1&loop=1&playlist=${youtubeId}&controls=0&rel=0`
+    : '';
+
+  return (
+    <div className="sound-wrap">
+      {youtubeId && playing ? (
+        <iframe
+          title="Vibe Engineering soundtrack"
+          src={youtubeSrc}
+          allow="autoplay"
+          aria-hidden="true"
+          tabIndex="-1"
+          style={{ position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none' }}
+        />
+      ) : null}
+      {!youtubeId && trackUrl ? <audio ref={audioRef} src={trackUrl} loop preload="none" /> : null}
+      <button className="sound-control" type="button" onClick={toggle} aria-pressed={playing}>
+        <span className="sound-dot" aria-hidden="true" />
+        <span>{playing ? 'Sound on' : 'Sound off'}</span>
+      </button>
+    </div>
+  );
+}
+
+function StoryMap({ activeIndex }) {
+  const nodeY = (index) => 48 + index * 51;
+  return (
+    <svg className="story-map" viewBox="0 0 320 410" role="img" aria-labelledby="story-map-title story-map-desc">
+      <title id="story-map-title">Vibe Engineering thinking path</title>
+      <desc id="story-map-desc">A connected path from access to judgment, verification, systems thinking, truth, proof, and ownership.</desc>
+      <line x1="64" y1="48" x2="64" y2={nodeY(journey.length - 1)} className="story-map-line" />
+      {journey.map((item, index) => {
+        const active = index === activeIndex;
+        const passed = index < activeIndex;
+        return (
+          <g key={item.number} className={`story-node ${active ? 'active' : ''} ${passed ? 'passed' : ''}`}>
+            <circle cx="64" cy={nodeY(index)} r={active ? 12 : 8} />
+            <text x="92" y={nodeY(index) - 4} className="story-node-number">{item.number}</text>
+            <text x="92" y={nodeY(index) + 15} className="story-node-label">{item.signal}</text>
+          </g>
+        );
+      })}
+    </svg>
+  );
 }
 
 function ScoreLab() {
@@ -75,66 +207,55 @@ function ScoreLab() {
 
 function App() {
   const page = useRef(null);
+  const [activeScene, setActiveScene] = useState(0);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const chapters = Array.from(document.querySelectorAll('[data-story-chapter]'));
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) setActiveScene(Number(visible.target.dataset.storyChapter));
+      },
+      { threshold: [0.35, 0.55, 0.75], rootMargin: '-18% 0px -30% 0px' },
+    );
+
+    chapters.forEach((chapter) => observer.observe(chapter));
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reducedMotion) return undefined;
 
     const ctx = gsap.context(() => {
-      gsap.from('.hero-kicker, .hero-title, .hero-copy, .hero-actions, .hero-proof', {
-        y: 30,
+      gsap.from('.hero-meta, .hero-title, .hero-copy, .hero-actions, .vibe-lockup', {
+        y: 28,
         opacity: 0,
-        duration: 1,
-        stagger: 0.1,
+        duration: 0.9,
+        stagger: 0.09,
         ease: 'power3.out',
       });
 
-      gsap.to('.hero-orb.one', {
-        yPercent: 22,
-        xPercent: -10,
-        scrollTrigger: { trigger: '.hero', scrub: 1.1, start: 'top top', end: 'bottom top' },
-      });
-      gsap.to('.hero-orb.two', {
-        yPercent: -18,
-        xPercent: 10,
-        scrollTrigger: { trigger: '.hero', scrub: 1.3, start: 'top top', end: 'bottom top' },
-      });
-      gsap.to('.hero-grid', {
-        scale: 1.12,
-        opacity: 0.1,
-        scrollTrigger: { trigger: '.hero', scrub: 1, start: 'top top', end: 'bottom top' },
-      });
-
-      gsap.utils.toArray('.reveal').forEach((element) => {
+      gsap.utils.toArray('.section-reveal').forEach((element) => {
         gsap.from(element, {
-          y: 46,
+          y: 34,
           opacity: 0,
-          duration: 0.9,
+          duration: 0.75,
           ease: 'power3.out',
-          scrollTrigger: { trigger: element, start: 'top 86%' },
+          scrollTrigger: { trigger: element, start: 'top 88%' },
         });
       });
 
-      gsap.utils.toArray('.stage-row').forEach((row, index) => {
+      gsap.utils.toArray('.method-step').forEach((row, index) => {
         gsap.from(row, {
-          x: index % 2 === 0 ? -28 : 28,
+          x: index % 2 === 0 ? -18 : 18,
           opacity: 0,
-          duration: 0.7,
-          scrollTrigger: { trigger: row, start: 'top 90%' },
+          duration: 0.55,
+          scrollTrigger: { trigger: row, start: 'top 91%' },
         });
-      });
-
-      gsap.to('.manifesto-line', {
-        backgroundPositionX: '0%',
-        stagger: 0.22,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: '.manifesto',
-          start: 'top 72%',
-          end: 'bottom 45%',
-          scrub: 1,
-        },
       });
     }, page);
 
@@ -144,97 +265,107 @@ function App() {
   const copyCommand = async () => {
     await navigator.clipboard.writeText('npm install && npm run check && npm run dev');
     setCopied(true);
-    window.setTimeout(() => setCopied(false), 1800);
+    window.setTimeout(() => setCopied(false), 1600);
   };
+
+  const progress = ((activeScene + 1) / journey.length) * 100;
 
   return (
     <main ref={page} id="main-content">
       <a className="skip-link" href="#content">Skip to content</a>
+
       <nav className="nav shell" aria-label="Primary navigation">
         <a className="brand" href="#top" aria-label="Vibe Engineering home">
           <Mark compact />
           <span>Vibe Engineering</span>
         </a>
         <div className="nav-links">
+          <a href="#story">Story</a>
           <a href="#method">Method</a>
-          <a href="#council">Council</a>
-          <a href="#score">Score</a>
-          <a href="#ownership">Ownership</a>
+          <a href="#score">Proof</a>
+          <a href="#ownership">Own it</a>
         </div>
-        <a className="nav-cta" href="#prompt">Get the prompt</a>
+        <SoundControl />
       </nav>
 
       <div id="content">
         <section className="hero" id="top">
-          <div className="hero-grid" />
-          <div className="hero-orb one" />
-          <div className="hero-orb two" />
+          <div className="hero-field" aria-hidden="true">
+            <span className="field-line line-a" />
+            <span className="field-line line-b" />
+            <span className="field-line line-c" />
+          </div>
           <div className="shell hero-inner">
-            <p className="eyebrow hero-kicker">A sovereign AI building method</p>
-            <h1 className="hero-title">Stop vibe coding.<br /><span>Start vibe engineering.</span></h1>
-            <p className="hero-copy">The speed of AI. The discipline of engineering. The freedom of ownership. No technical degree required.</p>
+            <p className="hero-meta">Built by The Pauli Effect · 2026 <span>Part of the Pauli Suite</span></p>
+            <h1 className="hero-title">Think before<br />you build.</h1>
+            <p className="hero-copy">Vibe Engineering is a way to take an idea, question it, test it, and turn it into something real. AI is part of the process. The bigger skill is learning how to make better decisions.</p>
             <div className="hero-actions">
-              <a href="#prompt" className="button primary">Get the free system prompt</a>
-              <a href="#score" className="button secondary">Test the release gate</a>
+              <a href="#story" className="button primary">Start the story</a>
+              <a href="#method" className="button text-button">See the method</a>
             </div>
-            <div className="hero-proof">
-              <span className="proof-rule" />
+            <div className="vibe-lockup" aria-label="V.I.B.E. means Verify It Before Everything">
               <strong>V.I.B.E.</strong>
               <span>Verify It Before Everything.</span>
             </div>
           </div>
         </section>
 
-        <section className="manifesto section shell">
-          <p className="eyebrow reveal">The line we will not cross</p>
-          <div className="manifesto-copy">
-            <p className="manifesto-line">Power without principles breeds chaos.</p>
-            <p className="manifesto-line">Freedom without ownership is just another dependency.</p>
+        <section className="story" id="story" aria-labelledby="story-heading">
+          <div className="shell story-intro section-reveal">
+            <p className="eyebrow">The idea</p>
+            <h2 id="story-heading">AI opened the door.<br />Your thinking decides what comes through it.</h2>
           </div>
-        </section>
 
-        <section className="section shell shift" aria-labelledby="shift-heading">
-          <div className="section-heading reveal">
-            <p className="eyebrow">The shift</p>
-            <h2 id="shift-heading">Generation is cheap.<br />Judgment is the product.</h2>
-          </div>
-          <div className="comparison reveal">
-            <div className="comparison-head"><span>Vibe coding</span><span>Vibe engineering</span></div>
-            {comparison.map(([before, after]) => (
-              <div className="comparison-row" key={before}>
-                <span>{before}</span><span>{after}</span>
+          <div className="shell story-layout">
+            <aside className="story-rail" aria-label="Story progress">
+              <div className="story-rail-head">
+                <span>{String(activeScene + 1).padStart(2, '0')}</span>
+                <span>{String(journey.length).padStart(2, '0')}</span>
               </div>
-            ))}
-          </div>
-        </section>
+              <div className="story-progress" aria-hidden="true"><span style={{ height: `${progress}%` }} /></div>
+              <StoryMap activeIndex={activeScene} />
+            </aside>
 
-        <section className="method section shell" id="method">
-          <div className="section-heading reveal">
-            <p className="eyebrow">The eight-stage flow</p>
-            <h2>Simple enough to teach.<br />Strict enough to trust.</h2>
-          </div>
-          <div className="stage-list">
-            {stages.map(({ number, title, text }) => (
-              <article className="stage-row" key={number}>
-                <span className="stage-number">{number}</span>
-                <h3>{title}</h3>
-                <p>{text}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="system section" id="system">
-          <div className="shell">
-            <div className="section-heading reveal">
-              <p className="eyebrow">The operating system</p>
-              <h2>Five tools.<br />One quality line.</h2>
+            <div className="story-chapters">
+              {journey.map((item, index) => (
+                <article className="story-chapter" key={item.number} data-story-chapter={index}>
+                  <div>
+                    <p className="chapter-kicker"><span>{item.number}</span>{item.kicker}</p>
+                    <h3>{item.title}</h3>
+                    <p>{item.text}</p>
+                    <span className="chapter-signal">{item.signal}</span>
+                  </div>
+                </article>
+              ))}
             </div>
-            <div className="system-grid">
-              {system.map(({ title, text }, index) => (
-                <article className="system-card reveal" key={title}>
-                  <span className="mono-label">0{index + 1}</span>
-                  <h3>{title}</h3>
+          </div>
+        </section>
+
+        <section className="core section shell" aria-labelledby="core-heading">
+          <div className="section-heading section-reveal">
+            <p className="eyebrow">The simple rule underneath everything</p>
+            <h2 id="core-heading">Intent. Standard. Evidence.</h2>
+            <p className="section-lead">Know what you are trying to do. Know what good looks like. Know what would prove you got there.</p>
+          </div>
+          <div className="core-grid section-reveal">
+            <article><span>01</span><h3>Intent</h3><p>What are we trying to change, for who, and why?</p></article>
+            <article><span>02</span><h3>Standard</h3><p>What does good look like before we start convincing ourselves?</p></article>
+            <article><span>03</span><h3>Evidence</h3><p>What can we point to that makes the claim real?</p></article>
+          </div>
+        </section>
+
+        <section className="method section" id="method">
+          <div className="shell">
+            <div className="section-heading section-reveal">
+              <p className="eyebrow">The Vibe flow</p>
+              <h2>Easy to remember.<br />Hard to fake.</h2>
+              <p className="section-lead">The public words stay simple. Underneath them, the ICM workspace keeps the contracts, proof, ownership, and handoffs organized for people and agents.</p>
+            </div>
+            <div className="method-list">
+              {stages.map(({ number, action, title, text }) => (
+                <article className="method-step" key={number}>
+                  <span className="method-number">{number}</span>
+                  <div className="method-action"><strong>{action}</strong><span>{title}</span></div>
                   <p>{text}</p>
                 </article>
               ))}
@@ -242,90 +373,102 @@ function App() {
           </div>
         </section>
 
-        <section className="council section shell" id="council">
-          <div className="section-heading reveal">
-            <p className="eyebrow">The Vibe Council</p>
-            <h2>Agreement is not proof.<br />Useful disagreement is.</h2>
-            <p className="section-lead">Each reviewer has a different job. No single agent is allowed to design, approve, and excuse the same decision.</p>
+        <section className="quality section shell" aria-labelledby="quality-heading">
+          <div className="section-heading section-reveal">
+            <p className="eyebrow">No slop</p>
+            <h2 id="quality-heading">Default is not a decision.</h2>
+            <p className="section-lead">Vibe Engineering checks the idea, the experience, the build, and the business before generic AI habits become the product.</p>
           </div>
-          <div className="council-grid">
-            {council.map(({ role, call, text }, index) => (
-              <article className="council-card reveal" key={role}>
-                <span className="mono-label">COUNCIL / 0{index + 1}</span>
-                <p className="council-call">{call}</p>
-                <h3>{role}</h3>
+          <div className="quality-list section-reveal">
+            {qualityLayers.map(({ title, question, text }, index) => (
+              <article key={title}>
+                <span>0{index + 1}</span>
+                <h3>{title}</h3>
+                <strong>{question}</strong>
                 <p>{text}</p>
               </article>
             ))}
+          </div>
+        </section>
+
+        <section className="council section" id="council">
+          <div className="shell">
+            <div className="section-heading section-reveal">
+              <p className="eyebrow">Fresh eyes</p>
+              <h2>Builders build.<br />Reviewers challenge.</h2>
+              <p className="section-lead">The person or agent that made the work does not get to be the only voice deciding whether it is ready.</p>
+            </div>
+            <div className="council-list section-reveal">
+              {council.map(({ role, call, text }, index) => (
+                <article key={role}>
+                  <span>0{index + 1}</span>
+                  <div><h3>{role}</h3><strong>{call}</strong></div>
+                  <p>{text}</p>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
 
         <section className="score section" id="score">
           <div className="shell">
-            <div className="score-intro reveal">
-              <p className="eyebrow">The visible standard</p>
+            <div className="score-intro section-reveal">
+              <p className="eyebrow">Proof before release</p>
               <h2>No “looks good to me.”<br />The work earns release.</h2>
-              <p>Move the controls. The Judge does not ship work below 8.5, and it never lets visual polish hide weak security, reliability, or ownership.</p>
+              <p>Move the controls. The Judge holds the line when confidence and reality disagree.</p>
             </div>
-            <div className="reveal"><ScoreLab /></div>
+            <div className="section-reveal"><ScoreLab /></div>
+          </div>
+        </section>
+
+        <section className="client-zero section shell" aria-labelledby="client-zero-heading">
+          <div className="client-zero-grid section-reveal">
+            <div>
+              <p className="eyebrow">Client Zero</p>
+              <h2 id="client-zero-heading">We use the system on ourselves first.</h2>
+            </div>
+            <div>
+              <p>This site is part of the proof. Its story, design, code, ICM structure, review, rights checks, deployment, and rollback all go through the same Vibe process.</p>
+              <a href="https://github.com/executiveusa/vibe-engineering" target="_blank" rel="noreferrer">Inspect the repo ↗</a>
+            </div>
           </div>
         </section>
 
         <section className="ownership section" id="ownership">
           <div className="shell ownership-inner">
-            <div className="ownership-mark reveal"><Mark /></div>
-            <p className="eyebrow reveal">The sovereignty pledge</p>
-            <h2 className="reveal">Once you buy it,<br />it is yours.</h2>
-            <p className="ownership-copy reveal">Your code. Your data. Your accounts. Your workflows. Your future. We charge for human time and compute—not permanent dependence.</p>
-            <div className="pledges reveal">
-              <span>No hostage data</span>
-              <span>No mystery systems</span>
-              <span>No forced subscription</span>
-              <span>No ownership games</span>
+            <div className="ownership-mark section-reveal"><Mark /></div>
+            <p className="eyebrow section-reveal">The ownership rule</p>
+            <h2 className="section-reveal">Build your own.<br />Keep your own.</h2>
+            <p className="ownership-copy section-reveal">Your code, data, accounts, access, documentation, and decisions should still make sense when the original builder is gone. Retention should come from value, not captivity.</p>
+            <div className="pledges section-reveal">
+              <span>Understand it</span>
+              <span>Move it</span>
+              <span>Change it</span>
+              <span>Own it</span>
             </div>
-          </div>
-        </section>
-
-        <section className="offers section shell" aria-labelledby="offers-heading">
-          <div className="section-heading reveal">
-            <p className="eyebrow">Freedom has an entry point</p>
-            <h2 id="offers-heading">Learn it. Install it. Own it.</h2>
-          </div>
-          <div className="offer-grid">
-            {offers.map(({ eyebrow, title, text, cta, href }) => (
-              <article className="offer-card reveal" key={title}>
-                <p className="eyebrow">{eyebrow}</p>
-                <h3>{title}</h3>
-                <p>{text}</p>
-                <a href={href} download={href.endsWith('.md') || undefined}>{cta} <Arrow /></a>
-              </article>
-            ))}
           </div>
         </section>
 
         <section className="prompt section shell" id="prompt">
-          <div className="prompt-card reveal">
+          <div className="prompt-card section-reveal">
             <div>
-              <p className="eyebrow">Free foundation</p>
-              <h2>Train your AI to act like a Vibe Engineer.</h2>
-              <p>The complete foundation prompt includes specification, verification, Council review, Vibe Score judging, rollback thinking, and ownership checks.</p>
+              <p className="eyebrow">Build with the method</p>
+              <h2>One process. Any capable agent.</h2>
+              <p>The rules live in the repo, not inside one personality. Humans, Codex, Claude, Gemini, Hermes, CI, and future tools can read the same contracts.</p>
             </div>
-            <div className="prompt-actions">
-              <a className="button primary light" href="/vibe-engineering-foundation-prompt.md" download>Download prompt</a>
-              <button className="command" type="button" onClick={copyCommand}>
-                <span className="mono-label">LOCAL START</span>
-                <code>{copied ? 'Copied.' : 'npm install && npm run check && npm run dev'}</code>
-              </button>
-            </div>
+            <button className="command" type="button" onClick={copyCommand}>
+              <span className="mono-label">LOCAL START</span>
+              <code>{copied ? 'Copied.' : 'npm install && npm run check && npm run dev'}</code>
+            </button>
           </div>
         </section>
 
         <section className="faq section shell">
-          <div className="section-heading reveal">
-            <p className="eyebrow">Plain answers</p>
-            <h2>Questions before trust.</h2>
+          <div className="section-heading section-reveal">
+            <p className="eyebrow">Keep it clear</p>
+            <h2>Four questions.</h2>
           </div>
-          <div className="faq-list reveal">
+          <div className="faq-list section-reveal">
             {faqs.map(([question, answer]) => (
               <details key={question}>
                 <summary>{question}</summary>
@@ -336,21 +479,23 @@ function App() {
         </section>
 
         <section className="references section shell">
-          <div className="section-heading reveal">
-            <p className="eyebrow">Built in the open</p>
-            <h2>Original method.<br />Clear intellectual roots.</h2>
-          </div>
-          <div className="reference-grid reveal">
-            <p>Vibe Engineering is an original Pauli Effect / Yappyverse methodology informed by established software engineering, test-driven development, evaluation systems, adversarial review, human-centered design, and AI-sovereignty principles.</p>
-            <p>Direct references include Andrej Karpathy’s <a href="https://github.com/karpathy/llm-council" target="_blank" rel="noreferrer">LLM Council</a> and <a href="https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f" target="_blank" rel="noreferrer">LLM Wiki</a> patterns. They are credited as influences—not presented as our original work.</p>
+          <div className="reference-grid section-reveal">
+            <div>
+              <p className="eyebrow">Built in the open</p>
+              <h2>Our method.<br />Clear roots.</h2>
+            </div>
+            <div>
+              <p>Vibe Engineering combines our own working rules with ideas we have tested from open-source engineering, design, review, context, and AI research. We keep a source and provenance ledger so influence never turns into invisible copying.</p>
+              <a href="https://github.com/executiveusa/vibe-engineering/blob/main/docs/governance/SOURCE-PROVENANCE-LEDGER.md" target="_blank" rel="noreferrer">See the source ledger ↗</a>
+            </div>
           </div>
         </section>
       </div>
 
       <footer className="footer shell">
         <a className="brand" href="#top"><Mark compact /><span>Vibe Engineering</span></a>
-        <p>Verify it before everything.</p>
-        <p>© 2026 The Pauli Effect / Yappyverse</p>
+        <p>V.I.B.E. · Verify It Before Everything.</p>
+        <p>Built by The Pauli Effect · 2026 · Part of the Pauli Suite</p>
       </footer>
     </main>
   );

@@ -35,6 +35,7 @@ export interface Manifest {
 export class VibeTruthClient {
   constructor(options: { baseUrl: string; fetchImpl?: typeof fetch });
   manifest(): Promise<Manifest>;
+  method(): Promise<{ bundleHash: string; artifact: Record<string, unknown> }>;
   truth(id: string): Promise<{ bundleHash: string; artifact: Record<string, unknown> }>;
   workflow(id: string): Promise<{ bundleHash: string; workflow: Record<string, unknown> }>;
   resolveContext(input: ContextRequest): Promise<Record<string, unknown>>;

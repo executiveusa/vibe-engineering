@@ -25,6 +25,10 @@ export class VibeTruthClient {
     return this.request('/api/v1/manifest');
   }
 
+  method() {
+    return this.truth('method.vibe-engineering-v2');
+  }
+
   truth(id) {
     return this.request(`/api/v1/truth/${encodeURIComponent(id)}`);
   }

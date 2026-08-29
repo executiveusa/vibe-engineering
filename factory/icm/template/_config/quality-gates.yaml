@@ -12,6 +12,19 @@ required_evidence:
   - rollback
   - ownership_receipt
   - target_environment_verification
+conditional_evidence:
+  open_ended_decision:
+    - decision_options_or_reason_standard_mode_was_used
+  taste_sensitive_surface:
+    - named_fetchable_comparable_reference_or_documented_reason_none_applies
+    - no_slop_review
+  third_party_distribution:
+    - source_provenance
+    - rights_or_license_record
+  customer_or_revenue_work:
+    - commercial_outcome_or_smallest_validation_test
+  production_change:
+    - live_target_environment_evidence
 human_approval_required_for:
   - legal
   - financial
@@ -19,3 +32,4 @@ human_approval_required_for:
   - safety
   - destructive_actions
   - production_release
+  - rights_sensitive_publication
