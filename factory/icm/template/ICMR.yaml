@@ -1,0 +1,151 @@
+icmr_version: "1.0"
+identity:
+  name: {{PROJECT_NAME_YAML}}
+  purpose: "Govern and deliver {{PROJECT_NAME}} with observable proof before release."
+  mode: {{PROJECT_MODE_YAML}}
+  schema: "_config/icmr.schema.json"
+
+detection:
+  subject_kind: "project"
+  primary_form: "pipeline"
+  nested_forms: []
+  role_topology: "role-chain"
+  execution_topology: "agent-led-human-gated"
+  state_topology: "artifact-state"
+  confidence: 0.75
+  assumptions:
+    - "The default software-factory scaffold is a staged project pipeline until Intake evidence proves another ICM form."
+    - "Irreversible actions and production release remain human-gated unless authority is explicitly delegated."
+
+routing:
+  entry: "AGENTS.md"
+  workspace_contract: "CONTEXT.md"
+  current_state: ".factory/state.json"
+  routes:
+    - id: "intake"
+      path: "stages/00_intake/CONTEXT.md"
+      when: "ICMR Step 0 passes and the project is ready for governed intake."
+
+roles:
+  - id: "orchestrator"
+    outcome: "Route one bounded unit of work through the correct ICM and engineering contracts."
+    authority:
+      - "inspect and propose"
+      - "write declared working artifacts"
+      - "route approved slices to specialist agents"
+    forbidden:
+      - "self-approve high-impact work"
+      - "publish, deploy, spend, delete, or perform irreversible actions without required authority"
+      - "expand scope without updating the approved contract"
+    inputs:
+      - "ICMR.yaml"
+      - "CONTEXT.md"
+      - "current stage contract"
+    outputs:
+      - "declared stage artifacts"
+      - "evidence and handoff records"
+    escalate_when:
+      - "architecture-affecting ambiguity remains"
+      - "required proof is unavailable"
+      - "authority or ownership is unclear"
+    proof:
+      - "current contract validation passes"
+      - "required evidence paths exist"
+
+contracts:
+  - id: "step-0-detect"
+    job: "Detect the real work topology and keep ICMR aligned before substantial work begins."
+    context:
+      include:
+        - "AGENTS.md"
+        - "CONTEXT.md"
+        - "PROJECT.yaml"
+      exclude:
+        - "unrelated stages"
+        - "secret values"
+    inputs:
+      - "project request"
+      - "existing repository/workspace evidence when brownfield"
+    process:
+      - "baseline greenfield or brownfield reality"
+      - "detect work, role, execution, and state topology"
+      - "record assumptions and confidence"
+      - "route to the minimum truthful ICM form"
+    outputs:
+      - "ICMR.yaml"
+    validation:
+      - "npm run icmr:validate -- <workspace-path>"
+      - "routing entry and workspace contract resolve"
+    gate:
+      required: false
+      approver: null
+
+  - id: "vibe-production-line"
+    job: "Execute governed product work after Step 0."
+    context:
+      include:
+        - "current stage CONTEXT.md"
+        - "only references named by the current stage"
+      exclude:
+        - "unrelated stage payloads"
+    inputs:
+      - "validated ICMR.yaml"
+      - "approved current-stage inputs"
+    process:
+      - "00_intake"
+      - "01_vision"
+      - "02_blueprint"
+      - "03_build"
+      - "04_verify"
+      - "05_council"
+      - "06_judge"
+      - "07_ship"
+      - "08_improve"
+    outputs:
+      - "stage artifacts and evidence"
+    validation:
+      - "npm run factory:doctor -- <workspace-path>"
+    gate:
+      required: true
+      approver: "Judge or authorized human at the release boundary"
+
+gates:
+  - id: "step-0-required"
+    rule: "No substantial work enters 00_intake until ICMR.yaml exists and passes structural validation."
+  - id: "independent-release"
+    rule: "The builder cannot be the sole approver of its own high-impact output or production release."
+
+proof:
+  required:
+    - "ICMR Step 0 validation passes"
+    - "Factory Doctor passes"
+    - "stage-specific evidence passes before progression"
+    - "live target evidence exists before PRODUCTION VERIFIED"
+  evidence_paths:
+    - "docs/evidence/"
+    - "stages/*/output/"
+  completion_rule: "Completion requires observable evidence for the current contract; build, CI, merge, preview, or deployment request alone is insufficient."
+
+sovereignty:
+  owner_controls:
+    - "code"
+    - "domain"
+    - "hosting"
+    - "database"
+    - "credentials"
+    - "data"
+  secrets_policy: "never-store-secret-values"
+  irreversible_actions: "human-approval-required-unless-explicitly-delegated"
+
+rollback:
+  strategy: "Use the project rollback point and reverse only the bounded change being released."
+  instructions:
+    - "Record rollback_point in PROJECT.yaml before release."
+    - "For brownfield work, preserve a restore point before mutation."
+    - "Test rollback when consequence warrants it."
+
+outputs:
+  - "ICMR.yaml"
+  - "stage artifacts"
+  - "evidence records"
+  - "handoff records"
