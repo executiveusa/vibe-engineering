@@ -19,12 +19,13 @@ Do NOT load discarded Blueprint candidates unless new evidence formally reopens 
 
 ## Process
 
-1. Capture the current rollback point and blast radius; work on an isolated branch or equivalent safe surface.
-2. Route the slice through the applicable skills in the mandatory `DEFINE → PLAN → BUILD → VERIFY → REVIEW → SHIP` engineering procedure. Do not invoke extra skills merely to create activity.
-3. Implement the smallest complete vertical slice. Reuse before adding. Preserve existing brownfield behavior outside the approved change.
-4. Add or update tests proportional to risk and handle expected failure explicitly.
-5. Check the changed surface against the no-slop standard: every material choice should trace to intent, repository convention, approved reference, or evidence rather than model habit.
-6. Do not broaden scope because unrelated defects, new ideas, or prettier architectures become visible. New consequence returns to governance.
+1. For brownfield work, prove the baseline and blast radius before changing code. Capture the current rollback point and work on an isolated branch or equivalent safe surface.
+2. For greenfield work, do not build until the user, problem, scope, architecture, approved specification, and implementation tickets are ready.
+3. Route the slice through the applicable skills in the mandatory `DEFINE → PLAN → BUILD → VERIFY → REVIEW → SHIP` engineering procedure. Do not invoke extra skills merely to create activity.
+4. Implement the smallest complete vertical slice. Reuse before adding. Preserve existing brownfield behavior outside the approved change.
+5. Add or update tests proportional to risk and handle expected failure explicitly.
+6. Check the changed surface against the no-slop standard: every material choice should trace to intent, repository convention, approved reference, or evidence rather than model habit.
+7. Do not broaden scope because unrelated defects, new ideas, or prettier architectures become visible. New consequence returns to governance.
 
 ## Outputs
 
