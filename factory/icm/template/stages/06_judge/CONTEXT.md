@@ -18,7 +18,7 @@ One job: decide whether the verified work deserves to move to release preparatio
 2. Score user value, architecture, reliability, security, accessibility/taste, ownership, rollback, evidence, and commercial alignment.
 3. Apply hard stops before averaging. Security, reliability, ownership, missing required rights, missing rollback, and missing target evidence cannot be hidden by strong visual or implementation scores.
 4. Treat unresolved Council HOLDs and missing proof as blockers until new evidence or authorized disposition exists.
-5. Return only `SHIP` or `HOLD`. Do not change the work being judged and do not invent missing evidence.
+5. Return only SHIP or HOLD. Do not change the work being judged and do not invent missing evidence.
 
 ## Outputs
 
