@@ -7,6 +7,7 @@ This is a Vibe Engineering project for {{PROJECT_AUDIENCE}} in the domain of {{P
 ## Non-negotiable laws
 
 - Verify It Before Everything.
+- Detect and compile ICMR before substantial work.
 - Inspect before changing.
 - Reuse before adding.
 - Specify before building.
@@ -16,6 +17,18 @@ This is a Vibe Engineering project for {{PROJECT_AUDIENCE}} in the domain of {{P
 - Never confuse a build, CI result, or deployment request with verified production.
 - The builder cannot approve its own work.
 - Use the Vibe Engineering mandatory engineering workflow for software changes.
+
+## Mandatory Step 0 — ICMR
+
+Read `ICMR.yaml` first. It is the portable runtime contract for the detected work topology, role boundaries, routing, context, proof, sovereignty, and rollback.
+
+The required order is:
+
+`DETECT → ICMR → INTAKE/SPEC → SLICE → BUILD → PROOF → SHIP`
+
+Do not enter `stages/00_intake/` for substantial work until `ICMR.yaml` exists and Step 0 validation passes. If evidence shows the project needs a different ICM form, update the detection rather than forcing the default pipeline assumption.
+
+For brownfield work, inventory the current repository/system before proposing restructuring, migration, or deletion.
 
 ## Mandatory engineering workflow
 
@@ -27,11 +40,12 @@ Vibe Engineering and ICM govern what, why, whether, and authority. Agent Skills 
 
 Before implementation:
 
-1. classify the work: `SELL`, `USE`, `MERGE`, `PARK`, or `ARCHIVE`;
-2. declare `greenfield` or `brownfield`;
-3. state outcome, target, constraints, proof, and commercial value;
-4. create or confirm the approved specification;
-5. slice into one independently verifiable unit.
+1. confirm Step 0 ICMR is valid;
+2. classify the work: `SELL`, `USE`, `MERGE`, `PARK`, or `ARCHIVE`;
+3. declare `greenfield` or `brownfield`;
+4. state outcome, target, constraints, proof, and commercial value;
+5. create or confirm the approved specification;
+6. slice into one independently verifiable unit.
 
 Then follow the applicable engineering lifecycle:
 
@@ -43,11 +57,12 @@ Engineering completion alone cannot authorize release. Council/Judge, ownership,
 
 ## ICM navigation
 
-1. Read this file for identity and boundaries.
-2. Read `CONTEXT.md` for routing.
-3. Open only the current stage `CONTEXT.md`.
-4. Load only the Layer 3 references named by that stage.
-5. Read and write Layer 4 artifacts only in stage `output/` folders.
+1. Read `ICMR.yaml` for Step 0 routing and authority.
+2. Read this file for identity and boundaries.
+3. Read `CONTEXT.md` for workspace routing.
+4. Open only the current stage `CONTEXT.md`.
+5. Load only the Layer 3 references named by that stage.
+6. Read and write Layer 4 artifacts only in stage `output/` folders.
 
 ## Audience rule
 
