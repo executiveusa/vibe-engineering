@@ -19,7 +19,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p public/audio
-          cat .client-zero-media/chunk-* | base64 --decode > public/audio/vibe-engineering-soundtrack.webm
+          : > public/audio/vibe-engineering-soundtrack.webm
+          for chunk in .client-zero-media/chunk-*; do
+            base64 --decode "$chunk" >> public/audio/vibe-engineering-soundtrack.webm
+          done
           test "$(wc -c < public/audio/vibe-engineering-soundtrack.webm)" = "556054"
           echo "c3fd295c430419dbc65e3a0d61bf845e02ff3d6ce4ee1c42cffa2adb93d30e02  public/audio/vibe-engineering-soundtrack.webm" | sha256sum -c -
       - name: Commit media and remove staging
