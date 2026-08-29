@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://icm.local/schemas/icmr.schema.json",
+  "title": "ICM Runtime Representation (ICMR)",
+  "type": "object",
+  "required": ["icmr_version", "identity", "detection", "routing", "roles", "contracts", "proof", "sovereignty", "rollback", "outputs"],
+  "properties": {
+    "icmr_version": {"type": "string", "const": "1.0"},
+    "identity": {
+      "type": "object",
+      "required": ["name", "purpose", "mode"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "purpose": {"type": "string", "minLength": 1},
+        "mode": {"enum": ["greenfield", "brownfield"]}
+      },
+      "additionalProperties": true
+    },
+    "detection": {
+      "type": "object",
+      "required": ["subject_kind", "primary_form", "role_topology", "execution_topology", "state_topology", "confidence", "assumptions"],
+      "properties": {
+        "subject_kind": {"enum": ["role", "project", "workflow", "repo", "organization", "knowledge", "records", "mixed"]},
+        "primary_form": {"enum": ["pipeline", "umbrella", "record-library", "knowledge-bundle", "context-map", "composite"]},
+        "nested_forms": {"type": "array", "items": {"type": "string"}},
+        "role_topology": {"enum": ["single-role", "role-chain", "role-hub", "role-matrix"]},
+        "execution_topology": {"enum": ["human-led", "agent-assisted", "agent-led-human-gated", "autonomous-bounded"]},
+        "state_topology": {"enum": ["artifact-state", "record-state", "graph-state", "mixed-state"]},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "assumptions": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    },
+    "routing": {
+      "type": "object",
+      "required": ["entry", "workspace_contract", "routes"],
+      "properties": {
+        "entry": {"type": "string"},
+        "workspace_contract": {"type": "string"},
+        "current_state": {"type": "string"},
+        "routes": {"type": "array", "items": {"type": "object"}}
+      },
+      "additionalProperties": true
+    },
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "outcome", "authority", "forbidden", "inputs", "outputs", "proof"],
+        "additionalProperties": true
+      }
+    },
+    "contracts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "job", "context", "inputs", "process", "outputs", "validation", "gate"],
+        "additionalProperties": true
+      }
+    },
+    "gates": {"type": "array", "items": {"type": "object"}},
+    "proof": {"type": "object"},
+    "sovereignty": {"type": "object"},
+    "rollback": {"type": "object"},
+    "outputs": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}
