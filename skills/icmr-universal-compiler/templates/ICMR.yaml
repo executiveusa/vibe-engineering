@@ -1,0 +1,41 @@
+icmr_version: "1.0"
+identity:
+  name: "<workspace-name>"
+  purpose: "<measurable outcome>"
+  mode: "greenfield|brownfield"
+
+detection:
+  subject_kind: "role|project|workflow|repo|organization|knowledge|records|mixed"
+  primary_form: "pipeline|umbrella|record-library|knowledge-bundle|context-map|composite"
+  nested_forms: []
+  role_topology: "single-role|role-chain|role-hub|role-matrix"
+  execution_topology: "human-led|agent-assisted|agent-led-human-gated|autonomous-bounded"
+  state_topology: "artifact-state|record-state|graph-state|mixed-state"
+  confidence: 0.0
+  assumptions: []
+
+routing:
+  entry: "AGENTS.md"
+  workspace_contract: "CONTEXT.md"
+  current_state: "<path or derivation rule>"
+  routes: []
+
+roles: []
+contracts: []
+gates: []
+
+proof:
+  required: []
+  evidence_paths: []
+  completion_rule: "<observable rule>"
+
+sovereignty:
+  owner_controls: ["code", "domain", "hosting", "database", "credentials", "data"]
+  secrets_policy: "never-store-secret-values"
+  irreversible_actions: "human-approval-required-unless-explicitly-delegated"
+
+rollback:
+  strategy: "<restore point / reverse operation>"
+  instructions: []
+
+outputs: []

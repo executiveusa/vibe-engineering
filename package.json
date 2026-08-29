@@ -20,7 +20,8 @@
     "check": "npm run truth:source-check && npm run test && npm run build",
     "factory:new": "node scripts/factory-new.mjs",
     "factory:one-click": "node scripts/factory-new.mjs",
-    "factory:doctor": "node scripts/factory-doctor.mjs"
+    "factory:doctor": "node scripts/factory-governor.mjs",
+    "icmr:validate": "node scripts/icmr-validate.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "6.0.3",
