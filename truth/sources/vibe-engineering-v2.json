@@ -1,0 +1,28 @@
+{
+  "id": "method.vibe-engineering-v2",
+  "kind": "method",
+  "version": "2.0.0",
+  "status": "approved",
+  "precedence": 950,
+  "title": "Vibe Engineering v2",
+  "sourcePath": "docs/VIBE-ENGINEERING-V2-DOCTRINE.md",
+  "summary": "Human-directed V.I.B.E. method: reality before invention, Intent-Standard-Evidence, controlled divergence, no-slop quality, independent challenge, proof, ownership, and earned retention.",
+  "motto": "Verify It Before Everything.",
+  "publicFlow": ["Choose", "See", "Shape", "Make", "Prove", "Challenge", "Decide", "Release", "Learn"],
+  "stageFlow": ["00_intake", "01_vision", "02_blueprint", "03_build", "04_verify", "05_council", "06_judge", "07_ship", "08_improve"],
+  "decisionContract": ["intent", "standard", "evidence"],
+  "thinkingHabits": ["critical-thinking", "systems-thinking", "first-principles", "discipline"],
+  "divergenceModes": ["STANDARD", "DIVERGE", "FRONTIER"],
+  "laws": [
+    "Reality before invention.",
+    "Diverge before deciding only when divergence helps.",
+    "Converge before Build.",
+    "Default is not a decision.",
+    "Fresh eyes beat self-approval.",
+    "Small finished moves beat wide unfinished motion.",
+    "Retention is earned, not manufactured through lock-in."
+  ],
+  "distribution": ["human-workspace", "cli", "http-api", "mcp", "agent-skill", "ci"],
+  "ownershipRule": "The owner can understand, export, move, replace providers or builders, recover, and continue operating.",
+  "productionRule": "Deployment is not production proof; target-environment evidence is required."
+}
