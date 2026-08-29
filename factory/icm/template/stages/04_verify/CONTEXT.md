@@ -22,7 +22,7 @@ One job: test the claims against the actual artifact and actual environment avai
 4. When a reference bar exists, use a fresh reviewer to inspect the actual output next to the real reference and name the largest remaining gap. Do not let the builder perform the only comparison.
 5. Verify source/provenance and media rights requirements that affect distribution. Missing required rights remain `UNVERIFIED` and block publication of that material.
 6. Record every finding as fixed, accepted with owner and reason, false positive with proof, or blocked.
-7. Separate native checks from live production proof. Passing CI or a production build proves only those checks.
+7. Separate native checks from live production proof. Passing CI or a production build is evidence for those checks only; it is not live-production proof.
 
 ## Outputs
 
