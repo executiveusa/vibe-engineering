@@ -82,7 +82,7 @@ function toolCatalog() {
             type: 'object',
             properties: {
               type: { type: 'string', minLength: 1 },
-              consequenceLevel: { type: 'string', enum: ['low', 'medium', 'high', 'critical'] },
+              consequenceLevel: { type: 'string', enum: ['low', 'medium', 'high'] },
             },
             required: ['type', 'consequenceLevel'],
             additionalProperties: false,
