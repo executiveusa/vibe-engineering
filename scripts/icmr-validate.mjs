@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const REQUIRED_PATTERNS = [
   ['icmr_version', /^icmr_version:\s*["']?1\.0["']?\s*$/m],
@@ -63,7 +64,8 @@ async function main() {
   console.log('ICMR Step 0: PASS');
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === new URL(import.meta.url).pathname) {
+const invokedPath = process.argv[1] ? path.resolve(process.argv[1]) : '';
+if (invokedPath && invokedPath === fileURLToPath(import.meta.url)) {
   main().catch((error) => {
     console.error(`ICMR validation failed: ${error.message}`);
     process.exitCode = 1;
