@@ -51,7 +51,7 @@ test('vibe_context preserves Truth API validation', async () => {
   });
 
   assert.equal(response.result.resultType, 'complete');
-  assert.ok(response.result.structuredContent.bundleHash);
+  assert.ok(response.result.structuredContent.truth.bundleHash);
 });
 
 test('MCP HTTP headers cannot disagree with the JSON-RPC request', () => {
