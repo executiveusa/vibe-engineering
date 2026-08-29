@@ -26,6 +26,8 @@ function Mark({ compact = false }) {
 
 function SoundControl() {
   const trackUrl = (import.meta.env.VITE_VIBE_SOUNDTRACK_URL || '').trim();
+  const youtubeMatch = trackUrl.match(/youtube\.com\/embed\/([A-Za-z0-9_-]+)/);
+  const youtubeId = youtubeMatch?.[1] || '';
   const audioRef = useRef(null);
   const synthRef = useRef(null);
   const [playing, setPlaying] = useState(false);
@@ -86,9 +88,14 @@ function SoundControl() {
 
   const toggle = async () => {
     if (playing) {
-      if (trackUrl && audioRef.current) audioRef.current.pause();
-      else await stopPulse();
+      if (!youtubeId && trackUrl && audioRef.current) audioRef.current.pause();
+      else if (!youtubeId) await stopPulse();
       setPlaying(false);
+      return;
+    }
+
+    if (youtubeId) {
+      setPlaying(true);
       return;
     }
 
@@ -106,9 +113,23 @@ function SoundControl() {
     if (startPulse()) setPlaying(true);
   };
 
+  const youtubeSrc = youtubeId
+    ? `https://www.youtube.com/embed/${youtubeId}?autoplay=1&loop=1&playlist=${youtubeId}&controls=0&rel=0`
+    : '';
+
   return (
     <div className="sound-wrap">
-      {trackUrl ? <audio ref={audioRef} src={trackUrl} loop preload="none" /> : null}
+      {youtubeId && playing ? (
+        <iframe
+          title="Vibe Engineering soundtrack"
+          src={youtubeSrc}
+          allow="autoplay"
+          aria-hidden="true"
+          tabIndex="-1"
+          style={{ position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none' }}
+        />
+      ) : null}
+      {!youtubeId && trackUrl ? <audio ref={audioRef} src={trackUrl} loop preload="none" /> : null}
       <button className="sound-control" type="button" onClick={toggle} aria-pressed={playing}>
         <span className="sound-dot" aria-hidden="true" />
         <span>{playing ? 'Sound on' : 'Sound off'}</span>
