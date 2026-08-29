@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Vibe Engineering brand board v1</title>
+  <desc id="desc">Canonical visual proof board for Vibe Engineering by The Pauli Effect, 2026.</desc>
+  <rect width="1600" height="1000" fill="#0B0D0B"/>
+  <g fill="none" stroke="#EFECE2" stroke-opacity=".10">
+    <path d="M80 0V1000M320 0V1000M560 0V1000M800 0V1000M1040 0V1000M1280 0V1000M1520 0V1000"/>
+    <path d="M0 100H1600M0 340H1600M0 610H1600M0 900H1600"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <text x="80" y="82" fill="#C9FF38" font-size="20" font-weight="700" letter-spacing="5">V.I.B.E. / BRAND SYSTEM / 2026</text>
+    <text x="80" y="220" fill="#EFECE2" font-size="112" font-weight="900" letter-spacing="-7">VERIFY IT</text>
+    <text x="80" y="312" fill="#EFECE2" font-size="112" font-weight="900" letter-spacing="-7">BEFORE EVERYTHING.</text>
+    <g transform="translate(1240 120)">
+      <circle cx="120" cy="120" r="108" stroke="#C9FF38" stroke-opacity=".34" stroke-width="2" fill="none"/>
+      <path d="M36 44h42l42 112 42-112h42l-68 144h-32L36 44Z" fill="#C9FF38"/>
+      <text x="120" y="260" text-anchor="middle" fill="#B7B5AD" font-size="15" letter-spacing="2">THE PROOF MARK</text>
+    </g>
+    <text x="80" y="390" fill="#B7B5AD" font-size="16" font-weight="700" letter-spacing="3">COLOR / ONE SIGNAL, ONE REJECT</text>
+    <g transform="translate(80 425)">
+      <rect width="220" height="128" fill="#0B0D0B" stroke="#EFECE2" stroke-opacity=".20"/>
+      <text x="18" y="82" fill="#EFECE2" font-size="19" font-weight="700">INK</text><text x="18" y="108" fill="#B7B5AD" font-size="14">#0B0D0B</text>
+      <rect x="240" width="220" height="128" fill="#EFECE2"/>
+      <text x="258" y="82" fill="#0B0D0B" font-size="19" font-weight="700">WARM PAPER</text><text x="258" y="108" fill="#141714" font-size="14">#EFECE2</text>
+      <rect x="480" width="220" height="128" fill="#C9FF38"/>
+      <text x="498" y="82" fill="#0B0D0B" font-size="19" font-weight="700">PROOF ACID</text><text x="498" y="108" fill="#293800" font-size="14">#C9FF38</text>
+      <rect x="720" width="220" height="128" fill="#141714"/>
+      <text x="738" y="82" fill="#EFECE2" font-size="19" font-weight="700">INK SOFT</text><text x="738" y="108" fill="#B7B5AD" font-size="14">#141714</text>
+      <rect x="960" width="220" height="128" fill="#B7B5AD"/>
+      <text x="978" y="82" fill="#0B0D0B" font-size="19" font-weight="700">PAPER DIM</text><text x="978" y="108" fill="#141714" font-size="14">#B7B5AD</text>
+      <rect x="1200" width="220" height="128" fill="#FF4D4D"/>
+      <text x="1218" y="82" fill="#0B0D0B" font-size="19" font-weight="700">REJECT RED</text><text x="1218" y="108" fill="#0B0D0B" font-size="14">#FF4D4D</text>
+    </g>
+    <text x="80" y="664" fill="#B7B5AD" font-size="16" font-weight="700" letter-spacing="3">TYPE / TWO FAMILIES MAX</text>
+    <text x="80" y="746" fill="#EFECE2" font-size="66" font-weight="800" letter-spacing="-3">AALTO</text>
+    <text x="80" y="786" fill="#B7B5AD" font-size="18">Display / architectural / human / decisive</text>
+    <text x="560" y="746" fill="#EFECE2" font-size="54" font-weight="600" letter-spacing="-2">PROJEKT BLACKBIRD</text>
+    <text x="560" y="786" fill="#B7B5AD" font-size="18">Body / precise / readable / system-minded</text>
+    <g transform="translate(1170 650)">
+      <rect x="0" y="0" width="156" height="156" fill="#141714" stroke="#FF4D4D" stroke-width="4"/>
+      <path d="M28 28L128 128M128 28L28 128" stroke="#FF4D4D" stroke-width="10" stroke-linecap="round"/>
+      <text x="78" y="187" text-anchor="middle" fill="#FF4D4D" font-size="14" font-weight="700" letter-spacing="2">REJECT</text>
+      <rect x="190" y="0" width="156" height="156" fill="#141714" stroke="#C9FF38" stroke-width="4"/>
+      <path d="M228 83l26 28 54-66" fill="none" stroke="#C9FF38" stroke-width="10" stroke-linecap="square"/>
+      <text x="268" y="187" text-anchor="middle" fill="#C9FF38" font-size="14" font-weight="700" letter-spacing="2">PROOF</text>
+    </g>
+    <line x1="80" y1="850" x2="1520" y2="850" stroke="#EFECE2" stroke-opacity=".18"/>
+    <text x="80" y="894" fill="#C9FF38" font-size="17" font-weight="700" letter-spacing="3">MOTION</text>
+    <text x="80" y="936" fill="#EFECE2" font-size="24" font-weight="700">OPTIONS → REJECT → PAUSE → VERIFY → MOVE FORWARD</text>
+    <text x="80" y="974" fill="#B7B5AD" font-size="15">Urban without cosplay. Human taste over model defaults. Proof before claims. Built by The Pauli Effect · 2026 · Part of the Pauli Suite.</text>
+  </g>
+</svg>
