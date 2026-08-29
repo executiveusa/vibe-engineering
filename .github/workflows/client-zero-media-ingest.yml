@@ -1,0 +1,35 @@
+name: Client Zero Media Ingest
+
+on:
+  push:
+    branches: [client-zero-vibe-v2]
+    paths:
+      - '.client-zero-media/READY'
+
+permissions:
+  contents: write
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconstruct and verify owner-authorized soundtrack
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p public/audio
+          cat .client-zero-media/chunk-* | base64 --decode > public/audio/vibe-engineering-soundtrack.webm
+          test "$(wc -c < public/audio/vibe-engineering-soundtrack.webm)" = "556054"
+          echo "c3fd295c430419dbc65e3a0d61bf845e02ff3d6ce4ee1c42cffa2adb93d30e02  public/audio/vibe-engineering-soundtrack.webm" | sha256sum -c -
+      - name: Commit media and remove staging
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/audio/vibe-engineering-soundtrack.webm
+          git rm -r .client-zero-media
+          git rm .github/workflows/client-zero-media-ingest.yml
+          git commit -m "media: add owner-authorized Vibe soundtrack"
+          git push
