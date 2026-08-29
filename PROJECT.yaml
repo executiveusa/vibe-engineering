@@ -5,39 +5,70 @@ project:
   status: building
   classification: USE
   owner: The Pauli Effect
-  business_goal: Convert existing code into verified owner-controlled customer outcomes and revenue.
+  suite: Pauli Suite
+  business_goal: Turn ideas into verified, owner-controlled outcomes while teaching systems thinking, critical thinking, first principles, and disciplined AI-assisted building in plain language.
   revenue_model: Vibe Audit, Vibe Rescue Sprint, Sovereign Launch, MAXX Operations
   repository: executiveusa/vibe-engineering
   production_branch: main
   production_url: https://vibe-engineering-the-pauli-effect.vercel.app
   current_release: 03871376c1bff7d1cd132472783fa8d9dda39b57
-  current_objective: Prove one sequential Sandcastle implementation and independent review run.
+  current_objective: Complete and prove Client Zero Vibe Engineering v2, then deploy to the authorized new Vercel team.
+  client_zero: true
+  public_motto: Verify It Before Everything.
+  public_flow:
+    - Choose
+    - See
+    - Shape
+    - Make
+    - Prove
+    - Challenge
+    - Decide
+    - Release
+    - Learn
+  interfaces:
+    human_workspace: true
+    cli: true
+    http_api: true
+    mcp: true
+    agent_skill: true
+    plugin: true
+    ci: true
   approved_stack:
     - React
     - Vite
     - Node.js 22
     - GitHub Actions
+    - ICM filesystem contracts
+    - Truth API / SDK / CLI
+    - MCP 2026-07-28 adapter
     - Sandcastle with Docker and Codex
   active_tasks:
-    - https://github.com/executiveusa/vibe-engineering/issues/4
-  blocked_tasks: []
-  dependencies:
-    - GitHub
-    - Docker
-    - Codex authentication
+    - https://github.com/executiveusa/vibe-engineering/issues/22
+  blocked_tasks:
+    - New Vercel team access is not available through the currently connected Vercel account; team_5qS6dGopLozD0HWaND62MGtM returns 403.
   acceptance_tests:
     - npm run check
     - npm audit --audit-level=high
+    - independent_pull_request_review
+    - live_target_environment_verification_after_authorized_release
   required_approvals:
     - merge
     - production deployment
     - paid sandbox usage
-  last_verified_at: "2026-07-17"
-  rollback_point: 03871376c1bff7d1cd132472783fa8d9dda39b57
+    - rights-sensitive public media
+  soundtrack:
+    default: silent
+    provided_reference_asset: private_only
+    production_env: VITE_VIBE_SOUNDTRACK_URL
+    rights_status: UNVERIFIED_FOR_PUBLIC_DISTRIBUTION
+  client_zero_baseline: 6bd796b812a5ff0ca2fb87d00013f33051d48a7c
+  rollback_point: 6bd796b812a5ff0ca2fb87d00013f33051d48a7c
+  production_verification: NOT_VERIFIED
+  last_verified_at: "2026-08-29"
 
 commercial:
-  target_customer: Organizations with broken, unfinished, or builder-dependent digital products
-  problem: Fragile systems, missing proof, and loss of owner control
+  target_customer: Creators, young builders, teams, nonprofits, and organizations that want AI speed without losing judgment, quality, ownership, or the ability to understand what they built.
+  problem: AI makes generation easy but also makes generic decisions, fragile systems, false confidence, and builder dependence easy.
   offer: Vibe Audit and Vibe Rescue Sprint
   price: Founding offer not yet validated by a paid customer
   prospects_contacted: 0
@@ -47,4 +78,5 @@ commercial:
   revenue_collected: 0
   monthly_recurring_revenue: 0
   delivery_cost: 0
-  next_sales_action: Identify and contact the first ten qualified prospects
+  retention_rule: Earn retention through measurable value, education, portability, and improvement rather than lock-in.
+  next_sales_action: Use the Client Zero proof to identify and contact the first ten qualified prospects.
