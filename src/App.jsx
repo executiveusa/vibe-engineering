@@ -5,26 +5,10 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 const FILM_SCENES = [
-  {
-    id: 'apps',
-    label: 'Apps',
-    line: 'Turn a rough idea into something people can use.',
-  },
-  {
-    id: 'automations',
-    label: 'Automations',
-    line: 'Turn repeat work into a system that keeps moving.',
-  },
-  {
-    id: 'agents',
-    label: 'AI agents',
-    line: 'Give AI a job, boundaries, and a way to check itself.',
-  },
-  {
-    id: 'systems',
-    label: 'Systems',
-    line: 'Connect the pieces so the whole thing can be trusted.',
-  },
+  { id: 'apps', label: 'Apps', line: 'Turn a rough idea into something people can use.' },
+  { id: 'automations', label: 'Automations', line: 'Turn repeat work into a system that keeps moving.' },
+  { id: 'agents', label: 'AI agents', line: 'Give AI a job, boundaries, and a way to check itself.' },
+  { id: 'systems', label: 'Systems', line: 'Connect the pieces so the whole thing can be trusted.' },
 ];
 
 function Mark() {
@@ -36,8 +20,19 @@ function Mark() {
   );
 }
 
+function getYouTubeId(url) {
+  if (!url) return '';
+  const embed = url.match(/youtube\.com\/embed\/([A-Za-z0-9_-]+)/);
+  if (embed?.[1]) return embed[1];
+  const watch = url.match(/[?&]v=([A-Za-z0-9_-]+)/);
+  if (watch?.[1]) return watch[1];
+  const short = url.match(/youtu\.be\/([A-Za-z0-9_-]+)/);
+  return short?.[1] || '';
+}
+
 function SoundControl() {
   const trackUrl = (import.meta.env.VITE_VIBE_SOUNDTRACK_URL || '').trim();
+  const youtubeId = getYouTubeId(trackUrl);
   const audioRef = useRef(null);
   const synthRef = useRef(null);
   const [playing, setPlaying] = useState(false);
@@ -46,7 +41,7 @@ function SoundControl() {
     if (synthRef.current?.context) synthRef.current.context.close();
   }, []);
 
-  const startPulse = async () => {
+  const startPulse = () => {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) return false;
 
@@ -81,7 +76,6 @@ function SoundControl() {
     high.start();
     drift.start();
     master.gain.exponentialRampToValueAtTime(0.026, context.currentTime + 0.8);
-
     synthRef.current = { context, master };
     return true;
   };
@@ -98,9 +92,14 @@ function SoundControl() {
 
   const toggle = async () => {
     if (playing) {
-      if (trackUrl && audioRef.current) audioRef.current.pause();
-      else await stopPulse();
+      if (!youtubeId && trackUrl && audioRef.current) audioRef.current.pause();
+      else if (!youtubeId) await stopPulse();
       setPlaying(false);
+      return;
+    }
+
+    if (youtubeId) {
+      setPlaying(true);
       return;
     }
 
@@ -115,12 +114,26 @@ function SoundControl() {
       return;
     }
 
-    if (await startPulse()) setPlaying(true);
+    if (startPulse()) setPlaying(true);
   };
+
+  const youtubeSrc = youtubeId
+    ? `https://www.youtube.com/embed/${youtubeId}?autoplay=1&loop=1&playlist=${youtubeId}&controls=0&rel=0`
+    : '';
 
   return (
     <div className="sound-wrap">
-      {trackUrl ? <audio ref={audioRef} src={trackUrl} loop preload="none" /> : null}
+      {youtubeId && playing ? (
+        <iframe
+          title="Vibe Engineering soundtrack"
+          src={youtubeSrc}
+          allow="autoplay"
+          aria-hidden="true"
+          tabIndex="-1"
+          style={{ position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none' }}
+        />
+      ) : null}
+      {!youtubeId && trackUrl ? <audio ref={audioRef} src={trackUrl} loop preload="none" /> : null}
       <button className="sound-control" type="button" onClick={toggle} aria-pressed={playing}>
         <span className="sound-bars" aria-hidden="true"><i /><i /><i /></span>
         <span>{playing ? 'Sound on' : 'Sound off'}</span>
@@ -157,10 +170,8 @@ function AutomationScene() {
   return (
     <div className="scene-object flow-scene-object">
       <svg className="flow-lines" viewBox="0 0 700 520" aria-hidden="true">
-        <path d="M105 260H260" />
-        <path d="M350 260H520" />
-        <path d="M305 215V115H505" />
-        <path d="M305 305V405H505" />
+        <path d="M105 260H260" /><path d="M350 260H520" />
+        <path d="M305 215V115H505" /><path d="M305 305V405H505" />
       </svg>
       <div className="flow-node n1"><strong>Idea</strong><span>plain language</span></div>
       <div className="flow-node n2"><strong>AI</strong><span>make</span></div>
@@ -191,9 +202,7 @@ function SystemScene() {
     <div className="scene-object system-scene-object">
       {['INPUT', 'DECISION', 'OUTPUT', 'CHECK'].map((label, index) => (
         <div className="system-stage" key={label} style={{ '--stage': index }}>
-          <span>{String(index + 1).padStart(2, '0')}</span>
-          <strong>{label}</strong>
-          <i />
+          <span>{String(index + 1).padStart(2, '0')}</span><strong>{label}</strong><i />
         </div>
       ))}
     </div>
@@ -212,27 +221,20 @@ function BuildFilm() {
   const heroVideoUrl = (import.meta.env.VITE_VIBE_HERO_VIDEO_URL || '').trim();
 
   useEffect(() => {
-    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (media.matches) return undefined;
-    const timer = window.setInterval(() => {
-      setActive((current) => (current + 1) % FILM_SCENES.length);
-    }, 3600);
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+    const timer = window.setInterval(() => setActive((current) => (current + 1) % FILM_SCENES.length), 3600);
     return () => window.clearInterval(timer);
   }, []);
 
   return (
     <div className="build-film" aria-hidden="true">
-      <div className="film-grain" />
-      <div className="film-grid" />
+      <div className="film-grain" /><div className="film-grid" />
       {FILM_SCENES.map((scene, index) => (
         <div className={`film-scene ${active === index ? 'active' : ''}`} key={scene.id}>
-          <div className="film-word">{scene.label}</div>
-          <SceneVisual id={scene.id} />
+          <div className="film-word">{scene.label}</div><SceneVisual id={scene.id} />
         </div>
       ))}
-      {heroVideoUrl ? (
-        <video className="hero-video" src={heroVideoUrl} autoPlay muted loop playsInline preload="metadata" />
-      ) : null}
+      {heroVideoUrl ? <video className="hero-video" src={heroVideoUrl} autoPlay muted loop playsInline preload="metadata" /> : null}
       <div className="film-vignette" />
       <div className="film-status">
         <span>{String(active + 1).padStart(2, '0')} / 04</span>
@@ -244,42 +246,20 @@ function BuildFilm() {
 }
 
 function MethodRow({ number, title, children }) {
-  return (
-    <article className="method-row reveal">
-      <span className="method-number">{number}</span>
-      <h3>{title}</h3>
-      <p>{children}</p>
-    </article>
-  );
+  return <article className="method-row reveal"><span className="method-number">{number}</span><h3>{title}</h3><p>{children}</p></article>;
 }
 
 function App() {
   const page = useRef(null);
 
   useEffect(() => {
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reducedMotion) return undefined;
-
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
     const ctx = gsap.context(() => {
-      gsap.from('.hero-copy-block > *', {
-        y: 32,
-        opacity: 0,
-        duration: 0.9,
-        stagger: 0.08,
-        ease: 'power4.out',
-      });
-
+      gsap.from('.hero-copy-block > *', { y: 32, opacity: 0, duration: 0.9, stagger: 0.08, ease: 'power4.out' });
       gsap.utils.toArray('.reveal').forEach((element) => {
-        gsap.from(element, {
-          y: 28,
-          opacity: 0,
-          duration: 0.7,
-          ease: 'power3.out',
-          scrollTrigger: { trigger: element, start: 'top 88%' },
-        });
+        gsap.from(element, { y: 28, opacity: 0, duration: 0.7, ease: 'power3.out', scrollTrigger: { trigger: element, start: 'top 88%' } });
       });
     }, page);
-
     return () => ctx.revert();
   }, []);
 
@@ -289,51 +269,27 @@ function App() {
 
       <section className="hero" id="top">
         <BuildFilm />
-
         <nav className="nav" aria-label="Primary navigation">
-          <a className="brand" href="#top" aria-label="Vibe Engineering home">
-            <Mark />
-            <span>Vibe Engineering</span>
-          </a>
-          <div className="nav-actions">
-            <a href="#method">The process</a>
-            <a href="#why">Why it matters</a>
-            <SoundControl />
-          </div>
+          <a className="brand" href="#top" aria-label="Vibe Engineering home"><Mark /><span>Vibe Engineering</span></a>
+          <div className="nav-actions"><a href="#method">The process</a><a href="#why">Why it matters</a><SoundControl /></div>
         </nav>
 
         <div className="hero-copy-block">
           <p className="hero-kicker">V.I.B.E.</p>
           <h1>Verify it<br />before<br />everything.</h1>
           <p className="hero-copy">You do not need to become a developer. You need a process for turning your ideas, taste, and judgment into systems that work.</p>
-          <div className="hero-actions">
-            <a className="button primary" href="#method">See the process</a>
-            <a className="button secondary" href="#why">Why not vibe coding?</a>
-          </div>
+          <div className="hero-actions"><a className="button primary" href="#method">See the process</a><a className="button secondary" href="#why">Why not vibe coding?</a></div>
         </div>
 
-        <div className="hero-foot">
-          <span>Stop vibe coding.</span>
-          <strong>Start Vibe Engineering.</strong>
-        </div>
+        <div className="hero-foot"><span>Stop vibe coding.</span><strong>Start Vibe Engineering.</strong></div>
       </section>
 
       <section className="why section" id="why" aria-labelledby="why-title">
         <div className="section-shell">
-          <div className="why-lead reveal">
-            <p>AI made the first draft cheap.</p>
-            <h2 id="why-title">The hard part is deciding what is worth shipping.</h2>
-          </div>
-
+          <div className="why-lead reveal"><p>AI made the first draft cheap.</p><h2 id="why-title">The hard part is deciding what is worth shipping.</h2></div>
           <div className="contrast-grid reveal">
-            <div className="contrast-side muted-side">
-              <h3>Vibe coding</h3>
-              <p>Prompt it. Hope it works. Patch what breaks. Keep going.</p>
-            </div>
-            <div className="contrast-side signal-side">
-              <h3>Vibe Engineering</h3>
-              <p>Set the intent. Use your taste. Prove the important parts. Keep ownership.</p>
-            </div>
+            <div className="contrast-side muted-side"><h3>Vibe coding</h3><p>Prompt it. Hope it works. Patch what breaks. Keep going.</p></div>
+            <div className="contrast-side signal-side"><h3>Vibe Engineering</h3><p>Set the intent. Use your taste. Prove the important parts. Keep ownership.</p></div>
           </div>
         </div>
       </section>
@@ -341,11 +297,9 @@ function App() {
       <section className="method section" id="method" aria-labelledby="method-title">
         <div className="section-shell">
           <div className="section-heading reveal">
-            <p>The process</p>
-            <h2 id="method-title">Systems thinking without the engineer costume.</h2>
+            <p>The process</p><h2 id="method-title">Systems thinking without the engineer costume.</h2>
             <span>You bring the point of view. AI gives you reach. The process keeps the work honest.</span>
           </div>
-
           <div className="method-list">
             <MethodRow number="01" title="Idea">Say what you want in plain language. Start with the change you want to make.</MethodRow>
             <MethodRow number="02" title="Shape">Use your taste to steer the result. Decide what good should feel like before AI decides for you.</MethodRow>
@@ -357,16 +311,8 @@ function App() {
 
       <section className="systems section" aria-labelledby="systems-title">
         <div className="section-shell systems-shell">
-          <div className="systems-copy reveal">
-            <p>Systems thinking, plain English</p>
-            <h2 id="systems-title">Know what goes in. Know what should happen. Know what comes out. Know how you will check it.</h2>
-          </div>
-          <div className="system-line reveal" aria-label="Input, decision, output, check">
-            <span>Input</span><i />
-            <span>Decision</span><i />
-            <span>Output</span><i />
-            <span>Check</span>
-          </div>
+          <div className="systems-copy reveal"><p>Systems thinking, plain English</p><h2 id="systems-title">Know what goes in. Know what should happen. Know what comes out. Know how you will check it.</h2></div>
+          <div className="system-line reveal" aria-label="Input, decision, output, check"><span>Input</span><i /><span>Decision</span><i /><span>Output</span><i /><span>Check</span></div>
         </div>
       </section>
 
@@ -378,12 +324,7 @@ function App() {
         </div>
       </section>
 
-      <footer>
-        <div className="section-shell footer-inner">
-          <span>Vibe Engineering · The Pauli Effect</span>
-          <span>Verify It Before Everything.</span>
-        </div>
-      </footer>
+      <footer><div className="section-shell footer-inner"><span>Vibe Engineering · The Pauli Effect</span><span>Verify It Before Everything.</span></div></footer>
     </main>
   );
 }
