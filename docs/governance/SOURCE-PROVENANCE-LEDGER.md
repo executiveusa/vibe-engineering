@@ -1,0 +1,32 @@
+# Vibe Engineering source and provenance ledger
+
+Purpose: keep the method open, traceable, and legally clean. This ledger records external ideas that materially influence Vibe Engineering. It is not a claim that every idea below is copied into the repository.
+
+| Source | License / terms | What Vibe Engineering uses | How we changed or bounded it | Adoption |
+|---|---|---|---|---|
+| `executiveusa/pauli-agent-skills-2026` / Addy Osmani Agent Skills | MIT | Engineering procedure library: spec, plan, incremental build, TDD, source-driven development, review, security, performance, documentation, observability, shipping | Lives beneath Vibe/ICM authority. Skills do not self-authorize release and are invoked only when relevant. | Canonical engineering procedure |
+| Interpretable Context Methodology / Jake Van Clief (`icm-architect` material; core cites arXiv:2603.16021) | MIT in supplied `icm-architect` package | Filesystem-as-agent-architecture, one stage/one job, layered context, editable stage outputs, configure factory not product | Used as the structure of the Vibe factory. Vibe adds commercial gates, Council/Judge authority, ownership, consequence rules, and public creator language. | Core architecture |
+| `robonuggets/gauntlet-loop` / Gauntlet Loop, crediting Matt Shumer's original technique | CC BY 4.0 in supplied package | Named/fetchable/comparable quality bar; builder + separate harsh critic; inspect actual artifact; keep improving until the real comparison is won or an authorized stop condition occurs | Vibe does not use unbounded loops for consequential deployment. Cost, safety, ownership, scope, and Judge rules remain hard boundaries. | Quality/reference pattern |
+| `executiveusa/pauli-verbalized-sampling` / CHATS Lab Verbalized Sampling | Apache 2.0 | Model-agnostic controlled diversity for open-ended candidate generation | Vibe treats probability labels as exploration signals, not truth. Sampling is off for final factual verification, security conclusions, destructive actions, migrations, and release decisions. | Exploration primitive |
+| `pbakaus/impeccable` | Apache 2.0 | Persistent PRODUCT/DESIGN context, deterministic design detectors, critique vocabulary, browser iteration, anti-default design thinking | Vibe generalizes the lesson beyond UI: default model behavior is not a deliberate decision. Design tools remain replaceable. | Design influence / optional tool |
+| `cyxzdev/Uncodixfy` | MIT | Explicit detection/removal of repeated GPT UI defaults | Used as a defensive reference, not as the design philosophy. Intent, product context, references, accessibility, and taste still decide the design. | UI anti-slop influence |
+| `hardikpandya/stop-slop` | MIT | Detection of common AI prose tells and structural clichés | Folded into the broader anti-slop rule. A banned phrase list cannot replace voice, meaning, or human judgment. | Copy anti-slop influence |
+| `blader/humanizer` | MIT | Preserve meaning while removing statistical AI-writing patterns; do not invent facts; match supplied voice | Used as a finishing check for public prose. Vibe keeps technical/reference prose plain and preserves exact claims and citations. | Copy quality influence |
+| `ayghri/i-have-adhd` | MIT | Action-first, low-friction, bounded, state-aware communication; reduce buried answers and tangents | Vibe adapts the information-shaping principles for broad accessibility and youth/creator education without assuming a diagnosis. | Communication/accessibility influence |
+| `executiveusa/pauli-scroll-world` and its pinned ScrollCraft integration | MIT for Pauli Scroll World; upstream ScrollCraft documented as MIT by the repository | Scroll-led storytelling, scene contracts, story-to-action flow, responsive motion discipline, rights/approval boundaries | Vibe reuses the story discipline without importing a second rendering engine for the homepage. The initial Client Zero experience uses HTML/SVG/CSS/GSAP and preserves reduced-motion access. | Experience influence |
+| Proven-Better-New / Mark Pincus framework as encoded in the Pauli `proven-better-new` skill | Framework attribution retained in the skill | Separate durable instinct from first idea; research audience-matched analogs; map proven/better/new mechanics; quarantine unproven load-bearing assumptions | Vibe uses this at Stage 00 when product/market novelty matters. It remains an evidence map, not an automatic verdict. | Intake/validation influence |
+| Google Engineering Practices | Public engineering guidance | Small changes, code health over time, independent review, maintainability | Used as supporting engineering rationale; Vibe retains its own stage names, governance, score, ownership rules, and ICM structure. | Engineering influence |
+| Andrej Karpathy LLM Council / LLM Wiki patterns | Public repositories/gists; terms governed by their sources | Independent perspectives and agent-readable knowledge patterns | Vibe Council has its own roles, hard gates, authority rules, and evidence requirements. | Council/context influence |
+
+## Rules for future additions
+
+1. Record the source before promoting an external pattern into a canonical Vibe rule.
+2. Record the license or terms when code, text, templates, or substantial expression may be reused.
+3. Keep required copyright/attribution notices when the license requires them.
+4. Describe the idea we adopted and the boundary we added; do not relabel another person's full method as ours.
+5. Prefer linking/installing an upstream capability over copying and silently forking it when the capability can remain replaceable.
+6. Re-check this ledger when an upstream source changes materially or a new Vibe release distributes adapted source text/code.
+
+## Client Zero media record
+
+The 2026-08-29 Client Zero work received a user-supplied commercial instrumental as a desired soundtrack. The file is treated as a private design/reference input only. It is not committed or publicly deployed until a rights record explicitly authorizes the required use. The site accepts a rights-cleared soundtrack via `VITE_VIBE_SOUNDTRACK_URL` and makes no media request when that value is absent.
