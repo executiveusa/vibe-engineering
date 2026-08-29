@@ -12,17 +12,30 @@ This repository inherits the authoritative studio policy in `docs/STUDIO-SYSTEM-
 
 For Vibe v2 method decisions, also read `docs/VIBE-ENGINEERING-V2-DOCTRINE.md`. It adds plain-language public framing, Intent → Standard → Evidence, controlled divergence, no-slop quality, source/provenance, earned retention, and Client Zero rules without weakening existing studio authority.
 
+## Mandatory Step 0 — ICMR
+
+Before substantial work, run the ICMR Universal Compiler contract in `skills/icmr-universal-compiler/SKILL.md`.
+
+The order is:
+
+`DETECT → ICMR → INTAKE/SPEC → SLICE → BUILD → PROOF → SHIP`
+
+For a governed workspace, `ICMR.yaml` is the portable runtime representation of the detected work topology, roles, authority, routing, context boundaries, proof, sovereignty, and rollback. No substantial work should enter `00_intake` until the manifest exists and its Step 0 validation passes.
+
+For brownfield work, Step 0 inventories reality before restructuring or migration. If evidence shows the work is not a simple project pipeline, update the detected ICM form rather than forcing the default scaffold.
+
 ## Required reading
 
 Before substantial work, read only what the task requires, starting with:
 
-1. `CONTEXT.md`
-2. `PROJECT.yaml`
-3. the approved issue/specification
-4. the current ICM stage contract and references it names
-5. `docs/STUDIO-SYSTEM-PROMPT.md` and `docs/VIBE-ENGINEERING-V2-DOCTRINE.md` when governance or method behavior is involved
-6. `docs/governance/ENGINEERING-WORKFLOW.md` for software implementation
-7. `ARCHITECTURE.md`, `RUNBOOK.md`, or `SECURITY.md` when the task touches those boundaries
+1. `ICMR.yaml` when working inside a governed workspace;
+2. `CONTEXT.md`;
+3. `PROJECT.yaml`;
+4. the approved issue/specification;
+5. the current ICM stage contract and references it names;
+6. `docs/STUDIO-SYSTEM-PROMPT.md` and `docs/VIBE-ENGINEERING-V2-DOCTRINE.md` when governance or method behavior is involved;
+7. `docs/governance/ENGINEERING-WORKFLOW.md` for software implementation;
+8. `ARCHITECTURE.md`, `RUNBOOK.md`, or `SECURITY.md` when the task touches those boundaries.
 
 Do not load every method document into every task.
 
@@ -83,11 +96,13 @@ Factory commands:
 
 ```bash
 npm run factory:new -- --name "Project Name"
+npm run icmr:validate -- ./workspaces/project-name
 npm run factory:doctor -- ./workspaces/project-name
 ```
 
 ## ICM rule
 
+- `ICMR.yaml` is Step 0: detected runtime representation and entry contract.
 - `AGENTS.md` is Layer 0 identity and law.
 - `CONTEXT.md` is Layer 1 routing.
 - Each `stages/NN_name/CONTEXT.md` is a Layer 2 stage contract.
@@ -107,6 +122,7 @@ The owner must be able to understand, export, move, replace providers/builders, 
 
 ## Prohibited changes
 
+- Do not begin substantial governed work without a valid `ICMR.yaml` Step 0 contract.
 - Do not rewrite unrelated product surfaces during infrastructure tickets.
 - Do not add another orchestrator when an adapter to the existing Vibe/ICM core is sufficient.
 - Do not commit secrets or `.sandcastle/.env`.
