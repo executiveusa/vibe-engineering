@@ -29,4 +29,4 @@ Purpose: keep the method open, traceable, and legally clean. This ledger records
 
 ## Client Zero media record
 
-The 2026-08-29 Client Zero work received a user-supplied commercial instrumental as a desired soundtrack. The file is treated as a private design/reference input only. It is not committed or publicly deployed until a rights record explicitly authorizes the required use. The site accepts a rights-cleared soundtrack via `VITE_VIBE_SOUNDTRACK_URL` and makes no media request when that value is absent.
+The 2026-08-29 Client Zero soundtrack was supplied by the project owner. On 2026-08-29 the owner explicitly confirmed that the song is theirs and authorized its use in this Vibe Engineering project. Status: `OWNER_AUTHORIZED`. The release may bundle and publicly serve the project copy while preserving the site's user-controlled sound behavior. This project-specific authorization does not weaken the provenance or rights requirements for any other media or third-party material.
