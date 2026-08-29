@@ -1,0 +1,32 @@
+{
+  "version": "1.0.0",
+  "brand": "Vibe Engineering",
+  "owner": "The Pauli Effect",
+  "year": 2026,
+  "suite": "Pauli Suite",
+  "governing_idea": "Verify It Before Everything.",
+  "permanent_brand_board": "/vibe-brand-board.svg",
+  "fal_generation": {
+    "provider": "fal.ai",
+    "model": "fal-ai/flux-2/klein/9b",
+    "request_id": "01a04f79-abe3-74b3-98e8-2b169f7a4591",
+    "seed": 1033804674,
+    "size": "1536x864",
+    "generated_at": "2026-08-29",
+    "temporary_reference_urls": [
+      "https://v3b.fal.media/files/b/0aa85509/lbN89HTBtQQcLPtBgECrI_x1tj6PJa.png",
+      "https://v3b.fal.media/files/b/0aa85509/82weWzmkRrco7Tf7OJhZL_OV4yNVkF.png",
+      "https://v3b.fal.media/files/b/0aa8551e/kFJBKZKieuwfHZvi1PJa2_Ofs2uqB2.png"
+    ],
+    "temporary_url_expiration_seconds": 604800
+  },
+  "visual_laws": [
+    "Near-black is the anchor; warm paper carries human warmth.",
+    "Acid green means selected, verified, or move forward.",
+    "Reject red means reject or needs review and is never decorative.",
+    "Show people making decisions, not posing with AI.",
+    "Urban means real environments and cultural specificity, never fake street styling.",
+    "No graffiti-by-default, torn paper, claw marks, decorative scratches, purple AI gradients, glassmorphism, holograms, AI brains, or generic SaaS dashboards."
+  ],
+  "motion_law": "OPTIONS -> REJECT -> PAUSE -> VERIFY -> MOVE FORWARD"
+}
