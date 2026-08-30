@@ -29,6 +29,10 @@ async function readBody(req) {
   }
 }
 
+function bodyError(res, error) {
+  return res.status(error === 'PAYLOAD_TOO_LARGE' ? 413 : 400).json({ error });
+}
+
 export function createNodeHandlers(runtimeLoader = getRuntime) {
   return {
     async manifest(_req, res) {
@@ -45,13 +49,29 @@ export function createNodeHandlers(runtimeLoader = getRuntime) {
     },
     async resolve(req, res) {
       const parsed = await readBody(req);
-      if (parsed.error) {
-        return res.status(parsed.error === 'PAYLOAD_TOO_LARGE' ? 413 : 400).json({ error: parsed.error });
-      }
+      if (parsed.error) return bodyError(res, parsed.error);
       const validation = validateContextRequest(parsed.body);
       if (!validation.valid) return res.status(400).json({ error: 'INVALID_CONTEXT_REQUEST', issues: validation.errors });
       const { api } = await runtimeLoader();
       return send(res, api.resolve(parsed.body));
+    },
+    async detect(req, res) {
+      const parsed = await readBody(req);
+      if (parsed.error) return bodyError(res, parsed.error);
+      const { api } = await runtimeLoader();
+      return send(res, api.detect(parsed.body));
+    },
+    async compileIcmr(req, res) {
+      const parsed = await readBody(req);
+      if (parsed.error) return bodyError(res, parsed.error);
+      const { api } = await runtimeLoader();
+      return send(res, api.compileIcmr(parsed.body));
+    },
+    async validateIcmr(req, res) {
+      const parsed = await readBody(req);
+      if (parsed.error) return bodyError(res, parsed.error);
+      const { api } = await runtimeLoader();
+      return send(res, api.validateIcmr(parsed.body));
     },
   };
 }
