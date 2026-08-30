@@ -1,0 +1,5 @@
+.env*
+.sandcastle/
+workspaces/
+node_modules/
+dist/
