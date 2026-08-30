@@ -1,5 +1,5 @@
 const PROTOCOL_VERSION = '2026-07-28';
-const SERVER_INFO = { name: 'vibe-engineering', version: '2.0.0' };
+const SERVER_INFO = { name: 'vibe-engineering', version: '2.1.0' };
 const METHOD_ID = 'method.vibe-engineering-v2';
 
 function complete(id, result) {
@@ -31,6 +31,19 @@ function textResult(id, value) {
     structuredContent: value,
   });
 }
+
+const WORK_INPUT_PROPERTIES = {
+  title: { type: 'string' },
+  description: { type: 'string', minLength: 1 },
+  target: { type: 'string' },
+  commercialValue: { type: 'string' },
+  repository: { type: 'string' },
+  mode: { type: 'string', enum: ['greenfield', 'brownfield'] },
+  roles: { type: 'array', items: { type: 'string' } },
+  constraints: { type: 'array', items: { type: 'string' } },
+  approvals: { type: 'array', items: { type: 'string' } },
+  rollbackPoint: { type: 'string' },
+};
 
 function toolCatalog() {
   return [
@@ -92,6 +105,41 @@ function toolCatalog() {
         additionalProperties: false,
       },
     },
+    {
+      name: 'vibe_detect',
+      title: 'Detect ICMR Topology',
+      description: 'Classify arbitrary work before planning. Detect mode, ICM form, role topology, execution model, state model, confidence, and assumptions.',
+      inputSchema: {
+        type: 'object',
+        properties: WORK_INPUT_PROPERTIES,
+        required: ['description'],
+        additionalProperties: false,
+      },
+    },
+    {
+      name: 'vibe_compile_icmr',
+      title: 'Compile ICMR',
+      description: 'Compile arbitrary role, project, workflow, organization, knowledge system, or mixed work into the canonical ICM Runtime Representation and YAML.',
+      inputSchema: {
+        type: 'object',
+        properties: WORK_INPUT_PROPERTIES,
+        required: ['description'],
+        additionalProperties: false,
+      },
+    },
+    {
+      name: 'vibe_validate_icmr',
+      title: 'Validate ICMR',
+      description: 'Validate an ICMR object or compiled YAML against mandatory Vibe Step 0 structural and authority invariants.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          icmr: { oneOf: [{ type: 'object' }, { type: 'string', minLength: 1 }] },
+        },
+        required: ['icmr'],
+        additionalProperties: false,
+      },
+    },
   ];
 }
 
@@ -104,7 +152,7 @@ export async function handleMcpRpc(api, request = {}) {
     return complete(id, {
       supportedVersions: [PROTOCOL_VERSION],
       capabilities: { tools: {} },
-      instructions: 'Use vibe_method first for methodology questions. Use vibe_context for task-scoped context. Vibe tools expose governance and truth; they do not authorize production release.',
+      instructions: 'Use vibe_detect before substantial new work, vibe_compile_icmr to produce the Step 0 runtime contract, vibe_validate_icmr before entering Intake/Spec, vibe_method for methodology, and vibe_context for task-scoped context. No Vibe tool authorizes production release.',
       ttlMs: 300000,
       cacheScope: 'public',
     });
@@ -142,9 +190,22 @@ export async function handleMcpRpc(api, request = {}) {
 
   if (name === 'vibe_context') {
     const result = api.resolve(args);
-    return result.status === 200
-      ? textResult(id, result.body)
-      : error(id, -32602, 'Context request rejected', result.body);
+    return result.status === 200 ? textResult(id, result.body) : error(id, -32602, 'Context request rejected', result.body);
+  }
+
+  if (name === 'vibe_detect') {
+    const result = api.detect(args);
+    return result.status === 200 ? textResult(id, result.body) : error(id, -32602, 'Detection request rejected', result.body);
+  }
+
+  if (name === 'vibe_compile_icmr') {
+    const result = api.compileIcmr(args);
+    return result.status === 200 ? textResult(id, result.body) : error(id, -32602, 'ICMR compilation rejected', result.body);
+  }
+
+  if (name === 'vibe_validate_icmr') {
+    const result = api.validateIcmr(args);
+    return result.status === 200 ? textResult(id, result.body) : error(id, -32602, 'ICMR validation failed', result.body);
   }
 
   return error(id, -32602, 'Unknown tool', { name });
