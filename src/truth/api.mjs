@@ -1,5 +1,6 @@
 import { resolveContext } from './context-resolver.mjs';
 import { validateContextRequest } from './request-validation.mjs';
+import { detectWork, compileIcmr, validateIcmr } from '../icmr/runtime.mjs';
 
 function json(status, body) {
   return {
@@ -31,6 +32,7 @@ export function createTruthApi(bundle) {
         sourceCommit: bundle.sourceCommit,
         bundleHash: bundle.bundleHash,
         artifacts: approved.map(publicArtifact),
+        operations: ['vibe_detect', 'vibe_compile_icmr', 'vibe_validate_icmr'],
       });
     },
 
@@ -53,6 +55,21 @@ export function createTruthApi(bundle) {
       } catch {
         return json(400, { error: 'CONTEXT_RESOLUTION_FAILED' });
       }
+    },
+
+    detect(request) {
+      const result = detectWork(request);
+      return result.valid ? json(200, result) : json(400, { error: 'INVALID_ICMR_DETECTION_REQUEST', details: result.errors });
+    },
+
+    compileIcmr(request) {
+      const result = compileIcmr(request);
+      return result.valid ? json(200, result) : json(400, { error: 'ICMR_COMPILE_FAILED', details: result.errors });
+    },
+
+    validateIcmr(request) {
+      const result = validateIcmr(request);
+      return json(result.valid ? 200 : 400, result.valid ? result : { error: 'INVALID_ICMR', ...result });
     },
   };
 }

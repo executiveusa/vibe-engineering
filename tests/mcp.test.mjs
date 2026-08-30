@@ -19,7 +19,15 @@ test('MCP discovery advertises current stateless protocol and tools', async () =
   assert.equal(response.result._meta['io.modelcontextprotocol/serverInfo'].name, 'vibe-engineering');
 
   const tools = await handleMcpRpc(api, { jsonrpc: '2.0', id: 2, method: 'tools/list' });
-  assert.deepEqual(tools.result.tools.map((tool) => tool.name), ['vibe_method', 'vibe_truth', 'vibe_workflow', 'vibe_context']);
+  assert.deepEqual(tools.result.tools.map((tool) => tool.name), [
+    'vibe_method',
+    'vibe_truth',
+    'vibe_workflow',
+    'vibe_context',
+    'vibe_detect',
+    'vibe_compile_icmr',
+    'vibe_validate_icmr',
+  ]);
 });
 
 test('vibe_method returns the approved Vibe Engineering v2 truth artifact', async () => {
@@ -52,6 +60,35 @@ test('vibe_context preserves Truth API validation', async () => {
 
   assert.equal(response.result.resultType, 'complete');
   assert.ok(response.result.structuredContent.truth.bundleHash);
+});
+
+test('ICMR MCP tools detect, compile, and validate the same runtime contract', async () => {
+  const api = await createApi();
+  const input = {
+    title: 'Grant Operations Agent',
+    description: 'An AI orchestrator routes grant research through reviewers and human approval before submission.',
+    roles: ['orchestrator', 'researcher', 'reviewer'],
+    constraints: ['no submission without human approval'],
+    commercialValue: 'reduce grant preparation time',
+  };
+
+  const detected = await handleMcpRpc(api, {
+    jsonrpc: '2.0', id: 10, method: 'tools/call', params: { name: 'vibe_detect', arguments: input },
+  });
+  assert.equal(detected.result.structuredContent.valid, true);
+  assert.equal(detected.result.structuredContent.roleStructure, 'orchestrator_hub');
+
+  const compiled = await handleMcpRpc(api, {
+    jsonrpc: '2.0', id: 11, method: 'tools/call', params: { name: 'vibe_compile_icmr', arguments: input },
+  });
+  assert.equal(compiled.result.structuredContent.icmr.icmr_version, '1.0');
+  assert.match(compiled.result.structuredContent.yaml, /^icmr_version: "1\.0"/);
+
+  const validated = await handleMcpRpc(api, {
+    jsonrpc: '2.0', id: 12, method: 'tools/call',
+    params: { name: 'vibe_validate_icmr', arguments: { icmr: compiled.result.structuredContent.icmr } },
+  });
+  assert.equal(validated.result.structuredContent.valid, true);
 });
 
 test('MCP HTTP headers cannot disagree with the JSON-RPC request', () => {

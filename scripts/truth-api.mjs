@@ -39,6 +39,9 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'GET' && url.pathname.startsWith('/api/v1/truth/')) return send(res, api.truth(decodeURIComponent(url.pathname.slice('/api/v1/truth/'.length))));
     if (req.method === 'GET' && url.pathname.startsWith('/api/v1/workflows/')) return send(res, api.workflow(decodeURIComponent(url.pathname.slice('/api/v1/workflows/'.length))));
     if (req.method === 'POST' && url.pathname === '/api/v1/resolve-context') return send(res, api.resolve(await readJson(req)));
+    if (req.method === 'POST' && url.pathname === '/api/v1/detect') return send(res, api.detect(await readJson(req)));
+    if (req.method === 'POST' && url.pathname === '/api/v1/compile-icmr') return send(res, api.compileIcmr(await readJson(req)));
+    if (req.method === 'POST' && url.pathname === '/api/v1/validate-icmr') return send(res, api.validateIcmr(await readJson(req)));
 
     return send(res, { status: 404, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' }, body: { error: 'NOT_FOUND' } });
   } catch (error) {
