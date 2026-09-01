@@ -173,7 +173,7 @@ export async function handleMcpRpc(api, request = {}) {
     return complete(id, {
       supportedVersions: [PROTOCOL_VERSION],
       capabilities: { tools: {} },
-      instructions: 'Use vibe_skills to discover the smallest procedure. For substantial work use stop-slop and proof before a done claim. Use ship only for an actual release. No Vibe tool authorizes production release by itself.',
+      instructions: 'For substantial new work, start with vibe_detect, compile the Step 0 contract with vibe_compile_icmr, and verify it with vibe_validate_icmr before planning or execution. Then use vibe_skills to choose the smallest procedure. Use stop-slop and proof before a done claim. Use ship only for an actual release. No Vibe tool authorizes production release by itself.',
       ttlMs: 300000,
       cacheScope: 'public',
     });
