@@ -21,6 +21,9 @@ test('MCP discovery advertises current stateless protocol and tools', async () =
   const tools = await handleMcpRpc(api, { jsonrpc: '2.0', id: 2, method: 'tools/list' });
   assert.deepEqual(tools.result.tools.map((tool) => tool.name), [
     'vibe_method',
+    'vibe_skills',
+    'vibe_skill',
+    'vibe_run_skill',
     'vibe_truth',
     'vibe_workflow',
     'vibe_context',
@@ -30,15 +33,30 @@ test('MCP discovery advertises current stateless protocol and tools', async () =
   ]);
 });
 
+test('vibe skill tools expose and run canonical procedures', async () => {
+  const api = await createApi();
+  const listed = await handleMcpRpc(api, {
+    jsonrpc: '2.0', id: 20, method: 'tools/call', params: { name: 'vibe_skills', arguments: {} },
+  });
+  assert.ok(listed.result.structuredContent.skills.some((skill) => skill.id === 'stop-slop'));
+
+  const fetched = await handleMcpRpc(api, {
+    jsonrpc: '2.0', id: 21, method: 'tools/call', params: { name: 'vibe_skill', arguments: { id: 'grill' } },
+  });
+  assert.equal(fetched.result.structuredContent.id, 'grill');
+
+  const run = await handleMcpRpc(api, {
+    jsonrpc: '2.0', id: 22, method: 'tools/call', params: { name: 'vibe_run_skill', arguments: { id: 'human-voice', input: { text: 'hello' } } },
+  });
+  assert.equal(run.result.structuredContent.skill.id, 'human-voice');
+  assert.equal(run.result.structuredContent.input.text, 'hello');
+});
+
 test('vibe_method returns the approved Vibe Engineering v2 truth artifact', async () => {
   const api = await createApi();
   const response = await handleMcpRpc(api, {
-    jsonrpc: '2.0',
-    id: 3,
-    method: 'tools/call',
-    params: { name: 'vibe_method', arguments: {} },
+    jsonrpc: '2.0', id: 3, method: 'tools/call', params: { name: 'vibe_method', arguments: {} },
   });
-
   assert.equal(response.result.structuredContent.artifact.id, 'method.vibe-engineering-v2');
   assert.equal(response.result.structuredContent.artifact.motto, 'Verify It Before Everything.');
 });
@@ -46,10 +64,7 @@ test('vibe_method returns the approved Vibe Engineering v2 truth artifact', asyn
 test('vibe_context preserves Truth API validation', async () => {
   const api = await createApi();
   const response = await handleMcpRpc(api, {
-    jsonrpc: '2.0',
-    id: 4,
-    method: 'tools/call',
-    params: {
+    jsonrpc: '2.0', id: 4, method: 'tools/call', params: {
       name: 'vibe_context',
       arguments: {
         project: { repository: 'executiveusa/vibe-engineering', mode: 'brownfield' },
@@ -57,7 +72,6 @@ test('vibe_context preserves Truth API validation', async () => {
       },
     },
   });
-
   assert.equal(response.result.resultType, 'complete');
   assert.ok(response.result.structuredContent.truth.bundleHash);
 });
