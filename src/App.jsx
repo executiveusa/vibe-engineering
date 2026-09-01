@@ -132,7 +132,7 @@ function SignalField() {
       <div className="signal-stamp">V</div>
       <div className="signal-rule signal-rule-a" />
       <div className="signal-rule signal-rule-b" />
-      <div className="signal-caption">IDEA / TASTE / PROOF</div>
+      <div className="signal-caption">INTENT / STANDARD / EVIDENCE</div>
     </div>
   );
 }
@@ -154,29 +154,10 @@ function App() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
 
     const ctx = gsap.context(() => {
-      gsap.from('.hero-intro > *', {
-        y: 24,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.07,
-        ease: 'power3.out',
-      });
-
-      gsap.from('.signal-stamp', {
-        xPercent: 8,
-        opacity: 0,
-        duration: 1.2,
-        ease: 'power4.out',
-      });
-
+      gsap.from('.hero-intro > *', { y: 24, opacity: 0, duration: 0.8, stagger: 0.07, ease: 'power3.out' });
+      gsap.from('.signal-stamp', { xPercent: 8, opacity: 0, duration: 1.2, ease: 'power4.out' });
       gsap.utils.toArray('.reveal').forEach((element) => {
-        gsap.from(element, {
-          y: 22,
-          opacity: 0,
-          duration: 0.65,
-          ease: 'power3.out',
-          scrollTrigger: { trigger: element, start: 'top 90%' },
-        });
+        gsap.from(element, { y: 22, opacity: 0, duration: 0.65, ease: 'power3.out', scrollTrigger: { trigger: element, start: 'top 90%' } });
       });
     }, page);
 
@@ -189,12 +170,8 @@ function App() {
 
       <section className="hero" id="top">
         <SignalField />
-
         <nav className="nav" aria-label="Primary navigation">
-          <a className="brand" href="#top" aria-label="Vibe Engineering home">
-            <Mark />
-            <span>Vibe Engineering</span>
-          </a>
+          <a className="brand" href="#top" aria-label="Vibe Engineering home"><Mark /><span>Vibe Engineering</span></a>
           <div className="nav-actions">
             <a href="#method">How it works</a>
             <a href="https://github.com/executiveusa/vibe-engineering" target="_blank" rel="noreferrer">Open source</a>
@@ -205,39 +182,25 @@ function App() {
           <div className="hero-intro">
             <p className="eyebrow">V.I.B.E. / Verify It Before Everything</p>
             <h1>AI builds fast.<br /><em>Slop does too.</em></h1>
-            <p className="hero-copy">
-              Vibe Engineering is an open-source set of skills that helps you turn an idea into something clear, useful, well designed, and actually proven to work.
-            </p>
+            <p className="hero-copy">Vibe Engineering is an open-source set of skills that helps you turn an idea into something clear, useful, well designed, and actually proven to work.</p>
             <div className="hero-actions">
               <a className="text-link strong" href="#method">See how it works <span aria-hidden="true">↘</span></a>
               <a className="text-link" href="https://github.com/executiveusa/vibe-engineering" target="_blank" rel="noreferrer">Use the open-source repo <span aria-hidden="true">↗</span></a>
             </div>
           </div>
-
           <aside className="hero-note" aria-label="Vibe Engineering in one sentence">
             <span>01 / THE POINT</span>
             <p>You do not need to know code. You need a way to tell the AI what you mean, what good looks like, and how to prove it.</p>
           </aside>
         </div>
-
-        <div className="hero-index" aria-hidden="true">
-          <span>OPEN SOURCE</span>
-          <span>BUILT FOR HUMANS + AGENTS</span>
-          <span>STOP SLOP BUILT IN</span>
-        </div>
+        <div className="hero-index" aria-hidden="true"><span>OPEN SOURCE</span><span>BUILT FOR HUMANS + AGENTS</span><span>STOP SLOP BUILT IN</span></div>
       </section>
 
       <section className="why section paper-section" id="why" aria-labelledby="why-title">
         <div className="section-shell split-heading reveal">
           <p className="section-label">Why care</p>
-          <div>
-            <h2 id="why-title">AI can give you an answer before you have finished the question.</h2>
-            <p className="lead-copy">
-              That is the opportunity and the problem. Vibe Engineering gives you a few simple habits that keep speed from turning into bad decisions.
-            </p>
-          </div>
+          <div><h2 id="why-title">AI can give you an answer before you have finished the question.</h2><p className="lead-copy">That is the opportunity and the problem. Vibe Engineering gives you a few simple habits that keep speed from turning into bad decisions.</p></div>
         </div>
-
         <div className="principles section-shell">
           <Principle number="01" title="Get clear first">Before the AI starts building, make sure it understands what you actually want.</Principle>
           <Principle number="02" title="Keep your taste">Do not let the model's average answer become your brand, product, or voice.</Principle>
@@ -249,28 +212,18 @@ function App() {
       <section className="method section ink-section" id="method" aria-labelledby="method-title">
         <div className="section-shell split-heading reveal">
           <p className="section-label">How it works</p>
-          <div>
-            <h2 id="method-title">Use one skill for the problem in front of you.</h2>
-            <p className="lead-copy muted">Grill the idea. Write the spec. Build a slice. Stop the slop. Prove it. Ship the exact version that passed.</p>
-          </div>
+          <div><h2 id="method-title">Use one skill for the problem in front of you.</h2><p className="lead-copy muted">Grill the idea. Write the spec. Build a slice. Stop the slop. Prove it. Ship the exact version that passed.</p></div>
         </div>
-
         <div className="flow section-shell reveal" aria-label="Vibe Engineering full nine-step rhythm grouped into four public movements">
-          {FLOW.map((step, index) => (
-            <div className="flow-step" key={step}>
-              <span>{String(index + 1).padStart(2, '0')}</span>
-              <strong>{step}</strong>
-            </div>
-          ))}
+          {FLOW.map((step, index) => <div className="flow-step" key={step}><span>{String(index + 1).padStart(2, '0')}</span><strong>{step}</strong></div>)}
         </div>
-
         <div className="method-note section-shell reveal">
-          <span>THREE QUESTIONS</span>
+          <span>THREE QUESTIONS / INTENT → STANDARD → EVIDENCE</span>
           <p>For anything important, answer these before calling it done:</p>
           <div className="contract-line">
-            <strong>What do we want?</strong><i />
-            <strong>What does good look like?</strong><i />
-            <strong>What proves it?</strong>
+            <strong>Intent — What do we want?</strong><i />
+            <strong>Standard — What does good look like?</strong><i />
+            <strong>Evidence — What proves it?</strong>
           </div>
         </div>
       </section>
@@ -281,20 +234,13 @@ function App() {
           <h2 id="closing-title">Use the rules.<br />Keep the keys.</h2>
           <div className="closing-copy">
             <p>The skills, design rules, proof steps, CLI, API, and MCP interface live in the repo. Use them with your own agents and change what you need.</p>
-            <a className="closing-link" href="#method">Learn the flow <span aria-hidden="true">↘</span></a>
-            {' '}
+            <a className="closing-link" href="#method">Learn the flow <span aria-hidden="true">↘</span></a>{' '}
             <a className="closing-link" href="https://github.com/executiveusa/vibe-engineering" target="_blank" rel="noreferrer">Open the repo <span aria-hidden="true">↗</span></a>
           </div>
         </div>
       </section>
 
-      <footer>
-        <div className="section-shell footer-inner">
-          <span>Vibe Engineering / The Pauli Effect</span>
-          <SoundControl />
-          <span>Verify It Before Everything.</span>
-        </div>
-      </footer>
+      <footer><div className="section-shell footer-inner"><span>Vibe Engineering / The Pauli Effect</span><SoundControl /><span>Verify It Before Everything.</span></div></footer>
     </main>
   );
 }
