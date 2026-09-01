@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import process from 'node:process';
 import { VibeTruthClient } from '../packages/truth-sdk/index.mjs';
 import { getSkill, listSkills, runSkill } from '../src/skills/catalog.mjs';
