@@ -1,4 +1,4 @@
-import { runSkill } from '../../src/skills/catalog.mjs';
+import { runSkill } from '../../src/skills/index.mjs';
 
 export default async function handler(req, res) {
   res.setHeader('cache-control', 'no-store');
