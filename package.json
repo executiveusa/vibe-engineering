@@ -3,6 +3,10 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "license": "MIT",
+  "bin": {
+    "vibe": "scripts/vibe.mjs"
+  },
   "engines": {
     "node": ">=22"
   },
@@ -17,6 +21,7 @@
     "truth:preview-verify": "node scripts/truth-preview-verify.mjs",
     "vibe": "node scripts/vibe.mjs",
     "mcp": "node scripts/vibe-mcp-stdio.mjs",
+    "skills:export": "node scripts/export-skills.mjs",
     "check": "npm run truth:source-check && npm run test && npm run build",
     "factory:new": "node scripts/factory-new.mjs",
     "factory:one-click": "node scripts/factory-new.mjs",

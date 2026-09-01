@@ -154,29 +154,10 @@ function App() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
 
     const ctx = gsap.context(() => {
-      gsap.from('.hero-intro > *', {
-        y: 24,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.07,
-        ease: 'power3.out',
-      });
-
-      gsap.from('.signal-stamp', {
-        xPercent: 8,
-        opacity: 0,
-        duration: 1.2,
-        ease: 'power4.out',
-      });
-
+      gsap.from('.hero-intro > *', { y: 24, opacity: 0, duration: 0.8, stagger: 0.07, ease: 'power3.out' });
+      gsap.from('.signal-stamp', { xPercent: 8, opacity: 0, duration: 1.2, ease: 'power4.out' });
       gsap.utils.toArray('.reveal').forEach((element) => {
-        gsap.from(element, {
-          y: 22,
-          opacity: 0,
-          duration: 0.65,
-          ease: 'power3.out',
-          scrollTrigger: { trigger: element, start: 'top 90%' },
-        });
+        gsap.from(element, { y: 22, opacity: 0, duration: 0.65, ease: 'power3.out', scrollTrigger: { trigger: element, start: 'top 90%' } });
       });
     }, page);
 
@@ -189,112 +170,77 @@ function App() {
 
       <section className="hero" id="top">
         <SignalField />
-
         <nav className="nav" aria-label="Primary navigation">
-          <a className="brand" href="#top" aria-label="Vibe Engineering home">
-            <Mark />
-            <span>Vibe Engineering</span>
-          </a>
+          <a className="brand" href="#top" aria-label="Vibe Engineering home"><Mark /><span>Vibe Engineering</span></a>
           <div className="nav-actions">
-            <a href="#method">Method</a>
-            <a href="https://github.com/executiveusa/vibe-engineering" target="_blank" rel="noreferrer">Source</a>
+            <a href="#method">How it works</a>
+            <a href="https://github.com/executiveusa/vibe-engineering" target="_blank" rel="noreferrer">Open source</a>
           </div>
         </nav>
 
         <div className="hero-layout">
           <div className="hero-intro">
             <p className="eyebrow">V.I.B.E. / Verify It Before Everything</p>
-            <h1>Software got cheap.<br /><em>Judgment didn&apos;t.</em></h1>
-            <p className="hero-copy">
-              Build with AI without handing your taste, proof, or ownership to the machine.
-            </p>
+            <h1>AI builds fast.<br /><em>Slop does too.</em></h1>
+            <p className="hero-copy">Vibe Engineering is an open-source set of skills that helps you turn an idea into something clear, useful, well designed, and actually proven to work.</p>
             <div className="hero-actions">
-              <a className="text-link strong" href="#method">Learn the method <span aria-hidden="true">↘</span></a>
-              <a className="text-link" href="https://github.com/executiveusa/vibe-engineering" target="_blank" rel="noreferrer">Inspect the source <span aria-hidden="true">↗</span></a>
+              <a className="text-link strong" href="#method">See how it works <span aria-hidden="true">↘</span></a>
+              <a className="text-link" href="https://github.com/executiveusa/vibe-engineering" target="_blank" rel="noreferrer">Use the open-source repo <span aria-hidden="true">↗</span></a>
             </div>
           </div>
-
           <aside className="hero-note" aria-label="Vibe Engineering in one sentence">
-            <span>01 / POINT OF VIEW</span>
-            <p>AI can make the thing. You still decide what deserves to exist.</p>
+            <span>01 / THE POINT</span>
+            <p>You do not need to know code. You need a way to tell the AI what you mean, what good looks like, and how to prove it.</p>
           </aside>
         </div>
-
-        <div className="hero-index" aria-hidden="true">
-          <span>THE PAULI EFFECT</span>
-          <span>CLIENT ZERO / 2026</span>
-          <span>OPEN METHOD</span>
-        </div>
+        <div className="hero-index" aria-hidden="true"><span>OPEN SOURCE</span><span>BUILT FOR HUMANS + AGENTS</span><span>STOP SLOP BUILT IN</span></div>
       </section>
 
       <section className="why section paper-section" id="why" aria-labelledby="why-title">
         <div className="section-shell split-heading reveal">
-          <p className="section-label">Why now</p>
-          <div>
-            <h2 id="why-title">The machine can generate. The human still has to choose.</h2>
-            <p className="lead-copy">
-              When making gets easier, judgment becomes more valuable. Vibe Engineering keeps four human responsibilities explicit.
-            </p>
-          </div>
+          <p className="section-label">Why care</p>
+          <div><h2 id="why-title">AI can give you an answer before you have finished the question.</h2><p className="lead-copy">That is the opportunity and the problem. Vibe Engineering gives you a few simple habits that keep speed from turning into bad decisions.</p></div>
         </div>
-
         <div className="principles section-shell">
-          <Principle number="01" title="Intent before output">Start with the human change, not the prompt, framework, or feature list.</Principle>
-          <Principle number="02" title="Taste before defaults">Decide what good means before the model fills the gap with the average answer.</Principle>
-          <Principle number="03" title="Proof before confidence">A polished demo is still a hypothesis until the important claims are checked.</Principle>
-          <Principle number="04" title="Ownership before lock-in">Keep the code, data, decisions, recovery path, and ability to change direction.</Principle>
+          <Principle number="01" title="Get clear first">Before the AI starts building, make sure it understands what you actually want.</Principle>
+          <Principle number="02" title="Keep your taste">Do not let the model's average answer become your brand, product, or voice.</Principle>
+          <Principle number="03" title="Catch the slop">Use built-in checks for robotic copy, lazy design, half-finished wiring, missing states, and fake done claims.</Principle>
+          <Principle number="04" title="Make it prove it">Tests, screenshots, live checks, source history, and rollback beat “trust me, it works.”</Principle>
         </div>
       </section>
 
       <section className="method section ink-section" id="method" aria-labelledby="method-title">
         <div className="section-shell split-heading reveal">
-          <p className="section-label">The method</p>
-          <div>
-            <h2 id="method-title">Four movements. Nine verbs.</h2>
-            <p className="lead-copy muted">The full Vibe rhythm stays visible without turning the homepage into a framework encyclopedia.</p>
-          </div>
+          <p className="section-label">How it works</p>
+          <div><h2 id="method-title">Use one skill for the problem in front of you.</h2><p className="lead-copy muted">Grill the idea. Write the spec. Build a slice. Stop the slop. Prove it. Ship the exact version that passed.</p></div>
         </div>
-
         <div className="flow section-shell reveal" aria-label="Vibe Engineering full nine-step rhythm grouped into four public movements">
-          {FLOW.map((step, index) => (
-            <div className="flow-step" key={step}>
-              <span>{String(index + 1).padStart(2, '0')}</span>
-              <strong>{step}</strong>
-            </div>
-          ))}
+          {FLOW.map((step, index) => <div className="flow-step" key={step}><span>{String(index + 1).padStart(2, '0')}</span><strong>{step}</strong></div>)}
         </div>
-
         <div className="method-note section-shell reveal">
-          <span>THE CONTRACT</span>
-          <p>Every meaningful decision carries three things:</p>
+          <span>THREE QUESTIONS / INTENT → STANDARD → EVIDENCE</span>
+          <p>For anything important, answer these before calling it done:</p>
           <div className="contract-line">
-            <strong>Intent</strong><i />
-            <strong>Standard</strong><i />
-            <strong>Evidence</strong>
+            <strong>Intent — What do we want?</strong><i />
+            <strong>Standard — What does good look like?</strong><i />
+            <strong>Evidence — What proves it?</strong>
           </div>
         </div>
       </section>
 
       <section className="closing section oxide-section" aria-labelledby="closing-title">
         <div className="section-shell closing-layout reveal">
-          <p className="section-label">Use it / inspect it</p>
-          <h2 id="closing-title">Bring the idea.<br />Keep the keys.</h2>
+          <p className="section-label">Open source</p>
+          <h2 id="closing-title">Use the rules.<br />Keep the keys.</h2>
           <div className="closing-copy">
-            <p>Use the method to make the next decision, or inspect the source to see how the system earns trust.</p>
-            <a className="closing-link" href="#method">Learn the method <span aria-hidden="true">↘</span></a>
-            {' '}
-            <a className="closing-link" href="https://github.com/executiveusa/vibe-engineering" target="_blank" rel="noreferrer">Inspect source + proof <span aria-hidden="true">↗</span></a>
+            <p>The skills, design rules, proof steps, CLI, API, and MCP interface live in the repo. Use them with your own agents and change what you need.</p>
+            <a className="closing-link" href="#method">Learn the flow <span aria-hidden="true">↘</span></a>{' '}
+            <a className="closing-link" href="https://github.com/executiveusa/vibe-engineering" target="_blank" rel="noreferrer">Open the repo <span aria-hidden="true">↗</span></a>
           </div>
         </div>
       </section>
 
-      <footer>
-        <div className="section-shell footer-inner">
-          <span>Vibe Engineering / The Pauli Effect</span>
-          <SoundControl />
-          <span>Verify It Before Everything.</span>
-        </div>
-      </footer>
+      <footer><div className="section-shell footer-inner"><span>Vibe Engineering / The Pauli Effect</span><SoundControl /><span>Verify It Before Everything.</span></div></footer>
     </main>
   );
 }

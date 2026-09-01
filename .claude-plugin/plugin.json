@@ -1,7 +1,7 @@
 {
   "name": "vibe-engineering",
-  "description": "V.I.B.E. — Verify It Before Everything. A human-directed product and software method for critical thinking, systems thinking, first principles, disciplined building, no-slop quality, independent review, proof, ownership, and earned retention.",
-  "version": "2.0.0",
+  "description": "Open-source AI building skills with built-in stop-slop, plain-language planning, design judgment, proof, CLI, API, and MCP access.",
+  "version": "2.2.0",
   "author": {
     "name": "The Pauli Effect"
   },
@@ -9,12 +9,12 @@
   "license": "MIT",
   "keywords": [
     "vibe-engineering",
-    "icm",
+    "agent-skills",
+    "stop-slop",
     "verification",
-    "systems-thinking",
-    "critical-thinking",
-    "product",
-    "software-engineering",
-    "agent-skills"
+    "design",
+    "mcp",
+    "cli",
+    "open-source"
   ]
 }

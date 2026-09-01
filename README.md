@@ -2,151 +2,178 @@
 
 **V.I.B.E. = Verify It Before Everything.**
 
-Built by The Pauli Effect · 2026 · Part of the Pauli Suite.
+AI can make software fast now.
 
-Vibe Engineering is a way of thinking before you build.
+That is powerful. It also means you can make the wrong thing, badly, faster than ever.
 
-Take an idea. Break it down. Question it. Test it. Turn it into something real.
+Vibe Engineering is an open-source set of skills that helps you use AI without losing the part that matters most: your judgment.
 
-AI is part of the process. The bigger skill is learning how to make better decisions.
+You do not need to know how to code.
 
-## The habit
+You need to be able to answer three questions:
 
-Public memory aid:
+1. What are we trying to make?
+2. What should good look like?
+3. How will we know it actually works?
+
+That is Vibe Engineering.
+
+## Why should you care?
+
+AI is good at generating things.
+
+It is not automatically good at knowing what you meant, whether the idea is worth building, whether the design feels right, whether the feature is actually connected, or whether the finished product works outside a demo.
+
+That is how AI slop happens.
+
+You get something that looks finished, sounds confident, and falls apart when you really use it.
+
+Vibe Engineering gives you a repeatable way to catch that before it ships.
+
+It helps you:
+
+- think through an idea before building it;
+- get the AI to ask better questions;
+- keep your own taste and point of view;
+- turn fuzzy ideas into clear build instructions;
+- catch robotic writing and generic AI design;
+- stop agents from saying “done” too early;
+- test important claims;
+- keep control of your code, data, and recovery path.
+
+## The simple idea
 
 ```text
 Choose → See → Shape → Make → Prove → Challenge → Decide → Release → Learn
 ```
 
-Underneath those words is the ICM stage flow:
+That is the plain-language memory aid. For substantial software work, the required delivery lifecycle is:
 
 ```text
-00_intake
-01_vision
-02_blueprint
-03_build
-04_verify
-05_council
-06_judge
-07_ship
-08_improve
+DEFINE → PLAN → BUILD → VERIFY → REVIEW → SHIP
 ```
 
-Every material decision uses one small contract:
+You do not need to run the whole process every time.
+
+Most of the time, you call the skill you need.
+
+```bash
+vibe run setup-vibe "configure this repo"
+vibe run grill "help me figure out this app idea"
+vibe run spec "turn this idea into a build plan"
+vibe run stop-slop "review this landing page"
+vibe run human-voice "make this sound like a person wrote it"
+vibe run debug "this works locally but breaks in production"
+vibe run proof "prove this release is actually ready"
+```
+
+The same skills can be called through the CLI, HTTP API, MCP, or an agent plugin.
+
+## Built-in Stop Slop
+
+`stop-slop` is one of the main Vibe skills.
+
+It looks for the common ways AI work appears finished before it is actually good:
+
+- robotic copy;
+- generic AI or SaaS-looking design;
+- repeated ideas pretending to be more content;
+- fake certainty;
+- inflated claims;
+- half-connected features;
+- missing mobile, accessibility, empty, or error states;
+- “done” claims with no proof;
+- lock-in or missing owner control.
+
+Other skills focus on specific problems:
+
+- `human-voice` fixes robotic writing;
+- `taste` reviews design judgment;
+- `deep-work` stops large jobs from being declared finished too early;
+- `proof` checks whether important claims are true;
+- `ship` controls release.
+
+## The three questions underneath everything
+
+Every important Vibe decision uses the same small contract:
 
 ```text
 Intent → Standard → Evidence
 ```
 
-- **Intent** — what are we trying to change, for whom, and why?
-- **Standard** — what does good look like before we get attached to our own answer?
-- **Evidence** — what observable result would make the claim true?
+**Intent:** What are we actually trying to do, for whom, and why?
 
-See [`docs/VIBE-ENGINEERING-V2-DOCTRINE.md`](docs/VIBE-ENGINEERING-V2-DOCTRINE.md).
+**Standard:** What should good look like before we fall in love with the first answer?
 
-## What it teaches
+**Evidence:** What can we check so we know it is true?
 
-Vibe Engineering is not only an AI workflow.
+If a young builder learns that habit, they are already doing real engineering thinking.
 
-- Question the answer — critical thinking.
-- See what connects — systems thinking.
-- Get back to what is true — first principles.
-- Build one piece and prove it — discipline.
+## What is inside
 
-The public language stays simple. The professional engineering contracts remain available underneath it.
+The complete callable registry lives at [`src/skills/index.mjs`](src/skills/index.mjs), with the core procedures in [`src/skills/catalog.mjs`](src/skills/catalog.mjs).
 
-## Client Zero
-
-This repository is the first Client Zero.
-
-The Pauli Effect uses Vibe Engineering on Vibe Engineering before presenting it as a customer standard. Homepage changes, method changes, ICM changes, interfaces, reviews, rights checks, deployment, ownership, and rollback go through the same workflow.
-
-A method that cannot survive its own rules is not ready to teach.
-
-## No slop
-
-AI slop is important output that exists because the model defaulted to it instead of because the project deliberately chose it.
-
-Vibe checks slop across:
-
-- ideas and strategy;
-- copy and UI;
-- architecture and code;
-- business value;
-- production claims.
-
-The cure is not a larger banned-pattern list. Use context, a real reference where useful, deterministic detectors where useful, fresh review, and reality.
-
-Ask:
-
-> What part of this exists because we chose it, and what part exists because the model defaulted to it?
-
-## Controlled divergence
-
-Open-ended work can collapse into the same predictable answer. Vibe supports three modes:
-
-- **STANDARD** — factual work, approved implementation, verification, security conclusions, migrations, destructive actions, and release.
-- **DIVERGE** — a small set of materially different options for product, UX, positioning, creative direction, architecture alternatives, or debugging hypotheses.
-- **FRONTIER** — wider tail exploration only for bounded, reversible experiments where novelty is worth the risk.
-
-Verbalized Sampling can support DIVERGE and FRONTIER. Its probability labels are exploration signals, not truth. The workflow converges before Build.
-
-## Quality and independent review
-
-When taste or comparative quality matters, use a reference bar that is:
-
-1. named;
-2. fetchable;
-3. comparable.
-
-The builder does not perform the only comparison. Fresh reviewers challenge user value, architecture, failure modes, security/privacy, accessibility/taste, sovereignty/ownership, commercial reality, and proof proportional to consequence.
-
-Judge returns `SHIP` or `HOLD` and does not rewrite the work it judges.
-
-The default Vibe Score release floor remains **8.5/10** with hard stops for security, reliability, and ownership.
-
-## Ownership and retention
-
-A customer should stay because the system keeps producing value, not because leaving was made difficult.
-
-The owner should be able to understand, export, move, replace providers/builders, recover, and continue operating.
-
-Earned retention loop:
+Current skills include:
 
 ```text
-measure → show → explain → improve → teach → measure again
+setup-vibe         configure a repo for Vibe skills
+ask-vibe           choose the right workflow
+grill              get clear before coding
+grill-idea         pressure-test an idea
+language           create shared project language
+map                break down large work
+spec               turn intent into a build contract
+tickets            split work into small end-to-end pieces
+build              implement a complete slice
+test-first         red / green / refactor
+debug              diagnose with evidence
+prototype          learn with throwaway code
+research           answer questions from strong sources
+module-design      make interfaces smaller and clearer
+architecture-check find structural code problems
+review             review the work against the spec
+merge              resolve conflicts by intent
+triage             decide what an issue needs next
+human-step         guide steps only a person can perform
+handoff            let another agent continue cleanly
+teach              explain without dumping information
+ask-human          create a focused questionnaire
+explain            translate confusing system language
+interview          reusable question loop
+agent-docs         write instructions agents can follow
+stop-slop          catch generic and unfinished AI output
+human-voice        remove robotic AI writing
+deep-work          stop premature completion
+taste              check design judgment
+proof              verify important claims
+ship               release exact proven revisions
 ```
 
-## One ICM core, many interfaces
+## Open source and attribution
 
-There is no Vibe Engineering agent that owns the process.
+Vibe Engineering is MIT licensed.
 
-The method lives in inspectable files and machine-readable truth. Humans and agents use the same core through different adapters:
+The system was informed by useful ideas from other MIT-licensed open-source projects, including:
 
-```text
-VIBE ENGINEERING CORE
-  ├─ ICM stage contracts
-  ├─ Truth artifacts
-  ├─ deterministic gates
-  ├─ source + evidence records
-  │
-  ├─ human workspace
-  ├─ CLI
-  ├─ HTTP API
-  ├─ MCP
-  ├─ Agent Skill / plugin
-  └─ CI / hooks
-```
+- `blader/humanizer`
+- `Leonxlnx/unlazy`
+- `mattpocock/skills`
 
-### CLI
+The Vibe versions are re-authored and adapted to fit the Vibe Engineering method rather than copied and silently renamed.
 
-Start the local Truth API:
+See [`docs/UPSTREAM-INSPIRATION.md`](docs/UPSTREAM-INSPIRATION.md) and [`docs/governance/SOURCE-PROVENANCE-LEDGER.md`](docs/governance/SOURCE-PROVENANCE-LEDGER.md).
+
+## CLI
 
 ```bash
-npm run truth:api
+npm install
+npm run vibe -- explain
+npm run vibe -- skills
+npm run vibe -- skill grill
+npm run vibe -- run stop-slop "review this homepage"
 ```
 
-Then in another shell:
+Existing truth and context commands still work:
 
 ```bash
 npm run vibe -- method
@@ -156,41 +183,56 @@ npm run vibe -- workflow workflow.a2a-software-factory
 npm run vibe -- context executiveusa/vibe-engineering high
 ```
 
-Set `VIBE_TRUTH_API_URL` to use a remote deployment.
-
-### HTTP API
-
-Existing read-only Truth API:
+## HTTP API
 
 ```text
+GET  /api/v1/skills
+GET  /api/v1/skills/:id
+POST /api/v1/run-skill
+
 GET  /api/v1/manifest
 GET  /api/v1/truth/:id
 GET  /api/v1/workflows/:id
 POST /api/v1/resolve-context
 ```
 
-Canonical method artifact:
+Example:
 
-```text
-method.vibe-engineering-v2
+```json
+{
+  "id": "stop-slop",
+  "input": {
+    "artifact": "landing page copy"
+  }
+}
 ```
 
-### MCP
+The API returns a deterministic execution packet. The calling agent performs the procedure under its own permissions. The API does not quietly take external actions.
 
-Remote stateless endpoint:
+## MCP
+
+Remote endpoint:
 
 ```text
 POST /api/mcp
 ```
 
-The endpoint targets MCP protocol `2026-07-28` and exposes:
+Available MCP tools include:
 
 ```text
+vibe_skills
+vibe_skill
+vibe_run_skill
 vibe_method
 vibe_truth
 vibe_workflow
 vibe_context
+vibe_detect
+vibe_compile_icmr
+vibe_validate_icmr
 ```
+
+For substantial work, Vibe still requires reading the applicable repository rules, Step 0 detection, ICMR compilation and validation, then the `DEFINE → PLAN → BUILD → VERIFY → REVIEW → SHIP` lifecycle.
 
 Local stdio adapter:
 
@@ -198,56 +240,58 @@ Local stdio adapter:
 npm run mcp
 ```
 
-### Agent skill / plugin
+## Agent plugin
 
-Portable skill:
+Plugin metadata lives in `.claude-plugin/`.
 
-```text
-skills/vibe-engineering/SKILL.md
-```
-
-Claude Code plugin metadata lives under `.claude-plugin/`. Other `SKILL.md`-compatible agents can use the skill directly.
-
-## ICM factory
-
-Create a complete governed workspace:
-
-```bash
-npm install
-npm run factory:new -- --name "Neighborhood Health Guide"
-```
-
-Verify the structure:
-
-```bash
-npm run factory:doctor -- ./workspaces/neighborhood-health-guide
-```
-
-A passing factory doctor proves structure only. It does not prove the product is built, secure, accessible, rights-cleared, deployed, owned correctly, useful to a customer, or live in production.
-
-See [`factory/icm/README.md`](factory/icm/README.md).
-
-## Engineering workflow
-
-`executiveusa/pauli-agent-skills-2026` remains the canonical engineering procedure library beneath Vibe/ICM governance.
+The main router skill is:
 
 ```text
-DEFINE → PLAN → BUILD → VERIFY → REVIEW → SHIP
+skills/vibe/SKILL.md
 ```
 
-Vibe/ICM controls what, why, whether, evidence, authority, ownership, and release boundaries. Engineering skills control how an approved software slice is executed.
+Core direct skills are committed under `skills/`.
 
-## Source and provenance
+To materialize missing or empty generated skill files:
 
-Vibe Engineering combines Pauli Effect practice with credited research and open-source methods. External influence is recorded instead of silently relabeled.
+```bash
+npm run skills:export
+```
 
-See [`docs/governance/SOURCE-PROVENANCE-LEDGER.md`](docs/governance/SOURCE-PROVENANCE-LEDGER.md).
+The exporter refuses to overwrite a non-empty `SKILL.md` by default. Use `npm run skills:export -- --force` only when you intentionally want to replace generated skill files.
 
-The ledger currently covers the Agent Skills procedure layer, ICM, Gauntlet/reference-bar thinking, Verbalized Sampling, Impeccable, Uncodixfy, Stop Slop, Humanizer, i-have-adhd, Pauli Scroll World, Proven-Better-New, Google engineering practices, and Council/context influences.
+## Under the hood
 
-Third-party media intended for public release requires an appropriate rights record. Possession of a file alone is not treated as distribution permission.
+The simple skill layer sits on top of the full Vibe Engineering control plane:
 
-## Run and prove locally
+```text
+VIBE ENGINEERING
+  ├─ human intent + taste
+  ├─ callable skill registry
+  ├─ Stop Slop checks
+  ├─ ICM stage contracts
+  ├─ truth artifacts
+  ├─ deterministic gates
+  ├─ evidence + provenance
+  │
+  ├─ CLI
+  ├─ HTTP API
+  ├─ MCP
+  ├─ agent plugin
+  └─ CI / release proof
+```
+
+The deeper machinery exists when the work needs it. The person using Vibe should not have to understand all of it just to get started.
+
+## Client Zero
+
+This repository is Client Zero.
+
+Vibe Engineering is used to build and review Vibe Engineering itself.
+
+If the method cannot survive its own checks, it is not ready to teach or ship.
+
+## Run it locally
 
 ```bash
 npm ci
@@ -256,30 +300,10 @@ npm audit --audit-level=high
 npm run dev
 ```
 
-## Repository map
+## One rule before shipping
 
-```text
-AGENTS.md                                      Layer 0 repository policy
-CONTEXT.md                                     Layer 1 repository router
-docs/VIBE-ENGINEERING-V2-DOCTRINE.md           Canonical human-readable v2 method
-docs/governance/SOURCE-PROVENANCE-LEDGER.md    Influence/license ledger
-factory/icm/template/stages/*                   Layer 2 stage contracts
-factory/icm/template/shared/*                   Layer 3 Vibe standards
-factory/icm/template/references/*               Layer 3 external/project references
-truth/sources/vibe-engineering-v2.json          Machine-readable method
-src/truth/*                                     Truth compiler/API/runtime
-packages/truth-sdk/*                            JavaScript/TypeScript client
-scripts/vibe.mjs                                CLI
-src/mcp/core.mjs                                MCP method/tool adapter
-api/mcp.mjs                                     Remote stateless MCP endpoint
-scripts/vibe-mcp-stdio.mjs                      Local stdio MCP adapter
-skills/vibe-engineering/SKILL.md                Portable agent skill
-.claude-plugin/*                                Plugin packaging
-src/                                            Public Client Zero site
-```
+A polished demo is not proof.
 
-## Production rule
+Build, test, review, merge, deploy, and production verification are different things.
 
-Build, test, review, merge, preview, and deployment submission are separate facts.
-
-Do not claim production success until the authorized release has occurred and the live target environment has been checked.
+Only call something shipped when the exact released revision has been checked in the real environment and there is a rollback path.
