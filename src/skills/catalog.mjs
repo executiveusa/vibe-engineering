@@ -1,0 +1,60 @@
+const UPSTREAM = {
+  vibe: 'Vibe Engineering',
+  humanizer: 'Inspired by blader/humanizer (MIT); re-authored for Vibe Engineering.',
+  unlazy: 'Inspired by Leonxlnx/unlazy (MIT); re-authored for Vibe Engineering.',
+  matt: 'Inspired by mattpocock/skills (MIT); concepts adapted and renamed for Vibe Engineering.',
+};
+
+const skill = (id, title, summary, steps, options = {}) => Object.freeze({
+  id, title, summary,
+  invocation: options.invocation ?? 'both',
+  category: options.category ?? 'engineering',
+  aliases: options.aliases ?? [],
+  outputs: options.outputs ?? [],
+  steps,
+  attribution: options.attribution ?? UPSTREAM.vibe,
+});
+
+export const SKILLS = Object.freeze([
+  skill('ask-vibe','Ask Vibe','Route a messy request to the smallest Vibe workflow that fits.',['Read the request and current repo state.','Name the real outcome in plain language.','Choose the smallest fitting skill or workflow.','Explain what proof will finish it.'],{invocation:'user',aliases:['router'],attribution:UPSTREAM.matt}),
+  skill('grill','Grill','Interview before building so the human and agent mean the same thing.',['Read what the repo can answer first.','Ask one decision-changing question at a time.','Write settled project words into CONTEXT.md.','Record only hard-to-reverse trade-offs as ADRs.','Stop when the next build step is unambiguous.'],{invocation:'user',outputs:['CONTEXT.md','ADR when warranted'],attribution:UPSTREAM.matt}),
+  skill('grill-idea','Grill Idea','Stress-test a non-code plan until the fuzzy parts are explicit.',['Map unresolved branches.','Ask one useful question at a time.','Challenge assumptions and edge cases.','Summarize settled decisions and unknowns.'],{invocation:'user',category:'thinking',attribution:UPSTREAM.matt}),
+  skill('language','Shared Language','Create short project terms so humans and agents stop talking past each other.',['Find overloaded terms.','Define them in plain project language.','Cross-check definitions against the system.','Update CONTEXT.md and remove duplicate jargon.'],{attribution:UPSTREAM.matt}),
+  skill('map','Map','Turn work too large for one session into a decision map with dependencies.',['Name the destination.','Split decisions from implementation work.','Map blocking edges.','Resolve high-leverage unknowns first.','Hand resolved slices to spec or build.'],{invocation:'user',attribution:UPSTREAM.matt}),
+  skill('spec','Spec','Turn settled intent into a buildable contract without adding new product ideas.',['State the user outcome.','State boundaries and non-goals.','Name touched modules and interfaces.','Write acceptance checks.','Record rollback and owner decisions.'],{invocation:'user',attribution:UPSTREAM.matt}),
+  skill('tickets','Tickets','Break a spec into small end-to-end slices with explicit dependencies.',['Find the smallest tracer-bullet slices.','Give each slice one observable outcome.','Declare blockers and ownership.','Put integration and proof in the ticket.'],{invocation:'user',attribution:UPSTREAM.matt}),
+  skill('build','Build','Implement one proven slice at a time and keep human intent visible.',['Read the spec and context.','Choose the smallest vertical slice.','Use test-first seams where useful.','Build the complete slice.','Review before claiming done.'],{invocation:'user',attribution:UPSTREAM.matt}),
+  skill('test-first','Test First','Use red, green, refactor when behavior can be checked through a stable seam.',['Write or identify a failing behavior check.','Confirm red for the right reason.','Make the smallest change that turns it green.','Refactor without changing behavior.','Re-run relevant tests.'],{aliases:['tdd'],attribution:UPSTREAM.matt}),
+  skill('debug','Debug','Diagnose hard bugs with evidence instead of random edits.',['Make the bug reproducible.','Reduce the failing case.','List competing hypotheses.','Instrument to distinguish them.','Fix the demonstrated cause.','Add a regression check.'],{attribution:UPSTREAM.matt}),
+  skill('prototype','Prototype','Build the cheapest throwaway artifact that can answer one design question.',['Write the question.','Strip unrelated production concerns.','Build only enough to learn.','Observe the result.','Keep the learning and quarantine or discard prototype code.'],{attribution:UPSTREAM.matt}),
+  skill('research','Research','Answer an engineering question from high-trust primary sources and save the evidence.',['State the question and decision.','Prefer primary current sources.','Separate facts from inference.','Cite claims.','End with what changed because of the research.'],{attribution:UPSTREAM.matt}),
+  skill('module-design','Module Design','Put more useful behavior behind smaller, clearer interfaces.',['Name the caller and job.','Find the cleanest seam.','Minimize what callers must know.','Hide implementation details.','Test behavior through the interface.'],{attribution:UPSTREAM.matt}),
+  skill('architecture-check','Architecture Check','Scan a codebase for complexity that leaks across boundaries.',['Find wide or leaky interfaces.','Find duplicated decisions and cross-layer knowledge.','Rank by pain and change frequency.','Propose a deeper module or cleaner seam.','Change one candidate and verify behavior.'],{invocation:'user',attribution:UPSTREAM.matt}),
+  skill('review','Review','Review correctness against the spec and quality against repo standards.',['Freeze the diff or commit range.','Review spec fidelity separately from code quality.','Name concrete defects.','Rank by consequence.','Re-check the final diff after fixes.'],{attribution:UPSTREAM.matt}),
+  skill('merge','Merge Cleanly','Resolve merge conflicts by intent, not by picking a side blindly.',['Read both sides and source intent.','Resolve one hunk at a time.','Preserve still-required behavior.','Run affected tests.','Finish only when combined state is coherent.'],{attribution:UPSTREAM.matt}),
+  skill('triage','Triage','Move issues from noise to a clear next state.',['Verify the issue.','Classify type and consequence.','Find duplicates or missing context.','Choose next state: reject, ask, plan, build, or block.','Leave a concrete next action.'],{invocation:'user',attribution:UPSTREAM.matt}),
+  skill('human-step','Human Step','Turn steps only a person can perform into a simple guided checklist.',['Identify what cannot be automated safely.','Give one action at a time.','Explain success.','Collect the minimum proof.','Resume automation from that proof.'],{aliases:['wizard'],attribution:UPSTREAM.matt}),
+  skill('handoff','Handoff','Compress work so another agent or human can continue without guessing.',['State outcome and status.','List decisions already made.','List changed systems.','Attach proof and known failures.','Name exactly what happens next.'],{invocation:'user',category:'productivity',attribution:UPSTREAM.matt}),
+  skill('teach','Teach','Teach from the learner’s current mental model instead of dumping information.',['Find what the learner knows.','Explain one layer plainly.','Use a concrete example.','Check understanding with a small task.','Increase difficulty only when it sticks.'],{invocation:'user',category:'productivity',attribution:UPSTREAM.matt}),
+  skill('ask-human','Ask Human','Turn a blocked decision into a short questionnaire for the person who knows.',['State the blocked decision.','Identify the right person.','Ask only questions that change the decision.','Make answers easy to give.','Feed answers back into context or an ADR.'],{invocation:'user',category:'productivity',attribution:UPSTREAM.matt}),
+  skill('explain','Explain','Re-explain confusing system language in normal words without losing the point.',['Identify what did not land.','Remove unnecessary jargon.','Use defined project vocabulary.','Give one concrete example.','Stop when the user can act.'],{invocation:'user',category:'productivity',aliases:['wait-what'],attribution:UPSTREAM.matt}),
+  skill('interview','Interview','Reusable one-question-at-a-time interview engine for plans and decisions.',['Map unresolved branches.','Ask one decision-changing question.','Use the answer to prune or open branches.','Repeat until important branches are settled.','Return decisions.'],{category:'thinking',attribution:UPSTREAM.matt}),
+  skill('agent-docs','Agent Docs','Write instructions agents can follow without bloated prompt prose.',['Put rules near the task that needs them.','Prefer observable behavior over adjectives.','Separate permanent doctrine from task context.','Use examples only when they remove ambiguity.','Delete duplicate instructions.'],{category:'productivity',attribution:UPSTREAM.matt}),
+  skill('stop-slop','Stop Slop','Catch generic, robotic, unfinished, over-designed, or unproven AI output before it ships.',['Check whether the output actually answers the user.','Remove generic AI filler, inflated claims, fake certainty, and repeated doctrine.','Check design against project taste instead of default AI/SaaS patterns.','Check integration, mobile, accessibility, empty/error states, and ownership.','Require evidence for important done claims.'],{aliases:['slop-check'],attribution:`${UPSTREAM.humanizer} ${UPSTREAM.vibe}`}),
+  skill('human-voice','Human Voice','Rewrite robotic copy into clear human language without inventing facts.',['Keep the original claims and meaning.','Remove inflated importance, vague sources, sales filler, stock AI transitions, forced triads, and chatbot formatting.','Prefer concrete verbs and normal sentence rhythm.','Match the writer’s real voice when a sample exists.','Re-read and cut anything a normal person would not say.'],{category:'writing',attribution:UPSTREAM.humanizer}),
+  skill('deep-work','Deep Work','Prevent premature completion on large jobs by defining gates and decomposing work.',['Write observable completion gates before substantial work.','Split independently omittable outcomes into a depth tree.','Give each leaf a complete deliverable and checks.','Re-verify returned work at the parent level.','Do not report done while any required gate is unmet or abandoned.'],{aliases:['unlazy'],attribution:UPSTREAM.unlazy}),
+  skill('taste','Taste Check','Judge whether the result feels intentional, clear, and specific instead of generated by default.',['Name the intended emotional and cultural register.','Find default patterns and decorative complexity.','Check hierarchy, spacing, typography, interaction, motion, and mobile as one system.','Remove anything that does not improve meaning or identity.','Name the largest remaining taste gap.'],{category:'design'}),
+  skill('proof','Proof','Turn looks-done into evidence that important claims are true.',['List the claims that matter.','Choose a check for each claim.','Run checks against the exact candidate revision.','Fix failures.','Publish evidence with the decision.'],{category:'governance'}),
+  skill('ship','Ship','Release only the exact revision that passed proof, with rollback.',['Freeze the candidate SHA or artifact.','Confirm required checks and independent review.','Deploy the exact candidate.','Smoke test production.','Verify provenance and runtime health.','Keep a tested rollback target.'],{category:'governance'}),
+]);
+
+const BY_ID = new Map(SKILLS.map((item) => [item.id, item]));
+for (const item of SKILLS) for (const alias of item.aliases) BY_ID.set(alias, item);
+
+export function listSkills() { return SKILLS.map(({ steps, ...meta }) => ({ ...meta, stepCount: steps.length })); }
+export function getSkill(id) { return BY_ID.get(id) ?? null; }
+export function runSkill(id, input = {}) {
+  const found = getSkill(id);
+  if (!found) return null;
+  return { skill: found, input, execution: { mode: 'agent-procedure', instructions: found.steps, completionRule: 'Do not claim completion until the requested outcome is satisfied and relevant proof is attached.', next: found.id === 'ship' ? null : 'proof' } };
+}
