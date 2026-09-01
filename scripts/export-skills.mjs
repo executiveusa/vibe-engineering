@@ -1,13 +1,13 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { SKILLS } from '../src/skills/catalog.mjs';
+import { SKILLS } from '../src/skills/index.mjs';
 
 const root = path.join(process.cwd(), 'skills');
 
 for (const skill of SKILLS) {
   const dir = path.join(root, skill.id);
   await mkdir(dir, { recursive: true });
-  const description = skill.summary.replace(/\n/g, ' ');
+  const description = JSON.stringify(skill.summary.replace(/\n/g, ' '));
   const body = [
     '---',
     `name: ${skill.id}`,
