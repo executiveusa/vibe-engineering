@@ -35,6 +35,31 @@ function bodyError(res, error) {
 
 export function createNodeHandlers(runtimeLoader = getRuntime) {
   return {
+    async selfTest(_req, res) {
+      try {
+        const { api } = await runtimeLoader();
+        const manifest = api.manifest();
+        const body = manifest?.body;
+        const ok = manifest?.status === 200
+          && typeof body?.bundleHash === 'string'
+          && body.bundleHash.length > 0
+          && Array.isArray(body?.artifacts);
+
+        return res.status(ok ? 200 : 503).json({
+          ok,
+          service: 'vibe-engineering-truth',
+          bundleHash: body?.bundleHash ?? null,
+          sourceCommit: body?.sourceCommit ?? null,
+          artifactCount: Array.isArray(body?.artifacts) ? body.artifacts.length : 0,
+        });
+      } catch {
+        return res.status(503).json({
+          ok: false,
+          service: 'vibe-engineering-truth',
+          error: 'SELF_TEST_FAILED',
+        });
+      }
+    },
     async manifest(_req, res) {
       const { api } = await runtimeLoader();
       return send(res, api.manifest());
