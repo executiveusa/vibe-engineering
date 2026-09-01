@@ -51,6 +51,17 @@ test('Node adapter exposes the same bundle hash', async () => {
   assert.equal(response.body.bundleHash, bundle.bundleHash);
 });
 
+test('Node adapter self-test proves the runtime manifest is available', async () => {
+  const handlers = createNodeHandlers(runtimeLoader);
+  const response = mockResponse();
+  await handlers.selfTest({}, response);
+  assert.equal(response.statusCode, 200);
+  assert.equal(response.body.ok, true);
+  assert.equal(response.body.bundleHash, bundle.bundleHash);
+  assert.equal(response.body.sourceCommit, 'runtime-test');
+  assert.equal(response.body.artifactCount, 3);
+});
+
 test('Node adapter validates context requests', async () => {
   const handlers = createNodeHandlers(runtimeLoader);
   const response = mockResponse();
