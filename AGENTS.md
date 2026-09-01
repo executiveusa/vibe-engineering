@@ -29,15 +29,16 @@ For brownfield work, Step 0 inventories reality before restructuring or migratio
 Before substantial work, read only what the task requires, starting with:
 
 1. `ICMR.yaml` when working inside a governed workspace;
-2. `CONTEXT.md`;
-3. `PROJECT.yaml`;
-4. the approved issue/specification;
-5. the current ICM stage contract and references it names;
-6. `docs/STUDIO-SYSTEM-PROMPT.md` and `docs/VIBE-ENGINEERING-V2-DOCTRINE.md` when governance or method behavior is involved;
-7. `docs/governance/ENGINEERING-WORKFLOW.md` for software implementation;
-8. `ARCHITECTURE.md`, `RUNBOOK.md`, or `SECURITY.md` when the task touches those boundaries.
+2. `icm/README.md` and `icm/backend/map.mjs` when orienting to backend code or interfaces;
+3. `CONTEXT.md`;
+4. `PROJECT.yaml`;
+5. the approved issue/specification;
+6. the current ICM stage contract and references it names;
+7. `docs/STUDIO-SYSTEM-PROMPT.md` and `docs/VIBE-ENGINEERING-V2-DOCTRINE.md` when governance or method behavior is involved;
+8. `docs/governance/ENGINEERING-WORKFLOW.md` for software implementation;
+9. `ARCHITECTURE.md`, `RUNBOOK.md`, or `SECURITY.md` when the task touches those boundaries.
 
-Do not load every method document into every task.
+Do not load every method document into every task. For backend orientation, run `npm run icm:walk` rather than guessing from directory names.
 
 ## The public memory aid
 
@@ -86,6 +87,9 @@ Use project context, a real reference where appropriate, deterministic detectors
 ```bash
 npm ci
 npm run check
+npm run icm:walk
+npm run vibe -- map
+npm run vibe -- walk
 npm audit --audit-level=high
 npm run truth:api
 npm run vibe -- method
@@ -104,10 +108,12 @@ npm run factory:doctor -- ./workspaces/project-name
 
 - `ICMR.yaml` is Step 0: detected runtime representation and entry contract.
 - `AGENTS.md` is Layer 0 identity and law.
+- `icm/README.md` + `icm/backend/map.mjs` are the backend walk/router layer.
 - `CONTEXT.md` is Layer 1 routing.
 - Each `stages/NN_name/CONTEXT.md` is a Layer 2 stage contract.
 - `_config/`, `references/`, and `shared/` are Layer 3 stable context.
 - `output/` folders are Layer 4 working artifacts/evidence.
+- `icm/backend/index.mjs` is the stable backend facade for CLI/HTTP/MCP adapters; canonical domain logic remains in the mapped domain modules.
 - Load only the current stage and references it explicitly names.
 - Working decisions end in durable artifacts, not chat memory.
 - Public-facing explanations use plain language first; technical terms remain available underneath.
@@ -131,6 +137,7 @@ The owner must be able to understand, export, move, replace providers/builders, 
 - Do not claim live production verification from local, scaffold, build, review, merge, preview, or CI results.
 - Do not bypass mandatory engineering procedure because direct implementation appears faster.
 - Do not publish a third-party media asset with unverified distribution rights.
+- Do not add a backend domain or public backend interface without updating `icm/backend/map.mjs` and `npm run icm:walk`.
 
 ## Review and release
 
