@@ -47,6 +47,12 @@ It helps you:
 Choose → See → Shape → Make → Prove → Challenge → Decide → Release → Learn
 ```
 
+That is the plain-language memory aid. For substantial software work, the required delivery lifecycle is:
+
+```text
+DEFINE → PLAN → BUILD → VERIFY → REVIEW → SHIP
+```
+
 You do not need to run the whole process every time.
 
 Most of the time, you call the skill you need.
@@ -226,7 +232,7 @@ vibe_compile_icmr
 vibe_validate_icmr
 ```
 
-For substantial work, Vibe still requires its Step 0 detection, ICMR compilation, and validation rules before execution.
+For substantial work, Vibe still requires reading the applicable repository rules, Step 0 detection, ICMR compilation and validation, then the `DEFINE → PLAN → BUILD → VERIFY → REVIEW → SHIP` lifecycle.
 
 Local stdio adapter:
 
@@ -244,13 +250,15 @@ The main router skill is:
 skills/vibe/SKILL.md
 ```
 
-Core direct skills are committed under `skills/`, and:
+Core direct skills are committed under `skills/`.
+
+To materialize missing or empty generated skill files:
 
 ```bash
 npm run skills:export
 ```
 
-materializes the full canonical registry as `SKILL.md` files.
+The exporter refuses to overwrite a non-empty `SKILL.md` by default. Use `npm run skills:export -- --force` only when you intentionally want to replace generated skill files.
 
 ## Under the hood
 
