@@ -2,55 +2,94 @@
 
 **V.I.B.E. = Verify It Before Everything.**
 
-AI can build fast. That is useful, but it also makes it easy to create junk fast.
+AI can make software fast now.
 
-Vibe Engineering is an open-source set of skills that helps people and AI agents slow down at the right moments, ask better questions, make clearer decisions, catch slop, and prove the important parts actually work.
+That is powerful. It also means you can make the wrong thing, badly, faster than ever.
 
-You do not need to be a developer to use it.
+Vibe Engineering is an open-source set of skills that helps you use AI without losing the part that matters most: your judgment.
 
-If you can explain what you want, what good looks like, and what would prove it works, you can use Vibe Engineering.
+You do not need to know how to code.
 
-## Why this matters
+You need to be able to answer three questions:
 
-AI is very good at producing an answer. It is not automatically good at knowing:
+1. What are we trying to make?
+2. What should good look like?
+3. How will we know it actually works?
 
-- what you really meant;
-- whether the idea is worth building;
-- whether the design fits your taste;
-- whether the code is actually wired up;
-- whether the copy sounds like a robot;
-- whether the result works outside the demo;
-- whether you still control the code, data, and recovery path.
+That is Vibe Engineering.
 
-That gap is where most AI slop comes from.
+## Why should you care?
 
-Vibe Engineering puts a repeatable process around that gap.
+AI is good at generating things.
 
-## The simple version
+It is not automatically good at knowing what you meant, whether the idea is worth building, whether the design feels right, whether the feature is actually connected, or whether the finished product works outside a demo.
+
+That is how AI slop happens.
+
+You get something that looks finished, sounds confident, and falls apart when you really use it.
+
+Vibe Engineering gives you a repeatable way to catch that before it ships.
+
+It helps you:
+
+- think through an idea before building it;
+- get the AI to ask better questions;
+- keep your own taste and point of view;
+- turn fuzzy ideas into clear build instructions;
+- catch robotic writing and generic AI design;
+- stop agents from saying “done” too early;
+- test important claims;
+- keep control of your code, data, and recovery path.
+
+## The simple idea
 
 ```text
 Choose → See → Shape → Make → Prove → Challenge → Decide → Release → Learn
 ```
 
-You do not have to memorize the whole system. Most of the time you call one skill for the problem in front of you.
+You do not need to run the whole process every time.
 
-Examples:
+Most of the time, you call the skill you need.
 
 ```bash
 vibe run setup-vibe "configure this repo"
 vibe run grill "help me figure out this app idea"
-vibe run spec "turn this idea into a clear build plan"
+vibe run spec "turn this idea into a build plan"
 vibe run stop-slop "review this landing page"
-vibe run human-voice "make this copy sound like a person wrote it"
-vibe run debug "this checkout works locally but fails in production"
+vibe run human-voice "make this sound like a person wrote it"
+vibe run debug "this works locally but breaks in production"
 vibe run proof "prove this release is actually ready"
 ```
 
-The same skills are available through CLI, HTTP API, MCP, and the agent plugin.
+The same skills can be called through the CLI, HTTP API, MCP, or an agent plugin.
+
+## Built-in Stop Slop
+
+`stop-slop` is one of the main Vibe skills.
+
+It looks for the common ways AI work appears finished before it is actually good:
+
+- robotic copy;
+- generic AI or SaaS-looking design;
+- repeated ideas pretending to be more content;
+- fake certainty;
+- inflated claims;
+- half-connected features;
+- missing mobile, accessibility, empty, or error states;
+- “done” claims with no proof;
+- lock-in or missing owner control.
+
+Other skills focus on specific problems:
+
+- `human-voice` fixes robotic writing;
+- `taste` reviews design judgment;
+- `deep-work` stops large jobs from being declared finished too early;
+- `proof` checks whether important claims are true;
+- `ship` controls release.
 
 ## The three questions underneath everything
 
-Every important decision uses the same small contract:
+Every important Vibe decision uses the same small contract:
 
 ```text
 Intent → Standard → Evidence
@@ -58,55 +97,40 @@ Intent → Standard → Evidence
 
 **Intent:** What are we actually trying to do, for whom, and why?
 
-**Standard:** What should good look like before we get attached to the first answer?
+**Standard:** What should good look like before we fall in love with the first answer?
 
-**Evidence:** What can we check so we know the claim is true?
+**Evidence:** What can we check so we know it is true?
 
-That is the core of Vibe Engineering.
+If a young builder learns that habit, they are already doing real engineering thinking.
 
-## Built-in anti-slop
-
-The `stop-slop` skill checks for the common ways AI output looks finished before it is good:
-
-- robotic or generic copy;
-- fake certainty and inflated claims;
-- repeated ideas dressed up as different sections;
-- default AI/SaaS design patterns;
-- half-wired features;
-- missing mobile, accessibility, empty, or error states;
-- “done” claims with no proof;
-- lock-in or missing owner control.
-
-`human-voice` focuses on robotic writing. `taste` focuses on design judgment. `deep-work` stops large jobs from being declared finished too early. `proof` checks the important claims. `ship` is the release gate.
-
-## The skill set
+## What is inside
 
 The complete callable registry lives at [`src/skills/index.mjs`](src/skills/index.mjs), with the core procedures in [`src/skills/catalog.mjs`](src/skills/catalog.mjs).
 
-It includes Vibe-native versions of the workflows we use most:
+Current skills include:
 
 ```text
 setup-vibe         configure a repo for Vibe skills
 ask-vibe           choose the right workflow
-grill              align before coding
-grill-idea         pressure-test a non-code idea
+grill              get clear before coding
+grill-idea         pressure-test an idea
 language           create shared project language
-map                plan work too large for one session
+map                break down large work
 spec               turn intent into a build contract
-tickets            split work into small end-to-end slices
+tickets            split work into small end-to-end pieces
 build              implement a complete slice
 test-first         red / green / refactor
 debug              diagnose with evidence
 prototype          learn with throwaway code
 research           answer questions from strong sources
-module-design      make interfaces smaller and deeper
-architecture-check find codebase design problems
-review             review spec fidelity and code quality
+module-design      make interfaces smaller and clearer
+architecture-check find structural code problems
+review             review the work against the spec
 merge              resolve conflicts by intent
 triage             decide what an issue needs next
 human-step         guide steps only a person can perform
 handoff            let another agent continue cleanly
-teach              teach without dumping information
+teach              explain without dumping information
 ask-human          create a focused questionnaire
 explain            translate confusing system language
 interview          reusable question loop
@@ -119,7 +143,19 @@ proof              verify important claims
 ship               release exact proven revisions
 ```
 
-The system was informed by useful ideas in MIT-licensed open-source work from `blader/humanizer`, `Leonxlnx/unlazy`, and `mattpocock/skills`. The Vibe skills are re-authored and adapted rather than copied wholesale. See [`docs/UPSTREAM-INSPIRATION.md`](docs/UPSTREAM-INSPIRATION.md).
+## Open source and attribution
+
+Vibe Engineering is MIT licensed.
+
+The system was informed by useful ideas from other MIT-licensed open-source projects, including:
+
+- `blader/humanizer`
+- `Leonxlnx/unlazy`
+- `mattpocock/skills`
+
+The Vibe versions are re-authored and adapted to fit the Vibe Engineering method rather than copied and silently renamed.
+
+See [`docs/UPSTREAM-INSPIRATION.md`](docs/UPSTREAM-INSPIRATION.md) and [`docs/governance/SOURCE-PROVENANCE-LEDGER.md`](docs/governance/SOURCE-PROVENANCE-LEDGER.md).
 
 ## CLI
 
@@ -157,7 +193,6 @@ POST /api/v1/resolve-context
 Example:
 
 ```json
-POST /api/v1/run-skill
 {
   "id": "stop-slop",
   "input": {
@@ -166,7 +201,7 @@ POST /api/v1/run-skill
 }
 ```
 
-The response is a deterministic execution packet. The caller or agent performs the procedure. The API does not quietly take external actions on its own.
+The API returns a deterministic execution packet. The calling agent performs the procedure under its own permissions. The API does not quietly take external actions.
 
 ## MCP
 
@@ -176,7 +211,7 @@ Remote endpoint:
 POST /api/mcp
 ```
 
-MCP tools include:
+Available MCP tools include:
 
 ```text
 vibe_skills
@@ -190,6 +225,8 @@ vibe_detect
 vibe_compile_icmr
 vibe_validate_icmr
 ```
+
+For substantial work, Vibe still requires its Step 0 detection, ICMR compilation, and validation rules before execution.
 
 Local stdio adapter:
 
@@ -207,11 +244,15 @@ The main router skill is:
 skills/vibe/SKILL.md
 ```
 
-Core direct skills are committed under `skills/`, and `npm run skills:export` materializes the full canonical registry as `SKILL.md` files.
+Core direct skills are committed under `skills/`, and:
 
-The router reads the canonical skill registry and sends work to the smallest useful Vibe procedure instead of forcing every task through the entire operating system.
+```bash
+npm run skills:export
+```
 
-## The deeper system
+materializes the full canonical registry as `SKILL.md` files.
+
+## Under the hood
 
 The simple skill layer sits on top of the full Vibe Engineering control plane:
 
@@ -219,7 +260,7 @@ The simple skill layer sits on top of the full Vibe Engineering control plane:
 VIBE ENGINEERING
   ├─ human intent + taste
   ├─ callable skill registry
-  ├─ anti-slop checks
+  ├─ Stop Slop checks
   ├─ ICM stage contracts
   ├─ truth artifacts
   ├─ deterministic gates
@@ -232,15 +273,17 @@ VIBE ENGINEERING
   └─ CI / release proof
 ```
 
-That deeper machinery is there when the work is important enough to need it. It should not make the basic experience confusing.
+The deeper machinery exists when the work needs it. The person using Vibe should not have to understand all of it just to get started.
 
 ## Client Zero
 
-This repository is the first Client Zero. Vibe Engineering is used on Vibe Engineering itself.
+This repository is Client Zero.
+
+Vibe Engineering is used to build and review Vibe Engineering itself.
 
 If the method cannot survive its own checks, it is not ready to teach or ship.
 
-## Run and prove locally
+## Run it locally
 
 ```bash
 npm ci
@@ -249,8 +292,10 @@ npm audit --audit-level=high
 npm run dev
 ```
 
-## Production rule
+## One rule before shipping
 
-A polished demo is not the same thing as a verified release.
+A polished demo is not proof.
 
-Build, test, review, merge, deploy, and production verification are separate facts. Only call something shipped when the exact released revision has been checked in the live environment and has a rollback path.
+Build, test, review, merge, deploy, and production verification are different things.
+
+Only call something shipped when the exact released revision has been checked in the real environment and there is a rollback path.
