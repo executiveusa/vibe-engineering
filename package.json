@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "vite",
     "test": "node --test tests/*.test.mjs",
-    "build": "vite build && npm run truth:compile",
+    "build": "node scripts/write-source-provenance.mjs && vite build && npm run truth:compile",
     "preview": "vite preview",
     "truth:compile": "node scripts/truth-compile.mjs",
     "truth:source-check": "node scripts/truth-source-check.mjs",
