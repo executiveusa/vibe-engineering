@@ -1,11 +1,36 @@
 openapi: 3.1.0
 info:
-  title: Vibe Truth and Skills API
-  version: 1.1.0
-  description: Versioned interface to approved Vibe Engineering truth, workflows, context, and deterministic skill execution packets.
+  title: Vibe Truth, Skills, and ICM API
+  version: 1.2.0
+  description: Versioned interface to approved Vibe Engineering truth, workflows, ICM navigation, context, and deterministic skill execution packets.
 servers:
   - url: /api/v1
 paths:
+  /icm/map:
+    get:
+      operationId: getIcmMap
+      responses:
+        '200':
+          description: Canonical walkable backend map
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/IcmMap' }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+  /icm/walk:
+    get:
+      operationId: runIcmWalk
+      responses:
+        '200':
+          description: ICM walk test passed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/IcmWalk' }
+        '503':
+          description: ICM walk test found structural failures
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/IcmWalk' }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
   /manifest:
     get:
       operationId: getManifest
@@ -14,8 +39,7 @@ paths:
           description: Approved truth manifest
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Manifest'
+              schema: { $ref: '#/components/schemas/Manifest' }
   /skills:
     get:
       operationId: listSkills
@@ -95,13 +119,35 @@ paths:
         required: true
         content:
           application/json:
-            schema:
-              $ref: '#/components/schemas/ContextRequest'
+            schema: { $ref: '#/components/schemas/ContextRequest' }
       responses:
         '200': { description: Resolved work contract }
         '400': { $ref: '#/components/responses/BadRequest' }
 components:
   schemas:
+    IcmMap:
+      type: object
+      required: [schemaVersion, id, purpose, entry, lifecycle, domains, interfaces, rules]
+      additionalProperties: true
+      properties:
+        schemaVersion: { type: string }
+        id: { type: string }
+        purpose: { type: string }
+        lifecycle: { type: array, items: { type: string } }
+        entry: { type: object, additionalProperties: true }
+        domains: { type: object, additionalProperties: true }
+        interfaces: { type: object, additionalProperties: true }
+        rules: { type: object, additionalProperties: true }
+    IcmWalk:
+      type: object
+      required: [ok, test, map, lifecycle, checks]
+      additionalProperties: true
+      properties:
+        ok: { type: boolean }
+        test: { type: string, const: vibe-icm-walk }
+        map: { type: string }
+        lifecycle: { type: string }
+        checks: { type: object, additionalProperties: true }
     ArtifactSummary:
       type: object
       additionalProperties: false
@@ -172,9 +218,7 @@ components:
       type: object
       additionalProperties: false
       properties:
-        agent:
-          type: object
-          additionalProperties: true
+        agent: { type: object, additionalProperties: true }
         project:
           type: object
           additionalProperties: false
