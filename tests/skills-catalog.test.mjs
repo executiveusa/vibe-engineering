@@ -1,16 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { getSkill, listSkills, runSkill } from '../src/skills/catalog.mjs';
+import { getSkill, listSkills, runSkill } from '../src/skills/index.mjs';
 
 test('skill catalog exposes the Vibe workflow set', () => {
   const skills = listSkills();
-  assert.ok(skills.length >= 25);
-  for (const required of ['grill', 'spec', 'build', 'review', 'stop-slop', 'deep-work', 'proof', 'ship']) {
+  assert.ok(skills.length >= 30);
+  for (const required of ['setup-vibe', 'grill', 'spec', 'build', 'review', 'stop-slop', 'deep-work', 'proof', 'ship']) {
     assert.ok(skills.some((skill) => skill.id === required), required);
   }
 });
 
 test('aliases resolve to canonical skills', () => {
+  assert.equal(getSkill('setup')?.id, 'setup-vibe');
   assert.equal(getSkill('tdd')?.id, 'test-first');
   assert.equal(getSkill('unlazy')?.id, 'deep-work');
 });
