@@ -4,7 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const FLOW = ['Choose', 'Shape', 'Prove', 'Release'];
+const FLOW = ['Choose / See', 'Shape / Make', 'Prove / Challenge', 'Decide / Release / Learn'];
 
 function Mark() {
   return (
@@ -250,12 +250,12 @@ function App() {
         <div className="section-shell split-heading reveal">
           <p className="section-label">The method</p>
           <div>
-            <h2 id="method-title">Choose. Shape. Prove. Release.</h2>
-            <p className="lead-copy muted">The public rhythm stays simple. The full operating system remains inspectable in the repository.</p>
+            <h2 id="method-title">Four movements. Nine verbs.</h2>
+            <p className="lead-copy muted">The full Vibe rhythm stays visible without turning the homepage into a framework encyclopedia.</p>
           </div>
         </div>
 
-        <div className="flow section-shell reveal" aria-label="Vibe Engineering public workflow">
+        <div className="flow section-shell reveal" aria-label="Vibe Engineering full nine-step rhythm grouped into four public movements">
           {FLOW.map((step, index) => (
             <div className="flow-step" key={step}>
               <span>{String(index + 1).padStart(2, '0')}</span>
@@ -282,6 +282,7 @@ function App() {
           <div className="closing-copy">
             <p>Use the method to make the next decision, or inspect the source to see how the system earns trust.</p>
             <a className="closing-link" href="#method">Learn the method <span aria-hidden="true">↘</span></a>
+            {' '}
             <a className="closing-link" href="https://github.com/executiveusa/vibe-engineering" target="_blank" rel="noreferrer">Inspect source + proof <span aria-hidden="true">↗</span></a>
           </div>
         </div>
