@@ -31,6 +31,7 @@ paths:
                   skills:
                     type: array
                     items: { $ref: '#/components/schemas/SkillSummary' }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
   /skills/{id}:
     get:
       operationId: getSkill
@@ -46,6 +47,7 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Skill' }
         '404': { $ref: '#/components/responses/NotFound' }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
   /run-skill:
     post:
       operationId: runSkill
@@ -63,6 +65,7 @@ paths:
               schema: { $ref: '#/components/schemas/RunSkillResponse' }
         '400': { $ref: '#/components/responses/BadRequest' }
         '404': { $ref: '#/components/responses/NotFound' }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
   /truth/{id}:
     get:
       operationId: getTruth
@@ -196,3 +199,5 @@ components:
       description: Resource not found
     BadRequest:
       description: Invalid request
+    MethodNotAllowed:
+      description: Method not allowed for this resource
