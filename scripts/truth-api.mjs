@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { createTruthApi } from '../src/truth/api.mjs';
-import { getSkill, listSkills, runSkill } from '../src/skills/index.mjs';
+import { getIcmBackendMap, getSkill, listSkills, runIcmWalk, runSkill } from '../icm/backend/index.mjs';
 
 const bundlePath = path.join(process.cwd(), 'dist', 'truth', 'truth-bundle.json');
 const bundle = JSON.parse(await readFile(bundlePath, 'utf8'));
@@ -33,7 +33,7 @@ function send(res, response) {
   res.end(JSON.stringify(response.body));
 }
 
-function skillResponse(status, body, cache = 'no-store', headers = {}) {
+function jsonResponse(status, body, cache = 'no-store', headers = {}) {
   return { status, headers: { 'content-type': 'application/json', 'cache-control': cache, ...headers }, body };
 }
 
@@ -50,22 +50,29 @@ const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host ?? 'localhost'}`);
 
-    if (url.pathname === '/api/v1/skills' && req.method !== 'GET') return send(res, skillResponse(405, { error: 'METHOD_NOT_ALLOWED' }, 'no-store', { allow: 'GET' }));
-    if (url.pathname.startsWith('/api/v1/skills/') && req.method !== 'GET') return send(res, skillResponse(405, { error: 'METHOD_NOT_ALLOWED' }, 'no-store', { allow: 'GET' }));
-    if (url.pathname === '/api/v1/run-skill' && req.method !== 'POST') return send(res, skillResponse(405, { error: 'METHOD_NOT_ALLOWED' }, 'no-store', { allow: 'POST' }));
+    for (const getPath of ['/api/v1/icm/map', '/api/v1/icm/walk', '/api/v1/skills']) {
+      if (url.pathname === getPath && req.method !== 'GET') return send(res, jsonResponse(405, { error: 'METHOD_NOT_ALLOWED' }, 'no-store', { allow: 'GET' }));
+    }
+    if (url.pathname.startsWith('/api/v1/skills/') && req.method !== 'GET') return send(res, jsonResponse(405, { error: 'METHOD_NOT_ALLOWED' }, 'no-store', { allow: 'GET' }));
+    if (url.pathname === '/api/v1/run-skill' && req.method !== 'POST') return send(res, jsonResponse(405, { error: 'METHOD_NOT_ALLOWED' }, 'no-store', { allow: 'POST' }));
 
+    if (req.method === 'GET' && url.pathname === '/api/v1/icm/map') return send(res, jsonResponse(200, getIcmBackendMap(), 'public, max-age=60'));
+    if (req.method === 'GET' && url.pathname === '/api/v1/icm/walk') {
+      const result = await runIcmWalk();
+      return send(res, jsonResponse(result.ok ? 200 : 503, result));
+    }
     if (req.method === 'GET' && url.pathname === '/api/v1/manifest') return send(res, api.manifest());
-    if (req.method === 'GET' && url.pathname === '/api/v1/skills') return send(res, skillResponse(200, { skills: listSkills() }, 'public, max-age=60'));
+    if (req.method === 'GET' && url.pathname === '/api/v1/skills') return send(res, jsonResponse(200, { skills: listSkills() }, 'public, max-age=60'));
     if (req.method === 'GET' && url.pathname.startsWith('/api/v1/skills/')) {
       const id = decodeURIComponent(url.pathname.slice('/api/v1/skills/'.length));
       const found = getSkill(id);
-      return send(res, found ? skillResponse(200, found, 'public, max-age=60') : skillResponse(404, { error: 'SKILL_NOT_FOUND', id }));
+      return send(res, found ? jsonResponse(200, found, 'public, max-age=60') : jsonResponse(404, { error: 'SKILL_NOT_FOUND', id }));
     }
     if (req.method === 'POST' && url.pathname === '/api/v1/run-skill') {
       const body = await readJson(req);
-      if (!validRunSkillRequest(body)) return send(res, skillResponse(400, { error: 'INVALID_RUN_SKILL_REQUEST' }));
+      if (!validRunSkillRequest(body)) return send(res, jsonResponse(400, { error: 'INVALID_RUN_SKILL_REQUEST' }));
       const result = runSkill(body.id, body.input ?? {});
-      return send(res, result ? skillResponse(200, result) : skillResponse(404, { error: 'SKILL_NOT_FOUND', id: body.id }));
+      return send(res, result ? jsonResponse(200, result) : jsonResponse(404, { error: 'SKILL_NOT_FOUND', id: body.id }));
     }
     if (req.method === 'GET' && url.pathname.startsWith('/api/v1/truth/')) return send(res, api.truth(decodeURIComponent(url.pathname.slice('/api/v1/truth/'.length))));
     if (req.method === 'GET' && url.pathname.startsWith('/api/v1/workflows/')) return send(res, api.workflow(decodeURIComponent(url.pathname.slice('/api/v1/workflows/'.length))));
@@ -76,9 +83,7 @@ const server = http.createServer(async (req, res) => {
 
     return send(res, { status: 404, headers: jsonHeaders, body: { error: 'NOT_FOUND' } });
   } catch (error) {
-    if (error.code === 'PAYLOAD_TOO_LARGE') {
-      return send(res, { status: 413, headers: jsonHeaders, body: { error: 'PAYLOAD_TOO_LARGE', maxBytes: MAX_BODY_BYTES } });
-    }
+    if (error.code === 'PAYLOAD_TOO_LARGE') return send(res, { status: 413, headers: jsonHeaders, body: { error: 'PAYLOAD_TOO_LARGE', maxBytes: MAX_BODY_BYTES } });
     return send(res, { status: 400, headers: jsonHeaders, body: { error: 'BAD_REQUEST' } });
   }
 });
