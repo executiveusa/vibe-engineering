@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import process from 'node:process';
 import { VibeTruthClient } from '../packages/truth-sdk/index.mjs';
-import { getSkill, listSkills, runSkill } from '../src/skills/catalog.mjs';
+import { getSkill, listSkills, runSkill } from '../src/skills/index.mjs';
 
 const [command, ...args] = process.argv.slice(2);
 const client = new VibeTruthClient({ baseUrl: process.env.VIBE_TRUTH_API_URL ?? 'http://localhost:4317' });
