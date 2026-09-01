@@ -5,7 +5,7 @@ description: Configure a repository so Vibe Engineering skills know where projec
 
 # Setup Vibe
 
-Inspect the repository before writing anything. Reuse existing `AGENTS.md`, `CONTEXT.md`, decision/ADR folders, issue tracking, CI, and deployment conventions when they already exist.
+Inspect the repository before writing anything. Reuse existing `AGENTS.md`, project context, decision/ADR folders, issue tracking, CI, and deployment conventions when they already exist.
 
 Settle these basics with the owner only where the repository cannot answer them:
 
@@ -18,4 +18,4 @@ Settle these basics with the owner only where the repository cannot answer them:
 
 Prefer the existing repository structure over adding parallel Vibe-only files. Add the smallest missing pointers needed so `grill`, `spec`, `tickets`, `review`, `proof`, and `ship` can work without guessing.
 
-Do not overwrite existing owner decisions. Show material setup changes before applying them when they affect authority, release, or destructive actions.
+Do not overwrite existing owner decisions. Preview material setup changes that affect authority, release, or destructive actions, and require the owner's explicit approval before applying them.
