@@ -12,7 +12,7 @@ const SETUP_VIBE = Object.freeze({
     'Inspect existing repository policy, context, decision records, issue tracking, CI, and deployment conventions before adding anything.',
     'Reuse existing files and workflows instead of creating parallel Vibe-only structure.',
     'Resolve only the missing choices that other skills need: work tracker, shared language, durable decisions, merge proof, release authority, and rollback.',
-    'Show material authority or release changes to the owner before applying them.',
+    'Preview material authority, release, or destructive setup changes and require explicit owner approval before applying them.',
     'Leave the repository with clear pointers that grill, spec, tickets, review, proof, and ship can follow without guessing.',
   ],
   attribution: 'Inspired by the setup/configuration pattern in mattpocock/skills (MIT); re-authored for Vibe Engineering.',
@@ -34,7 +34,6 @@ export function getSkill(id) {
 export function runSkill(id, input = {}) {
   const found = getSkill(id);
   if (!found) return null;
-  const terminal = found.id === 'proof' || found.id === 'ship';
   return {
     skill: found,
     input,
@@ -42,7 +41,7 @@ export function runSkill(id, input = {}) {
       mode: 'agent-procedure',
       instructions: found.steps,
       completionRule: 'Do not claim completion until the requested outcome is satisfied and relevant proof is attached.',
-      next: terminal ? null : 'proof',
+      next: null,
     },
   };
 }
