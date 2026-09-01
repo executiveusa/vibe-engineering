@@ -1,4 +1,4 @@
-import { getSkill } from '../../../src/skills/catalog.mjs';
+import { getSkill } from '../../../src/skills/index.mjs';
 
 export default async function handler(req, res) {
   res.setHeader('cache-control', 'public, max-age=60');
