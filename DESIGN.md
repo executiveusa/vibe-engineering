@@ -3,10 +3,12 @@ name: Vibe Engineering
 mode: persuade
 surface: public-homepage
 palette:
-  ink: "#0b0d0b"
-  paper: "#efece2"
-  signal: "#c9ff38"
-  line: "rgba(239,236,226,0.18)"
+  ink: "#171512"
+  paper: "#efe8dc"
+  bone: "#d7c9b7"
+  oxide: "#b65f3d"
+  smoke: "#6d675e"
+  line: "rgba(23,21,18,0.18)"
 motion:
   easing: "cubic-bezier(0.16,1,0.3,1)"
   reducedMotion: true
@@ -14,81 +16,122 @@ motion:
 
 # Product truth
 
-Vibe Engineering makes software discipline understandable and usable for non-technical AI builders.
+Vibe Engineering makes software discipline understandable and usable for people building with AI who do not want to surrender judgment, taste, proof, or ownership.
 
 V.I.B.E. means **Verify It Before Everything**.
 
-The public promise is not "learn to code." It is: learn enough systems thinking to direct AI with intent, taste, judgment, proof, and ownership.
+The public promise is not "learn to code." It is: use AI to make more while learning how to decide what deserves to exist, what good means, how to prove it, and how to keep control.
 
 # Audience
 
-Non-technical founders, operators, creators, young builders, small business owners, and curious generalists who have ideas but do not identify as developers.
+Non-technical founders, operators, creators, young builders, small business owners, nonprofit teams, and culturally aware generalists.
 
-They should understand the page without learning software vocabulary first.
+They should feel invited into serious systems thinking without developer cosplay, startup cliché, or institutional stiffness.
 
-# Design direction
+# Governing creative idea
 
-**Cinematic systems film.** The first viewport should feel more like the opening frame of a music video or design film than a SaaS landing page.
+## Quiet Signal
 
-The page uses a full-bleed near-black canvas, warm paper typography, acid-green proof signals, large compressed statements, visible system lines, subtle grain, and one purposeful cinematic montage showing apps, automations, AI agents, and systems being assembled.
+**Software got cheap. Judgment did not.**
 
-The montage has two layers:
+The site should feel like a well-edited independent magazine, gallery program, record sleeve, or urban cultural institution that happens to teach a rigorous AI-building method.
 
-1. A zero-dependency procedural fallback built in React/CSS.
-2. An optional generated film layer provided through `VITE_VIBE_HERO_VIDEO_URL`.
+It is laid-back without being casual, premium without luxury theater, young without slang cosplay, and technical without looking like developer software.
 
-The generated film should be muted, loop cleanly, avoid legible fake UI text, show diverse people shaping ideas with AI, and move through four outcome worlds: app, automation, agent, system. It should feel documentary/editorial rather than cyberpunk.
+Confidence comes from proportion, typography, rhythm, whitespace, material color, useful contrast, and a small number of memorable compositions.
+
+# Selected territory
+
+Three directions were considered:
+
+1. **Gallery Utility** — maximum restraint and institutional clarity. Rejected as too formal by itself.
+2. **Street Editorial** — expressive fashion/editorial composition and cultural energy. Rejected as too easy to over-style by itself.
+3. **Quiet Signal** — selected. It keeps Gallery Utility's discipline and Street Editorial's rhythm while preserving Vibe's systems-thinking identity.
+
+Do not average the rejected directions back into the selected one.
+
+# Visual language
+
+- Warm ink rather than pure black.
+- Bone/paper backgrounds rather than white.
+- Oxide/burnt-clay accent rather than acid or neon green.
+- Accent is a signal, not a flood fill.
+- Large editorial type is used for hierarchy, not spectacle.
+- Small labels and rules should feel like publishing metadata, not SaaS chrome.
+- Asymmetry is controlled by a consistent grid.
+- Texture may suggest print, concrete, paper, or analog media, but it must remain subtle and zero-dependency.
+- No default card system. Prefer rows, rules, fields, margins, captions, and direct content composition.
 
 # Hierarchy
 
-The homepage is deliberately short.
+The homepage remains deliberately short.
 
-1. **VERIFY IT BEFORE EVERYTHING.**
-2. Why Vibe Engineering exists.
-3. Four-step public process: Idea → Shape → Prove → Own.
-4. Systems thinking in plain English.
-5. One closing invitation.
-
-No secondary framework, score lab, council diagram, internal governance detail, or developer tutorial belongs on the public homepage.
+1. Immediate category/promise: **Software got cheap. Judgment didn't.**
+2. What Vibe Engineering is and who it is for.
+3. Why the method matters now.
+4. The public method, with the full Vibe rhythm visible without becoming a framework encyclopedia.
+5. Proof/ownership principles.
+6. One invitation into the open system.
 
 # Voice
 
-Short before long. Concrete before abstract. No jargon when plain language works.
+Short before long. Concrete before abstract. Culturally literate, never try-hard.
 
-Do not make visitors feel they are missing credentials. The idea is capability without developer cosplay.
+Prefer:
 
-Preferred language:
-
-- You do not need to become a developer.
-- You bring the idea and taste.
-- AI gives you reach.
+- Software got cheap. Judgment didn't.
+- Build with AI. Keep your taste.
+- Decide what good means before the machine decides for you.
 - Prove the important parts.
-- Keep ownership.
+- Keep the keys.
 
-Avoid inflated futurism, fear, technical gatekeeping, AI clichés, and long explanatory blocks.
+Avoid:
+
+- futurist hype;
+- "revolutionary" AI language;
+- developer gatekeeping;
+- fake street language;
+- luxury-brand adjectives;
+- fear-based anti-AI rhetoric;
+- long explanations on the primary path.
 
 # Interaction
 
-One signature motion system is enough: the full-bleed hero montage.
+One signature motion language is enough: quiet editorial reveals and spatial shifts that support reading order.
 
-Other motion exists only to explain hierarchy or state. Use transform and opacity. Respect `prefers-reduced-motion`. Never autoplay audible media.
+Use transform and opacity. Motion must never delay access to content. Respect `prefers-reduced-motion`. Never autoplay audible media.
+
+The existing owner-controlled soundtrack capability remains available but visually subordinate.
+
+# Subtraction rules
+
+Every element must help the visitor understand, decide, act, verify, recover, or remember.
+
+Before keeping an element ask whether it can be removed, merged, inferred, deferred, or moved. Continue until another removal would damage clarity, trust, accessibility, emotional resonance, or essential identity.
 
 # Anti-patterns
 
-- No generic purple/blue AI gradients.
-- No glassmorphism card stacks.
-- No long-scroll framework encyclopedia.
-- No nested cards.
-- No decorative dashboards or fake analytics.
-- No developer-centric copy on the main path.
-- No copying Impeccable or Renaissance Geek visual motifs.
+- No acid/neon green as the brand identity.
+- No purple/blue AI gradients.
+- No glassmorphism stacks.
+- No glowing orbs or AI-brain imagery.
+- No generic centered SaaS hero.
+- No card wall or default bento grid.
+- No floating dashboard mockup.
+- No random luxury serif treatment.
+- No fake metrics or decorative analytics.
+- No endless marquee.
+- No arbitrary parallax.
+- No copying COLLINS, Impeccable, Awwwards sites, fashion brands, or editorial references literally.
 
-Their useful philosophical reference is **human judgment inside the AI loop** and **craft beyond the first draft**. Vibe Engineering must remain its own system: systems thinking + taste + proof + ownership.
+Use external references to extract principles, not surfaces.
 
 # Quality bar
 
-A first-time visitor should understand the core promise in under five seconds.
+A first-time visitor should understand in under five seconds that Vibe Engineering is a disciplined way to build with AI while keeping human judgment and control.
 
-A non-technical visitor should be able to explain Vibe Engineering back as: "I use AI to build, but I use a process to decide what good is, check it, and keep control of it."
+A visitor should be able to explain it back as:
 
-The hero must work with no external video asset. A future generated film should enhance the same composition rather than become a dependency.
+> "AI can make the thing. Vibe Engineering helps me decide what should be made, what good looks like, prove it, and keep control."
+
+The experience must work without external media, without JavaScript animation, and with reduced motion enabled.
