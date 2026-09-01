@@ -1,4 +1,4 @@
-import { runSkill } from '../../src/skills/index.mjs';
+import { runSkill } from '../../icm/backend/index.mjs';
 
 function validRunSkillRequest(body) {
   if (!body || Array.isArray(body) || typeof body !== 'object') return false;
