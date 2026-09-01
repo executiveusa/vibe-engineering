@@ -1,0 +1,261 @@
+icmr_version: "1.0"
+
+identity:
+  name: "Vibe Engineering"
+  purpose: "Govern Vibe Engineering itself as Client Zero and deliver verified, owner-controlled product, design, governance, factory, and distribution changes."
+  mode: "brownfield"
+  schema: "factory/icm/template/_config/icmr.schema.json"
+
+detection:
+  subject_kind: "mixed"
+  primary_form: "composite"
+  nested_forms:
+    - "pipeline"
+    - "knowledge-bundle"
+    - "umbrella"
+  role_topology: "role-chain"
+  execution_topology: "agent-led-human-gated"
+  state_topology: "mixed-state"
+  confidence: 0.95
+  assumptions:
+    - "The repository is simultaneously a public product, canonical method knowledge bundle, reusable software factory, and adapter/distribution package."
+    - "Current design-governance work is bounded by GitHub issue #30 and must preserve existing product truth, ICM authority, and Vibe Engineering identity."
+    - "Irreversible actions, merge, production deployment, paid usage, and rights-sensitive publication remain human-gated unless explicitly delegated."
+
+routing:
+  entry: "AGENTS.md"
+  workspace_contract: "CONTEXT.md"
+  current_state: "PROJECT.yaml"
+  routes:
+    - id: "method-governance"
+      path: "docs/VIBE-ENGINEERING-V2-DOCTRINE.md"
+      when: "The change affects Vibe Engineering doctrine, authority, quality, design, verification, Council, Judge, or release behavior."
+    - id: "design-surface"
+      path: "DESIGN.md"
+      when: "The task affects the current Vibe Engineering public visual system or homepage experience."
+    - id: "icm-factory"
+      path: "factory/icm/README.md"
+      when: "The task affects ICM workspace generation, routing, contracts, stages, or templates."
+    - id: "current-design-governance-change"
+      path: "https://github.com/executiveusa/vibe-engineering/issues/30"
+      when: "The task is the Heart & Soul design doctrine, subtraction gauntlet, or related Client Zero integration."
+
+roles:
+  - id: "governor"
+    outcome: "Keep scope, authority, ICM routing, Client Zero obligations, proof, and commercial alignment intact."
+    authority:
+      - "inspect repository reality"
+      - "compile ICMR and specifications"
+      - "route approved bounded slices"
+      - "stop work that violates a gate"
+    forbidden:
+      - "self-approve high-impact output"
+      - "expand scope without updating the governing contract"
+      - "merge or release without required evidence and authority"
+    inputs:
+      - "ICMR.yaml"
+      - "AGENTS.md"
+      - "CONTEXT.md"
+      - "PROJECT.yaml"
+      - "approved issue/specification"
+    outputs:
+      - "bounded work contracts"
+      - "evidence and handoff records"
+    escalate_when:
+      - "scope or ownership is ambiguous"
+      - "required proof cannot be obtained"
+      - "an irreversible action is requested without authority"
+    proof:
+      - "ICMR Step 0 validation passes"
+      - "current slice has Intent, Standard, Evidence, constraints, and rollback"
+
+  - id: "builder"
+    outcome: "Implement only the approved bounded slice while preserving existing architecture, conventions, product truth, and owner control."
+    authority:
+      - "inspect"
+      - "reuse"
+      - "modify declared files on an isolated branch"
+      - "run declared checks"
+    forbidden:
+      - "approve its own taste-sensitive or high-impact work"
+      - "rewrite unrelated surfaces"
+      - "copy third-party identity or unlicensed assets"
+    inputs:
+      - "approved slice"
+      - "declared references"
+      - "existing implementation"
+    outputs:
+      - "bounded implementation"
+      - "test evidence"
+    escalate_when:
+      - "the approved slice conflicts with repository reality"
+      - "a new dependency, architecture boundary, or rights issue appears"
+    proof:
+      - "native checks pass for the slice"
+      - "actual output is inspectable"
+
+  - id: "critic"
+    outcome: "Independently identify the largest remaining gap against the declared standard and actual artifact."
+    authority:
+      - "inspect actual output"
+      - "compare against named fetchable references"
+      - "return pass/fail or preferred artifact with evidence"
+    forbidden:
+      - "rewrite the standard after seeing the builder effort"
+      - "approve based on effort, confidence, or description alone"
+    inputs:
+      - "actual artifact"
+      - "declared quality bar"
+      - "verification results"
+    outputs:
+      - "independent critique"
+      - "largest remaining gap"
+    escalate_when:
+      - "the quality bar is vague, inaccessible, or non-comparable"
+    proof:
+      - "critique cites the inspected artifact and bar"
+
+  - id: "judge"
+    outcome: "Return SHIP or HOLD based on hard stops, evidence, independent review, sovereignty, rollback, and commercial alignment."
+    authority:
+      - "hold work"
+      - "approve progression when delegated"
+    forbidden:
+      - "treat build, CI, preview, merge, or deployment request as production proof"
+    inputs:
+      - "verification evidence"
+      - "independent critique"
+      - "rollback plan"
+      - "authority record"
+    outputs:
+      - "SHIP or HOLD decision"
+    escalate_when:
+      - "human approval is required by PROJECT.yaml or issue scope"
+    proof:
+      - "decision is traceable to observable evidence"
+
+contracts:
+  - id: "step-0-detect"
+    job: "Keep the repo-wide runtime representation aligned with the actual brownfield system before substantial work begins."
+    context:
+      include:
+        - "AGENTS.md"
+        - "CONTEXT.md"
+        - "PROJECT.yaml"
+        - "ARCHITECTURE.md when architecture is affected"
+      exclude:
+        - "unrelated stage payloads"
+        - "secret values"
+    inputs:
+      - "user request"
+      - "existing repository evidence"
+    process:
+      - "inventory before mutation"
+      - "detect work, role, execution, and state topology"
+      - "record assumptions and confidence"
+      - "establish rollback from current main head"
+    outputs:
+      - "ICMR.yaml"
+    validation:
+      - "npm run icmr:validate -- ."
+      - "routing entry and workspace contract resolve"
+    gate:
+      required: false
+      approver: null
+
+  - id: "design-governance-integration"
+    job: "Integrate Heart & Soul design law and a subtraction-first critic/gauntlet into Vibe Engineering without duplicating or replacing existing doctrine."
+    context:
+      include:
+        - "docs/VIBE-ENGINEERING-V2-DOCTRINE.md"
+        - "DESIGN.md"
+        - "skills/vibe-engineering/SKILL.md"
+        - "factory/icm/"
+        - "docs/governance/SOURCE-PROVENANCE-LEDGER.md"
+        - "GitHub issue #30"
+      exclude:
+        - "unrelated product implementation"
+        - "secret values"
+    inputs:
+      - "user-authored Heart & Soul design doctrine"
+      - "uploaded gauntlet-loop skill"
+      - "uploaded ICM Architect skill"
+      - "hardikpandya/stop-slop"
+      - "pbakaus/impeccable and impeccable.style"
+    process:
+      - "map existing design and governance responsibilities"
+      - "define one authoritative home for durable design law"
+      - "define subtraction critic contract and independent comparison bar"
+      - "integrate references through ICM routing rather than context stuffing"
+      - "update source/provenance for material external methods"
+      - "verify no duplicated authority or conflicting design contracts"
+    outputs:
+      - "Heart & Soul design governance reference"
+      - "Subtraction Gauntlet design review contract"
+      - "ICM routing updates"
+      - "source/provenance update"
+      - "verification evidence"
+    validation:
+      - "npm run icmr:validate -- ."
+      - "npm run check"
+      - "npm audit --audit-level=high"
+      - "independent design/governance review"
+    gate:
+      required: true
+      approver: "authorized human / Judge at merge and release boundaries"
+
+gates:
+  - id: "step-0-required"
+    rule: "No substantial work proceeds until this ICMR.yaml exists and Step 0 validation passes."
+  - id: "client-zero"
+    rule: "Vibe Engineering must survive the same method, design, proof, review, sovereignty, and rollback rules it teaches clients."
+  - id: "subtraction"
+    rule: "For design work, remove until another removal would materially harm task success, comprehension, trust, accessibility, control, emotional resonance, or required brand meaning."
+  - id: "named-bar"
+    rule: "Taste-sensitive approval requires a named, fetchable, comparable standard or an explicit reason a direct reference is inappropriate."
+  - id: "independent-review"
+    rule: "The builder cannot be the sole approver of its own taste-sensitive or high-impact output."
+  - id: "source-rights"
+    rule: "External methods, code, text, and design references remain attributable and license/rights obligations are release gates."
+
+proof:
+  required:
+    - "ICMR Step 0 validation passes"
+    - "current slice native checks pass"
+    - "independent critic records the largest remaining gap"
+    - "source/provenance reflects material third-party inputs"
+    - "rollback remains viable"
+    - "live target evidence exists before PRODUCTION VERIFIED"
+  evidence_paths:
+    - "docs/evidence/"
+    - "GitHub issue and pull request records"
+  completion_rule: "Completion requires observable evidence for the current contract; implementation, CI, merge, preview, or deployment request alone is insufficient."
+
+sovereignty:
+  owner_controls:
+    - "code"
+    - "domain"
+    - "hosting"
+    - "database"
+    - "credentials"
+    - "data"
+    - "design system"
+    - "method artifacts"
+  secrets_policy: "never-store-secret-values"
+  irreversible_actions: "human-approval-required-unless-explicitly-delegated"
+
+rollback:
+  strategy: "Use main commit 6335af5f49c2750d28faa8163ed2af096af5384c as the restore point for this bounded design-governance branch and revert only the commits introduced for issue #30 if the change fails validation or review."
+  instructions:
+    - "Keep all issue #30 mutations on design/heart-soul-subtraction-icm until approved."
+    - "Do not force-update main."
+    - "Do not alter secrets or external infrastructure in this slice."
+    - "If validation fails, revert the bounded branch commits or delete the branch without changing main."
+
+outputs:
+  - "ICMR.yaml"
+  - "bounded specifications"
+  - "design governance references"
+  - "verification evidence"
+  - "independent review records"
+  - "handoff records"
