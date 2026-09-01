@@ -7,6 +7,8 @@ One job: give fresh, separately accountable perspectives permission to find what
 - Layer 4: `../02_blueprint/output/`.
 - Layer 4: `../04_verify/output/`.
 - Product interface, evidence, affected system map, and reference comparison when present.
+- Layer 3: `../../shared/HEART_AND_SOUL_STANDARD.md` for user-facing product or experience work.
+- Layer 3: `../../shared/SUBTRACTION_GAUNTLET_STANDARD.md` for user-facing product or experience work.
 - Layer 3: `../../shared/NO_SLOP_STANDARD.md`.
 - Layer 3: `../../shared/REFERENCE_BAR_STANDARD.md` when comparative quality matters.
 - Layer 3: `../../shared/OWNERSHIP_RETENTION_STANDARD.md`.
@@ -19,10 +21,12 @@ Run six independently attributable reviews. Each review names the reviewer or go
 2. **Architecture** — will the decision remain understandable, maintainable, and appropriately simple as the system changes?
 3. **Failure modes** — what breaks first, how is failure detected, and how does recovery work?
 4. **Security + privacy** — are permissions, data, secrets, external input, and exposure proportional to the risk?
-5. **Accessibility + taste** — can people use it, does the experience feel intentional, and did model-default slop survive into the artifact?
+5. **Accessibility + taste** — can people use it, does the experience feel intentional, did the seven design lenses converge into one coherent experience, did model-default slop survive, and did the Subtraction Gauntlet stop at a defensible essential form?
 6. **Sovereignty + ownership** — can the owner understand, export, move, replace providers/builders, recover, and continue operating?
 
 Every review also answers: **What claim here has the weakest proof?**
+
+The accessibility + taste review additionally names the single largest remaining experience gap and whether another subtraction would improve or damage the approved outcome.
 
 When a named reference bar exists, reviewers inspect the actual comparison rather than approving from adjectives or screenshots selected by the builder.
 
@@ -44,4 +48,4 @@ Any of the six reviews may issue a documented HOLD. Conflicts are escalated to J
 
 ## Plain-language proof
 
-Show what six separately accountable reviewers would worry about before trusting this product with their time, money, privacy, safety, access, ownership, or reputation. Name the weakest claim instead of smoothing it over.
+Show what six separately accountable reviewers would worry about before trusting this product with their time, money, privacy, safety, access, ownership, or reputation. For design-sensitive work, name the largest remaining experience gap and the quality that justified stopping subtraction. Name the weakest claim instead of smoothing it over.
