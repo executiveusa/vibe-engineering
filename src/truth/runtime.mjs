@@ -2,6 +2,7 @@ import path from 'node:path';
 import process from 'node:process';
 import { compileArtifacts, loadArtifacts } from './compiler.mjs';
 import { createTruthApi } from './api.mjs';
+import { BUILD_SOURCE_COMMIT } from './source-provenance.mjs';
 
 let runtimePromise;
 
@@ -17,6 +18,7 @@ export async function loadRuntimeBundle(options = {}) {
     process.env.VIBE_SOURCE_COMMIT,
     process.env.VERCEL_GIT_COMMIT_SHA,
     process.env.GITHUB_SHA,
+    BUILD_SOURCE_COMMIT,
   ) ?? 'local';
   const artifacts = await loadArtifacts(sourceDirectory);
   return compileArtifacts(artifacts, { sourceCommit });
