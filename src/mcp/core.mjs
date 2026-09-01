@@ -1,5 +1,7 @@
+import { getSkill, listSkills, runSkill } from '../skills/catalog.mjs';
+
 const PROTOCOL_VERSION = '2026-07-28';
-const SERVER_INFO = { name: 'vibe-engineering', version: '2.1.0' };
+const SERVER_INFO = { name: 'vibe-engineering', version: '2.2.0' };
 const METHOD_ID = 'method.vibe-engineering-v2';
 
 function complete(id, result) {
@@ -50,8 +52,39 @@ function toolCatalog() {
     {
       name: 'vibe_method',
       title: 'Get Vibe Engineering Method',
-      description: 'Read the canonical Vibe Engineering v2 method and public flow before planning or governing work.',
+      description: 'Read the canonical Vibe Engineering method.',
       inputSchema: { type: 'object', properties: {}, additionalProperties: false },
+    },
+    {
+      name: 'vibe_skills',
+      title: 'List Vibe Skills',
+      description: 'List the open Vibe Engineering skill catalog. Use this when deciding which procedure fits a task.',
+      inputSchema: { type: 'object', properties: {}, additionalProperties: false },
+    },
+    {
+      name: 'vibe_skill',
+      title: 'Get Vibe Skill',
+      description: 'Read one Vibe skill by id or alias.',
+      inputSchema: {
+        type: 'object',
+        properties: { id: { type: 'string', minLength: 1 } },
+        required: ['id'],
+        additionalProperties: false,
+      },
+    },
+    {
+      name: 'vibe_run_skill',
+      title: 'Run Vibe Skill',
+      description: 'Return the canonical execution packet for one Vibe skill with caller-supplied context. The caller or agent executes the procedure; this tool does not silently perform external side effects.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', minLength: 1 },
+          input: { type: 'object' },
+        },
+        required: ['id'],
+        additionalProperties: false,
+      },
     },
     {
       name: 'vibe_truth',
@@ -78,7 +111,7 @@ function toolCatalog() {
     {
       name: 'vibe_context',
       title: 'Resolve Vibe Context',
-      description: 'Resolve the smallest approved Vibe context set for a project and task instead of loading the whole methodology.',
+      description: 'Resolve the smallest approved Vibe context set for a project and task.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -108,34 +141,22 @@ function toolCatalog() {
     {
       name: 'vibe_detect',
       title: 'Detect ICMR Topology',
-      description: 'Classify arbitrary work before planning. Detect mode, ICM form, role topology, execution model, state model, confidence, and assumptions.',
-      inputSchema: {
-        type: 'object',
-        properties: WORK_INPUT_PROPERTIES,
-        required: ['description'],
-        additionalProperties: false,
-      },
+      description: 'Classify arbitrary work before planning.',
+      inputSchema: { type: 'object', properties: WORK_INPUT_PROPERTIES, required: ['description'], additionalProperties: false },
     },
     {
       name: 'vibe_compile_icmr',
       title: 'Compile ICMR',
-      description: 'Compile arbitrary role, project, workflow, organization, knowledge system, or mixed work into the canonical ICM Runtime Representation and YAML.',
-      inputSchema: {
-        type: 'object',
-        properties: WORK_INPUT_PROPERTIES,
-        required: ['description'],
-        additionalProperties: false,
-      },
+      description: 'Compile arbitrary work into the canonical ICM Runtime Representation.',
+      inputSchema: { type: 'object', properties: WORK_INPUT_PROPERTIES, required: ['description'], additionalProperties: false },
     },
     {
       name: 'vibe_validate_icmr',
       title: 'Validate ICMR',
-      description: 'Validate an ICMR object or compiled YAML against mandatory Vibe Step 0 structural and authority invariants.',
+      description: 'Validate an ICMR object or compiled YAML against Vibe Step 0 invariants.',
       inputSchema: {
         type: 'object',
-        properties: {
-          icmr: { oneOf: [{ type: 'object' }, { type: 'string', minLength: 1 }] },
-        },
+        properties: { icmr: { oneOf: [{ type: 'object' }, { type: 'string', minLength: 1 }] } },
         required: ['icmr'],
         additionalProperties: false,
       },
@@ -152,18 +173,14 @@ export async function handleMcpRpc(api, request = {}) {
     return complete(id, {
       supportedVersions: [PROTOCOL_VERSION],
       capabilities: { tools: {} },
-      instructions: 'Use vibe_detect before substantial new work, vibe_compile_icmr to produce the Step 0 runtime contract, vibe_validate_icmr before entering Intake/Spec, vibe_method for methodology, and vibe_context for task-scoped context. No Vibe tool authorizes production release.',
+      instructions: 'Use vibe_skills to discover the smallest procedure. For substantial work use stop-slop and proof before a done claim. Use ship only for an actual release. No Vibe tool authorizes production release by itself.',
       ttlMs: 300000,
       cacheScope: 'public',
     });
   }
 
   if (method === 'tools/list') {
-    return complete(id, {
-      tools: toolCatalog(),
-      ttlMs: 300000,
-      cacheScope: 'public',
-    });
+    return complete(id, { tools: toolCatalog(), ttlMs: 300000, cacheScope: 'public' });
   }
 
   if (method !== 'tools/call') return error(id, -32601, 'Method not found');
@@ -174,6 +191,20 @@ export async function handleMcpRpc(api, request = {}) {
   if (name === 'vibe_method') {
     const result = api.truth(METHOD_ID);
     return result.status === 200 ? textResult(id, result.body) : error(id, -32004, 'Vibe method not found');
+  }
+
+  if (name === 'vibe_skills') return textResult(id, { skills: listSkills() });
+
+  if (name === 'vibe_skill') {
+    if (typeof args.id !== 'string' || !args.id) return error(id, -32602, 'vibe_skill requires a non-empty id');
+    const found = getSkill(args.id);
+    return found ? textResult(id, found) : error(id, -32004, 'Vibe skill not found', { id: args.id });
+  }
+
+  if (name === 'vibe_run_skill') {
+    if (typeof args.id !== 'string' || !args.id) return error(id, -32602, 'vibe_run_skill requires a non-empty id');
+    const result = runSkill(args.id, args.input ?? {});
+    return result ? textResult(id, result) : error(id, -32004, 'Vibe skill not found', { id: args.id });
   }
 
   if (name === 'vibe_truth') {
@@ -216,18 +247,15 @@ export function validateMcpHeaders(headers = {}, request = {}) {
   if (protocol && protocol !== PROTOCOL_VERSION) {
     return { valid: false, status: 400, body: error(request.id, -32600, `Unsupported MCP protocol version: ${protocol}`) };
   }
-
   const headerMethod = headers['mcp-method'];
   if (headerMethod && headerMethod !== request.method) {
     return { valid: false, status: 400, body: error(request.id, -32600, 'Mcp-Method header does not match JSON-RPC method') };
   }
-
   const headerName = headers['mcp-name'];
   const bodyName = request.method === 'tools/call' ? request.params?.name : undefined;
   if (headerName && bodyName && headerName !== bodyName) {
     return { valid: false, status: 400, body: error(request.id, -32600, 'Mcp-Name header does not match tool name') };
   }
-
   return { valid: true };
 }
 
