@@ -129,7 +129,7 @@ Production review on `d969a24b3a493506982dae76fefeffc2a2ab9241` returned **REVIS
 ### Applied dispositions
 
 - **MERGE:** `Why now` now carries the four human responsibilities; the separate `What we believe` section is removed.
-- **DEFER:** the public nine-step sequence is reduced to `Choose → Shape → Prove → Release`; the full factory workflow remains in source/docs.
+- **MERGE / DEFER:** the full canonical nine-step rhythm remains visible but is grouped into four public movements: `Choose / See`, `Shape / Make`, `Prove / Challenge`, and `Decide / Release / Learn`. This compresses presentation without deleting canonical method steps.
 - **DEFER:** soundtrack control moves out of primary navigation and into the footer as an ambient secondary affordance.
 - **REMOVE:** the redundant `Why this matters now` hero route is removed.
 - **KEEP:** headline, judgment/ownership promise, public source, Intent / Standard / Evidence contract, accessibility controls, Quiet Signal identity, and owner-controlled sound.
@@ -137,7 +137,7 @@ Production review on `d969a24b3a493506982dae76fefeffc2a2ab9241` returned **REVIS
 
 ### Revised public journey
 
-`Point of view → Why now / four responsibilities → four-step public rhythm → Intent / Standard / Evidence → Use it / inspect it`
+`Point of view → Why now / four responsibilities → four grouped movements containing the full nine-verb rhythm → Intent / Standard / Evidence → Use it / inspect it`
 
 ### Protected stopping quality
 
