@@ -33,13 +33,26 @@ function send(res, response) {
   res.end(JSON.stringify(response.body));
 }
 
-function skillResponse(status, body, cache = 'no-store') {
-  return { status, headers: { 'content-type': 'application/json', 'cache-control': cache }, body };
+function skillResponse(status, body, cache = 'no-store', headers = {}) {
+  return { status, headers: { 'content-type': 'application/json', 'cache-control': cache, ...headers }, body };
+}
+
+function validRunSkillRequest(body) {
+  if (!body || Array.isArray(body) || typeof body !== 'object') return false;
+  const keys = Object.keys(body);
+  if (keys.some((key) => key !== 'id' && key !== 'input')) return false;
+  if (typeof body.id !== 'string' || !body.id.trim()) return false;
+  if (body.input !== undefined && (body.input === null || Array.isArray(body.input) || typeof body.input !== 'object')) return false;
+  return true;
 }
 
 const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host ?? 'localhost'}`);
+
+    if (url.pathname === '/api/v1/skills' && req.method !== 'GET') return send(res, skillResponse(405, { error: 'METHOD_NOT_ALLOWED' }, 'no-store', { allow: 'GET' }));
+    if (url.pathname.startsWith('/api/v1/skills/') && req.method !== 'GET') return send(res, skillResponse(405, { error: 'METHOD_NOT_ALLOWED' }, 'no-store', { allow: 'GET' }));
+    if (url.pathname === '/api/v1/run-skill' && req.method !== 'POST') return send(res, skillResponse(405, { error: 'METHOD_NOT_ALLOWED' }, 'no-store', { allow: 'POST' }));
 
     if (req.method === 'GET' && url.pathname === '/api/v1/manifest') return send(res, api.manifest());
     if (req.method === 'GET' && url.pathname === '/api/v1/skills') return send(res, skillResponse(200, { skills: listSkills() }, 'public, max-age=60'));
@@ -50,8 +63,9 @@ const server = http.createServer(async (req, res) => {
     }
     if (req.method === 'POST' && url.pathname === '/api/v1/run-skill') {
       const body = await readJson(req);
+      if (!validRunSkillRequest(body)) return send(res, skillResponse(400, { error: 'INVALID_RUN_SKILL_REQUEST' }));
       const result = runSkill(body.id, body.input ?? {});
-      return send(res, result ? skillResponse(200, result) : skillResponse(404, { error: 'SKILL_NOT_FOUND', id: body.id ?? null }));
+      return send(res, result ? skillResponse(200, result) : skillResponse(404, { error: 'SKILL_NOT_FOUND', id: body.id }));
     }
     if (req.method === 'GET' && url.pathname.startsWith('/api/v1/truth/')) return send(res, api.truth(decodeURIComponent(url.pathname.slice('/api/v1/truth/'.length))));
     if (req.method === 'GET' && url.pathname.startsWith('/api/v1/workflows/')) return send(res, api.workflow(decodeURIComponent(url.pathname.slice('/api/v1/workflows/'.length))));
