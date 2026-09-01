@@ -119,3 +119,26 @@ The design follows strategy before styling, distinction before decoration, self-
 ## ROLLBACK
 Base: `ee8ee42207d687d690a3c6b8dcd7c92d120c6f15`.
 Revert the Quiet Signal commits or close the PR without merge.
+
+---
+
+## GAUNTLET ITERATION — ISSUE #36
+
+Production review on `d969a24b3a493506982dae76fefeffc2a2ab9241` returned **REVISE** for one bounded problem: manifesto repetition after the hero.
+
+### Applied dispositions
+
+- **MERGE:** `Why now` now carries the four human responsibilities; the separate `What we believe` section is removed.
+- **DEFER:** the public nine-step sequence is reduced to `Choose → Shape → Prove → Release`; the full factory workflow remains in source/docs.
+- **DEFER:** soundtrack control moves out of primary navigation and into the footer as an ambient secondary affordance.
+- **REMOVE:** the redundant `Why this matters now` hero route is removed.
+- **KEEP:** headline, judgment/ownership promise, public source, Intent / Standard / Evidence contract, accessibility controls, Quiet Signal identity, and owner-controlled sound.
+- **CONVERGE:** the final section now presents exactly two destinations: learn/use the method or inspect source/proof.
+
+### Revised public journey
+
+`Point of view → Why now / four responsibilities → four-step public rhythm → Intent / Standard / Evidence → Use it / inspect it`
+
+### Protected stopping quality
+
+Human judgment and ownership must remain explicit. Further subtraction is only acceptable if it does not weaken comprehension, trust, accessibility, control, emotional resonance, or the distinction between Vibe Engineering and generic AI automation.
