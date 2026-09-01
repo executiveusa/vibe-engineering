@@ -53,9 +53,7 @@ That is the plain-language memory aid. For substantial software work, the requir
 DEFINE → PLAN → BUILD → VERIFY → REVIEW → SHIP
 ```
 
-You do not need to run the whole process every time.
-
-Most of the time, you call the skill you need.
+You do not need to run the whole process every time. Most of the time, you call the skill you need.
 
 ```bash
 vibe run setup-vibe "configure this repo"
@@ -71,9 +69,7 @@ The same skills can be called through the CLI, HTTP API, MCP, or an agent plugin
 
 ## Built-in Stop Slop
 
-`stop-slop` is one of the main Vibe skills.
-
-It looks for the common ways AI work appears finished before it is actually good:
+`stop-slop` is one of the main Vibe skills. It looks for the common ways AI work appears finished before it is actually good:
 
 - robotic copy;
 - generic AI or SaaS-looking design;
@@ -108,6 +104,41 @@ Intent → Standard → Evidence
 **Evidence:** What can we check so we know it is true?
 
 If a young builder learns that habit, they are already doing real engineering thinking.
+
+## The backend is walkable by design
+
+The backend is organized around ICM: the filesystem is the map, and a new human or AI agent should be able to enter the repo and understand where things live without guessing.
+
+Start here:
+
+```text
+AGENTS.md                repository law
+ICMR.yaml                Step 0 runtime contract
+icm/README.md            backend router
+icm/WALK.md              walk-test instructions
+icm/backend/map.mjs      machine-readable backend map
+icm/backend/index.mjs    stable backend facade
+```
+
+Then open only the domain you need:
+
+```text
+src/truth/      approved truth compiler/runtime
+src/skills/     callable Vibe procedures
+src/icmr/       Step 0 detection/compile/validation
+src/mcp/        MCP protocol adapter
+factory/icm/    reusable ICM workspace architecture
+```
+
+Run the walk test:
+
+```bash
+npm run icm:walk
+npm run vibe -- map
+npm run vibe -- walk
+```
+
+A walk-test PASS means the mapped backend structure and interfaces are internally coherent. It does not replace product proof, independent review, or release authority.
 
 ## What is inside
 
@@ -168,6 +199,8 @@ See [`docs/UPSTREAM-INSPIRATION.md`](docs/UPSTREAM-INSPIRATION.md) and [`docs/go
 ```bash
 npm install
 npm run vibe -- explain
+npm run vibe -- map
+npm run vibe -- walk
 npm run vibe -- skills
 npm run vibe -- skill grill
 npm run vibe -- run stop-slop "review this homepage"
@@ -186,10 +219,11 @@ npm run vibe -- context executiveusa/vibe-engineering high
 ## HTTP API
 
 ```text
+GET  /api/v1/icm/map
+GET  /api/v1/icm/walk
 GET  /api/v1/skills
 GET  /api/v1/skills/:id
 POST /api/v1/run-skill
-
 GET  /api/v1/manifest
 GET  /api/v1/truth/:id
 GET  /api/v1/workflows/:id
@@ -207,7 +241,7 @@ Example:
 }
 ```
 
-The API returns a deterministic execution packet. The calling agent performs the procedure under its own permissions. The API does not quietly take external actions.
+The API returns deterministic maps, checks, truth, and procedure packets. The calling agent performs procedures under its own permissions. The API does not quietly take external actions or authorize production release.
 
 ## MCP
 
@@ -220,6 +254,8 @@ POST /api/mcp
 Available MCP tools include:
 
 ```text
+vibe_icm_map
+vibe_walk
 vibe_skills
 vibe_skill
 vibe_run_skill
@@ -262,11 +298,10 @@ The exporter refuses to overwrite a non-empty `SKILL.md` by default. Use `npm ru
 
 ## Under the hood
 
-The simple skill layer sits on top of the full Vibe Engineering control plane:
-
 ```text
 VIBE ENGINEERING
   ├─ human intent + taste
+  ├─ ICM walk/router
   ├─ callable skill registry
   ├─ Stop Slop checks
   ├─ ICM stage contracts
@@ -274,20 +309,17 @@ VIBE ENGINEERING
   ├─ deterministic gates
   ├─ evidence + provenance
   │
-  ├─ CLI
-  ├─ HTTP API
-  ├─ MCP
-  ├─ agent plugin
-  └─ CI / release proof
+  └─ icm/backend/index.mjs
+       ├─ CLI
+       ├─ HTTP API
+       └─ MCP
 ```
 
 The deeper machinery exists when the work needs it. The person using Vibe should not have to understand all of it just to get started.
 
 ## Client Zero
 
-This repository is Client Zero.
-
-Vibe Engineering is used to build and review Vibe Engineering itself.
+This repository is Client Zero. Vibe Engineering is used to build and review Vibe Engineering itself.
 
 If the method cannot survive its own checks, it is not ready to teach or ship.
 
@@ -296,6 +328,7 @@ If the method cannot survive its own checks, it is not ready to teach or ship.
 ```bash
 npm ci
 npm run check
+npm run icm:walk
 npm audit --audit-level=high
 npm run dev
 ```
