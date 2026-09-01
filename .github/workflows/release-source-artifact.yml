@@ -1,0 +1,36 @@
+name: Release Source Artifact
+
+on:
+  push:
+    branches: [ops/release-7320109]
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact release SHA
+        uses: actions/checkout@v4
+        with:
+          ref: 7320109a2dda6489a467da60300ed45eb1ab9bf2
+      - name: Package deployable source
+        run: |
+          tar \
+            --exclude=.git \
+            --exclude=node_modules \
+            --exclude=dist \
+            --exclude=workspaces \
+            --exclude=.sandcastle \
+            --exclude='.env*' \
+            -czf /tmp/vibe-engineering-7320109.tgz .
+          sha256sum /tmp/vibe-engineering-7320109.tgz | tee /tmp/vibe-engineering-7320109.sha256
+      - name: Upload release source
+        uses: actions/upload-artifact@v4
+        with:
+          name: vibe-engineering-source-7320109
+          path: |
+            /tmp/vibe-engineering-7320109.tgz
+            /tmp/vibe-engineering-7320109.sha256
+          retention-days: 2
