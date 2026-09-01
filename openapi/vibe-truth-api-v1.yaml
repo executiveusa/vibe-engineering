@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
-  title: Vibe Truth API
-  version: 1.0.0
-  description: Read-only, versioned interface to approved Vibe Engineering truth.
+  title: Vibe Truth and Skills API
+  version: 1.1.0
+  description: Versioned interface to approved Vibe Engineering truth, workflows, context, and deterministic skill execution packets.
 servers:
   - url: /api/v1
 paths:
@@ -16,6 +16,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Manifest'
+  /skills:
+    get:
+      operationId: listSkills
+      responses:
+        '200':
+          description: Callable Vibe skill catalog
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [skills]
+                properties:
+                  skills:
+                    type: array
+                    items: { $ref: '#/components/schemas/SkillSummary' }
+  /skills/{id}:
+    get:
+      operationId: getSkill
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: One Vibe skill definition
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Skill' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /run-skill:
+    post:
+      operationId: runSkill
+      description: Return a deterministic procedure packet. The API does not perform external side effects on behalf of the caller.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RunSkillRequest' }
+      responses:
+        '200':
+          description: Skill execution packet
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RunSkillResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
   /truth/{id}:
     get:
       operationId: getTruth
@@ -77,6 +124,47 @@ components:
         artifacts:
           type: array
           items: { $ref: '#/components/schemas/ArtifactSummary' }
+    SkillSummary:
+      type: object
+      required: [id, title, summary, invocation, category, aliases, outputs, attribution, stepCount]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        summary: { type: string }
+        invocation: { type: string }
+        category: { type: string }
+        aliases: { type: array, items: { type: string } }
+        outputs: { type: array, items: { type: string } }
+        attribution: { type: string }
+        stepCount: { type: integer, minimum: 1 }
+    Skill:
+      allOf:
+        - $ref: '#/components/schemas/SkillSummary'
+        - type: object
+          required: [steps]
+          properties:
+            steps: { type: array, minItems: 1, items: { type: string } }
+    RunSkillRequest:
+      type: object
+      additionalProperties: false
+      required: [id]
+      properties:
+        id: { type: string, minLength: 1 }
+        input: { type: object, additionalProperties: true }
+    RunSkillResponse:
+      type: object
+      required: [skill, input, execution]
+      properties:
+        skill: { $ref: '#/components/schemas/Skill' }
+        input: { type: object, additionalProperties: true }
+        execution:
+          type: object
+          required: [mode, instructions, completionRule]
+          properties:
+            mode: { type: string, const: agent-procedure }
+            instructions: { type: array, minItems: 1, items: { type: string } }
+            completionRule: { type: string }
+            next: { type: [string, 'null'] }
     ContextRequest:
       type: object
       additionalProperties: false
