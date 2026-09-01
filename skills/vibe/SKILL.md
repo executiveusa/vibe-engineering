@@ -7,8 +7,14 @@ description: Route work through Vibe Engineering. Use when someone wants to buil
 
 AI makes it easy to make a lot of stuff quickly. Vibe Engineering helps you make the right thing, make it well, and prove it works before you call it done.
 
-Read `src/skills/catalog.mjs` as the canonical skill list. Pick the smallest skill that fits. Keep the user's words and goal visible. For substantial work, finish with `proof`. Use `ship` only for an actual release.
+Read `src/skills/index.mjs` as the canonical skill list. Pick the smallest skill that fits. Keep the user's words and goal visible.
 
-Common routes: `grill`, `language`, `spec`, `tickets`, `build`, `test-first`, `debug`, `review`, `architecture-check`, `stop-slop`, `deep-work`, `taste`, `proof`, `ship`, `handoff`.
+For substantial software work, do not jump straight to implementation. Follow the required lifecycle:
+
+`DEFINE → PLAN → BUILD → VERIFY → REVIEW → SHIP`
+
+Use `proof` during VERIFY to attach evidence. Use independent review before SHIP. Use `ship` only after an authorized owner, Judge, or human records `SHIP`; stop on `HOLD`.
+
+Common routes: `grill`, `language`, `spec`, `tickets`, `build`, `test-first`/`test`, `debug`, `review`, `architecture-check`/`architecture`, `stop-slop`, `deep-work`, `taste`, `proof`, `ship`, `handoff`.
 
 Do not bury the user in internal process names. Explain what you are doing in normal language.
