@@ -37,6 +37,7 @@ You do not have to memorize the whole system. Most of the time you call one skil
 Examples:
 
 ```bash
+vibe run setup-vibe "configure this repo"
 vibe run grill "help me figure out this app idea"
 vibe run spec "turn this idea into a clear build plan"
 vibe run stop-slop "review this landing page"
@@ -80,11 +81,12 @@ The `stop-slop` skill checks for the common ways AI output looks finished before
 
 ## The skill set
 
-The canonical registry lives at [`src/skills/catalog.mjs`](src/skills/catalog.mjs).
+The complete callable registry lives at [`src/skills/index.mjs`](src/skills/index.mjs), with the core procedures in [`src/skills/catalog.mjs`](src/skills/catalog.mjs).
 
 It includes Vibe-native versions of the workflows we use most:
 
 ```text
+setup-vibe         configure a repo for Vibe skills
 ask-vibe           choose the right workflow
 grill              align before coding
 grill-idea         pressure-test a non-code idea
@@ -204,6 +206,8 @@ The main router skill is:
 ```text
 skills/vibe/SKILL.md
 ```
+
+Core direct skills are committed under `skills/`, and `npm run skills:export` materializes the full canonical registry as `SKILL.md` files.
 
 The router reads the canonical skill registry and sends work to the smallest useful Vibe procedure instead of forcing every task through the entire operating system.
 
