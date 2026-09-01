@@ -34,6 +34,7 @@ export function getSkill(id) {
 export function runSkill(id, input = {}) {
   const found = getSkill(id);
   if (!found) return null;
+  const terminal = found.id === 'proof' || found.id === 'ship';
   return {
     skill: found,
     input,
@@ -41,7 +42,7 @@ export function runSkill(id, input = {}) {
       mode: 'agent-procedure',
       instructions: found.steps,
       completionRule: 'Do not claim completion until the requested outcome is satisfied and relevant proof is attached.',
-      next: found.id === 'ship' ? null : 'proof',
+      next: terminal ? null : 'proof',
     },
   };
 }
