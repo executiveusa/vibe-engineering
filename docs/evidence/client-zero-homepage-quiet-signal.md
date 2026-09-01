@@ -139,6 +139,21 @@ Production review on `d969a24b3a493506982dae76fefeffc2a2ab9241` returned **REVIS
 
 `Point of view → Why now / four responsibilities → four grouped movements containing the full nine-verb rhythm → Intent / Standard / Evidence → Use it / inspect it`
 
+### Final pre-merge inspection
+
+- inspected commit: `1abdd6d1a02de07875178d955fd9c2e71274a0d8`
+- preview deployment: `dpl_8deB9MoXbKVPDGPf46rnG9Zfh7g7`
+- preview state: `READY`
+- preview build: Vite production build completed successfully; 9 Node functions detected; source provenance emitted as the exact inspected commit
+- Quality Gate: **PASS** (`run #170`, commit `1abdd6d1a02de07875178d955fd9c2e71274a0d8`)
+- independent review: prior P1 finding about dropping canonical workflow verbs was addressed by restoring all nine verbs in four grouped movements
+- final Gauntlet result for the inspected candidate: **PASS**
+- unresolved subtraction candidates: **none**
+- accessibility regression: **false**
+- trust/control regression: **false**
+
+Production promotion is intentionally performed only after merge; the production SHA/deployment is recorded in issue #36 after promotion rather than claiming an unmerged candidate as production.
+
 ### Protected stopping quality
 
 Human judgment and ownership must remain explicit. Further subtraction is only acceptable if it does not weaken comprehension, trust, accessibility, control, emotional resonance, or the distinction between Vibe Engineering and generic AI automation.
