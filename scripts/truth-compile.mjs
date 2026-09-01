@@ -3,10 +3,18 @@ import path from 'node:path';
 import process from 'node:process';
 import { compileArtifacts, loadArtifacts, stableStringify } from '../src/truth/compiler.mjs';
 
+function firstNonEmpty(...values) {
+  return values.find((value) => typeof value === 'string' ? value.trim().length > 0 : value != null);
+}
+
 const root = process.cwd();
 const sourceDirectory = path.join(root, 'truth', 'sources');
 const outputDirectory = path.join(root, 'dist', 'truth');
-const sourceCommit = process.env.GITHUB_SHA ?? process.env.VERCEL_GIT_COMMIT_SHA ?? 'local';
+const sourceCommit = firstNonEmpty(
+  process.env.GITHUB_SHA,
+  process.env.VIBE_SOURCE_COMMIT,
+  process.env.VERCEL_GIT_COMMIT_SHA,
+) ?? 'local';
 
 const artifacts = await loadArtifacts(sourceDirectory);
 const bundle = compileArtifacts(artifacts, { sourceCommit });
