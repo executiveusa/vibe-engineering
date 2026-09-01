@@ -1,4 +1,4 @@
-import { getSkill, listSkills, runSkill } from '../skills/catalog.mjs';
+import { getSkill, listSkills, runSkill } from '../skills/index.mjs';
 
 const PROTOCOL_VERSION = '2026-07-28';
 const SERVER_INFO = { name: 'vibe-engineering', version: '2.2.0' };
