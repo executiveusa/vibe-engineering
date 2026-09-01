@@ -56,5 +56,6 @@ export function getSkill(id) { return BY_ID.get(id) ?? null; }
 export function runSkill(id, input = {}) {
   const found = getSkill(id);
   if (!found) return null;
-  return { skill: found, input, execution: { mode: 'agent-procedure', instructions: found.steps, completionRule: 'Do not claim completion until the requested outcome is satisfied and relevant proof is attached.', next: found.id === 'ship' ? null : 'proof' } };
+  const terminal = found.id === 'proof' || found.id === 'ship';
+  return { skill: found, input, execution: { mode: 'agent-procedure', instructions: found.steps, completionRule: 'Do not claim completion until the requested outcome is satisfied and relevant proof is attached.', next: terminal ? null : 'proof' } };
 }
