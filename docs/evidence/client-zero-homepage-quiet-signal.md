@@ -119,3 +119,41 @@ The design follows strategy before styling, distinction before decoration, self-
 ## ROLLBACK
 Base: `ee8ee42207d687d690a3c6b8dcd7c92d120c6f15`.
 Revert the Quiet Signal commits or close the PR without merge.
+
+---
+
+## GAUNTLET ITERATION — ISSUE #36
+
+Production review on `d969a24b3a493506982dae76fefeffc2a2ab9241` returned **REVISE** for one bounded problem: manifesto repetition after the hero.
+
+### Applied dispositions
+
+- **MERGE:** `Why now` now carries the four human responsibilities; the separate `What we believe` section is removed.
+- **MERGE / DEFER:** the full canonical nine-step rhythm remains visible but is grouped into four public movements: `Choose / See`, `Shape / Make`, `Prove / Challenge`, and `Decide / Release / Learn`. This compresses presentation without deleting canonical method steps.
+- **DEFER:** soundtrack control moves out of primary navigation and into the footer as an ambient secondary affordance.
+- **REMOVE:** the redundant `Why this matters now` hero route is removed.
+- **KEEP:** headline, judgment/ownership promise, public source, Intent / Standard / Evidence contract, accessibility controls, Quiet Signal identity, and owner-controlled sound.
+- **CONVERGE:** the final section now presents exactly two destinations: learn/use the method or inspect source/proof.
+
+### Revised public journey
+
+`Point of view → Why now / four responsibilities → four grouped movements containing the full nine-verb rhythm → Intent / Standard / Evidence → Use it / inspect it`
+
+### Final pre-merge inspection
+
+- inspected commit: `1abdd6d1a02de07875178d955fd9c2e71274a0d8`
+- preview deployment: `dpl_8deB9MoXbKVPDGPf46rnG9Zfh7g7`
+- preview state: `READY`
+- preview build: Vite production build completed successfully; 9 Node functions detected; source provenance emitted as the exact inspected commit
+- Quality Gate: **PASS** (`run #170`, commit `1abdd6d1a02de07875178d955fd9c2e71274a0d8`)
+- independent review: prior P1 finding about dropping canonical workflow verbs was addressed by restoring all nine verbs in four grouped movements
+- final Gauntlet result for the inspected candidate: **PASS**
+- unresolved subtraction candidates: **none**
+- accessibility regression: **false**
+- trust/control regression: **false**
+
+Production promotion is intentionally performed only after merge; the production SHA/deployment is recorded in issue #36 after promotion rather than claiming an unmerged candidate as production.
+
+### Protected stopping quality
+
+Human judgment and ownership must remain explicit. Further subtraction is only acceptable if it does not weaken comprehension, trust, accessibility, control, emotional resonance, or the distinction between Vibe Engineering and generic AI automation.

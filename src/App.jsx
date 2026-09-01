@@ -4,7 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const FLOW = ['Choose', 'See', 'Shape', 'Make', 'Prove', 'Challenge', 'Decide', 'Release', 'Learn'];
+const FLOW = ['Choose / See', 'Shape / Make', 'Prove / Challenge', 'Decide / Release / Learn'];
 
 function Mark() {
   return (
@@ -198,7 +198,6 @@ function App() {
           <div className="nav-actions">
             <a href="#method">Method</a>
             <a href="https://github.com/executiveusa/vibe-engineering" target="_blank" rel="noreferrer">Source</a>
-            <SoundControl />
           </div>
         </nav>
 
@@ -211,7 +210,7 @@ function App() {
             </p>
             <div className="hero-actions">
               <a className="text-link strong" href="#method">Learn the method <span aria-hidden="true">↘</span></a>
-              <a className="text-link" href="#why">Why this matters now</a>
+              <a className="text-link" href="https://github.com/executiveusa/vibe-engineering" target="_blank" rel="noreferrer">Inspect the source <span aria-hidden="true">↗</span></a>
             </div>
           </div>
 
@@ -234,7 +233,7 @@ function App() {
           <div>
             <h2 id="why-title">The machine can generate. The human still has to choose.</h2>
             <p className="lead-copy">
-              When making gets easier, judgment becomes more valuable. Vibe Engineering is the discipline between an idea and the moment you decide it is ready to become real.
+              When making gets easier, judgment becomes more valuable. Vibe Engineering keeps four human responsibilities explicit.
             </p>
           </div>
         </div>
@@ -251,12 +250,12 @@ function App() {
         <div className="section-shell split-heading reveal">
           <p className="section-label">The method</p>
           <div>
-            <h2 id="method-title">A rhythm for making better decisions with AI.</h2>
-            <p className="lead-copy muted">Simple enough to remember. Rigorous enough to trust.</p>
+            <h2 id="method-title">Four movements. Nine verbs.</h2>
+            <p className="lead-copy muted">The full Vibe rhythm stays visible without turning the homepage into a framework encyclopedia.</p>
           </div>
         </div>
 
-        <div className="flow section-shell reveal" aria-label="Vibe Engineering workflow">
+        <div className="flow section-shell reveal" aria-label="Vibe Engineering full nine-step rhythm grouped into four public movements">
           {FLOW.map((step, index) => (
             <div className="flow-step" key={step}>
               <span>{String(index + 1).padStart(2, '0')}</span>
@@ -276,29 +275,15 @@ function App() {
         </div>
       </section>
 
-      <section className="beliefs section paper-section" aria-labelledby="beliefs-title">
-        <div className="section-shell beliefs-layout">
-          <div className="beliefs-heading reveal">
-            <p className="section-label">What we believe</p>
-            <h2 id="beliefs-title">Make the system powerful.<br />Make the experience simple.</h2>
-          </div>
-
-          <div className="belief-list">
-            <div className="belief reveal"><span>01</span><p>Complex systems are acceptable. Complex interfaces are not.</p></div>
-            <div className="belief reveal"><span>02</span><p>Good design removes friction without removing trust or human control.</p></div>
-            <div className="belief reveal"><span>03</span><p>The builder should not be the only person deciding the work is good.</p></div>
-            <div className="belief reveal"><span>04</span><p>Retention should be earned through value, not dependence.</p></div>
-          </div>
-        </div>
-      </section>
-
       <section className="closing section oxide-section" aria-labelledby="closing-title">
         <div className="section-shell closing-layout reveal">
-          <p className="section-label">Open system</p>
+          <p className="section-label">Use it / inspect it</p>
           <h2 id="closing-title">Bring the idea.<br />Keep the keys.</h2>
           <div className="closing-copy">
-            <p>Vibe Engineering is an inspectable method for people and agents. Use it, challenge it, improve it.</p>
-            <a className="closing-link" href="https://github.com/executiveusa/vibe-engineering" target="_blank" rel="noreferrer">Explore the repository <span aria-hidden="true">↗</span></a>
+            <p>Use the method to make the next decision, or inspect the source to see how the system earns trust.</p>
+            <a className="closing-link" href="#method">Learn the method <span aria-hidden="true">↘</span></a>
+            {' '}
+            <a className="closing-link" href="https://github.com/executiveusa/vibe-engineering" target="_blank" rel="noreferrer">Inspect source + proof <span aria-hidden="true">↗</span></a>
           </div>
         </div>
       </section>
@@ -306,6 +291,7 @@ function App() {
       <footer>
         <div className="section-shell footer-inner">
           <span>Vibe Engineering / The Pauli Effect</span>
+          <SoundControl />
           <span>Verify It Before Everything.</span>
         </div>
       </footer>
