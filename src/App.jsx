@@ -14,7 +14,7 @@ const STEPS = [
 ];
 
 const ENTRY_POINTS = [
-  ['FILES + FOLDERS', 'Any agent', 'Read AGENTS.md, ICMR.yaml, and the current context. No extra orchestrator required.'],
+  ['FILES + FOLDERS', 'Any agent', 'Open the repo. Your agent reads the rules and current context. No extra orchestrator required.'],
   ['PLUGIN', 'Claude Code + skill-compatible agents', 'Use Vibe as an open-source skill pack inside the tools you already use.'],
   ['CLI', 'Terminal', 'Call the same Vibe skills from your shell when you want a direct workflow.'],
   ['API + MCP', 'Remote agents and apps', 'Connect other agents to the same skills, maps, and verification rules.'],
@@ -66,7 +66,7 @@ function App() {
 
         <div className="hero-layout studio-hero-layout">
           <div className="hero-intro">
-            <p className="eyebrow">FREE / OPEN SOURCE / AGENT-NEUTRAL</p>
+            <p className="eyebrow">FREE / OPEN SOURCE / WORKS WITH YOUR AGENT</p>
             <h1>Verify before<br /><em>everything.</em></h1>
             <p className="hero-copy">Bring the idea. Vibe helps your AI get clear, make it, check it, and prove it works—before you ship.</p>
             <div className="hero-actions">
@@ -111,8 +111,8 @@ function App() {
           <p className="section-label">We did the research</p>
           <div>
             <h2 id="research-title">You should not have to collect a hundred developer rules from the internet.</h2>
-            <p className="lead-copy muted">We came into this wave from both sides: builders and people who were not traditional developers. We studied experienced engineers, designers, open-source communities, review systems, and real production failures. We kept what survived the checks, recorded the sources, and put it behind one simpler workflow.</p>
-            <a className="text-link strong" href="https://github.com/executiveusa/vibe-engineering/blob/main/docs/governance/SOURCE-PROVENANCE-LEDGER.md" target="_blank" rel="noreferrer">See the source ledger <span aria-hidden="true">↗</span></a>
+            <p className="lead-copy muted">We did the homework: experienced engineers, designers, open-source communities, review systems, and real production failures. We kept the parts that survived our checks, recorded the sources, and put them behind one simple workflow.</p>
+            <a className="text-link strong" href="https://github.com/executiveusa/vibe-engineering/blob/main/docs/governance/SOURCE-PROVENANCE-LEDGER.md" target="_blank" rel="noreferrer">See what we studied <span aria-hidden="true">↗</span></a>
           </div>
         </div>
       </section>
@@ -122,7 +122,7 @@ function App() {
           <p className="section-label">Use it your way</p>
           <div>
             <h2 id="use-title">One set of rules.<br />Any agent.</h2>
-            <p className="lead-copy">Vibe is not another swarm of agents. The source of truth is a small, walkable filesystem. Adapters only give your tools another way in.</p>
+            <p className="lead-copy">Vibe is not another swarm of agents. The rules live in normal files and folders. Every way into Vibe points back to the same source.</p>
           </div>
         </div>
         <div className="section-shell entry-grid">
