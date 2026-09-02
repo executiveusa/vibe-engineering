@@ -19,7 +19,7 @@ You do **not** need to learn the machinery underneath before using it.
 Give this repository to the agent you already use and say:
 
 ```text
-Read AGENTS.md. Follow Vibe. Verify before everything.
+Read AGENTS.md. Follow Vibe. Verify It Before Everything.
 ```
 
 Repository:
