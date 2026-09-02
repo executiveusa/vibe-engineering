@@ -64,9 +64,10 @@ export async function runIcmWalk({ root = process.cwd() } = {}) {
     return { route, ok: rewriteOk || directOk };
   }));
   const missingHttp = httpChecks.filter((item) => !item.ok).map((item) => item.route);
+  const skillFloor = 32;
 
   return {
-    ok: missing.length === 0 && lifecycleOk && releaseAuthorityOk && skills.length >= 31 && missingMcp.length === 0 && missingHttp.length === 0,
+    ok: missing.length === 0 && lifecycleOk && releaseAuthorityOk && skills.length >= skillFloor && missingMcp.length === 0 && missingHttp.length === 0,
     test: 'vibe-icm-walk',
     map: ICM_BACKEND_MAP.id,
     lifecycle,
@@ -74,7 +75,7 @@ export async function runIcmWalk({ root = process.cwd() } = {}) {
       requiredPaths: { ok: missing.length === 0, missing },
       lifecycleInLaw: lifecycleOk,
       releaseAuthorityInLaw: releaseAuthorityOk,
-      skillRegistry: { ok: skills.length >= 31, count: skills.length },
+      skillRegistry: { ok: skills.length >= skillFloor, count: skills.length, floor: skillFloor },
       mcpCatalog: { ok: missingMcp.length === 0, expected: expectedMcp.length, missing: missingMcp },
       httpRouting: { ok: missingHttp.length === 0, expected: expectedHttp.length, missing: missingHttp },
       interfaces: ICM_BACKEND_MAP.interfaces,
