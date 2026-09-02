@@ -18,7 +18,26 @@ const SETUP_VIBE = Object.freeze({
   attribution: 'Inspired by the setup/configuration pattern in mattpocock/skills (MIT); re-authored for Vibe Engineering.',
 });
 
-export const SKILLS = Object.freeze([SETUP_VIBE, ...CORE_SKILLS]);
+const PROJECT_REVIEW = Object.freeze({
+  id: 'project-review',
+  title: 'Project Review',
+  summary: 'Run an independent, system-aware review before serious work can be called finished or ready to ship.',
+  invocation: 'both',
+  category: 'governance',
+  aliases: ['open-code-review', 'ocr'],
+  outputs: ['structured review findings', 'system-impact review evidence'],
+  steps: [
+    'Review the exact candidate revision or changed range; do not review an approximate or stale diff.',
+    'Use the repository review engine when available. Vibe Engineering standardizes on executiveusa/open-code-review, derived from Alibaba OpenCodeReview (Apache-2.0), for deterministic file selection and structured AI review.',
+    'Check findings against the whole affected system: callers, contracts, auth/security, data/state, user journeys, tests, deployment, and connected repositories.',
+    'Keep review independent from the builder whenever practical. The builder may answer findings but cannot be the only approver.',
+    'Resolve, explicitly accept, or escalate material findings. Do not hide unresolved defects behind a score or summary.',
+    'Pass the reviewed candidate into stop-slop, taste, proof, and release authority. Project Review never self-authorizes SHIP.',
+  ],
+  attribution: 'Backed by executiveusa/open-code-review, a Vibe-adapted fork of Alibaba OpenCodeReview (Apache-2.0), combined with Vibe Engineering system-impact and release-governance rules.',
+});
+
+export const SKILLS = Object.freeze([SETUP_VIBE, PROJECT_REVIEW, ...CORE_SKILLS]);
 
 const BY_ID = new Map(SKILLS.map((item) => [item.id, item]));
 for (const item of SKILLS) for (const alias of item.aliases ?? []) BY_ID.set(alias, item);
