@@ -14,13 +14,14 @@
         "./skills/vibe",
         "./skills/setup-vibe",
         "./skills/grill",
+        "./skills/project-review",
         "./skills/stop-slop",
         "./skills/human-voice",
         "./skills/deep-work",
         "./skills/proof",
         "./skills/ship"
       ],
-      "description": "Plain-language planning, repository setup, interviewing, anti-slop review, human copy, deep-work gates, proof, and release governance backed by the full callable Vibe registry.",
+      "description": "Studio operating-system skills for planning, repository setup, interviewing, independent Project Review, anti-slop checks, human copy, deep-work gates, proof, and release governance backed by the full callable Vibe registry.",
       "category": "development"
     }
   ]
