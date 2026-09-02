@@ -12,6 +12,24 @@ This repository inherits the authoritative studio policy in `docs/STUDIO-SYSTEM-
 
 For Vibe v2 method decisions, also read `docs/VIBE-ENGINEERING-V2-DOCTRINE.md`. It adds plain-language public framing, Intent → Standard → Evidence, controlled divergence, no-slop quality, source/provenance, earned retention, and Client Zero rules without weakening existing studio authority.
 
+## Universal filesystem law
+
+Vibe Engineering is **agent-neutral by default**.
+
+The canonical system is the repository filesystem: files, folders, contracts, skills, proof, and durable decisions. Claude Code, Codex, Cursor, OpenCode, MCP clients, CLIs, APIs, and future agents are adapters to that system. They are not separate sources of truth.
+
+Therefore:
+
+- a new agent must be able to enter through `AGENTS.md → ICMR.yaml → CONTEXT.md` and understand what to do next;
+- durable rules belong in files, not in chat memory or one vendor's hidden prompt;
+- adapters may translate access, but they must not duplicate or fork canonical law;
+- do not add another orchestrator, persona, sub-agent hierarchy, or agent swarm when a file, skill, stage contract, or adapter is enough;
+- changing agent vendors must not require redesigning the project architecture;
+- public onboarding must lead with the smallest useful action and keep implementation detail underneath;
+- every supported entry point—files, plugin, CLI, API, or MCP—must resolve to the same Vibe rules and skill definitions.
+
+**No agent soup. One walkable system. Any capable agent can use it.**
+
 ## Mandatory Step 0 — ICMR
 
 Before substantial work, run the ICMR Universal Compiler contract in `skills/icmr-universal-compiler/SKILL.md`.
