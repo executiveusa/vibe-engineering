@@ -2,11 +2,11 @@
 
 **V.I.B.E. = Verify It Before Everything.**
 
-AI can make software fast now.
+Vibe Engineering is the open-source operating system behind The Pauli Effect's AI-native product studio.
 
-That is powerful. It also means you can make the wrong thing, badly, faster than ever.
+AI can make software fast now. That is powerful. It also means you can make the wrong thing, badly, faster than ever.
 
-Vibe Engineering is an open-source set of skills that helps you use AI without losing the part that matters most: your judgment.
+Vibe Engineering helps humans and agents turn ideas into finished websites, agents, apps, brands, and business systems without losing judgment, taste, proof, ownership, or rollback.
 
 You do not need to know how to code.
 
@@ -37,6 +37,7 @@ It helps you:
 - keep your own taste and point of view;
 - turn fuzzy ideas into clear build instructions;
 - catch robotic writing and generic AI design;
+- run independent code and system review;
 - stop agents from saying “done” too early;
 - test important claims;
 - keep control of your code, data, and recovery path.
@@ -59,6 +60,7 @@ You do not need to run the whole process every time. Most of the time, you call 
 vibe run setup-vibe "configure this repo"
 vibe run grill "help me figure out this app idea"
 vibe run spec "turn this idea into a build plan"
+vibe run project-review "review the exact candidate revision"
 vibe run stop-slop "review this landing page"
 vibe run human-voice "make this sound like a person wrote it"
 vibe run debug "this works locally but breaks in production"
@@ -67,9 +69,58 @@ vibe run proof "prove this release is actually ready"
 
 The same skills can be called through the CLI, HTTP API, MCP, or an agent plugin.
 
+## 32 core Vibe skills
+
+The complete callable registry lives at [`src/skills/index.mjs`](src/skills/index.mjs), with the core procedures in [`src/skills/catalog.mjs`](src/skills/catalog.mjs).
+
+```text
+setup-vibe         configure a repo for Vibe skills
+project-review     independent system-aware review, backed by OpenCodeReview
+ask-vibe           choose the right workflow
+grill              get clear before coding
+grill-idea         pressure-test an idea
+language           create shared project language
+map                break down large work
+spec               turn intent into a build contract
+tickets            split work into small end-to-end pieces
+build              implement a complete slice
+test-first         red / green / refactor
+debug              diagnose with evidence
+prototype          learn with throwaway code
+research           answer questions from strong sources
+module-design      make interfaces smaller and clearer
+architecture-check find structural code problems
+review             review the work against the spec
+merge              resolve conflicts by intent
+triage             decide what an issue needs next
+human-step         guide steps only a person can perform
+handoff            let another agent continue cleanly
+teach              explain without dumping information
+ask-human          create a focused questionnaire
+explain            translate confusing system language
+interview          reusable question loop
+agent-docs         write instructions agents can follow
+stop-slop          catch generic and unfinished AI output
+human-voice        remove robotic AI writing
+deep-work          stop premature completion
+taste              check design judgment
+proof              verify important claims
+ship               release exact proven revisions
+```
+
+## Independent Project Review
+
+`project-review` is the dedicated completion-review skill.
+
+Vibe standardizes on [`executiveusa/open-code-review`](https://github.com/executiveusa/open-code-review), a Vibe-enabled fork of Alibaba OpenCodeReview (Apache-2.0), as the preferred review engine when available.
+
+OpenCodeReview supplies deterministic changed-file selection, rule matching, isolated review bundles, contextual AI review, line-level findings, full-codebase scans, and CI/CD integration. Vibe adds system-impact review, independent-review requirements, Stop Slop, taste, proof, owner authority, and rollback.
+
+The review engine cannot authorize production release.
+
 ## Built-in Stop Slop
 
-`stop-slop` is one of the main Vibe skills. It looks for the common ways AI work appears finished before it is actually good:
+`stop-slop` looks for the common ways AI work appears finished before it is actually good:
 
 - robotic copy;
 - generic AI or SaaS-looking design;
@@ -83,6 +134,7 @@ The same skills can be called through the CLI, HTTP API, MCP, or an agent plugin
 
 Other skills focus on specific problems:
 
+- `project-review` performs independent completion review;
 - `human-voice` fixes robotic writing;
 - `taste` reviews design judgment;
 - `deep-work` stops large jobs from being declared finished too early;
@@ -140,57 +192,22 @@ npm run vibe -- walk
 
 A walk-test PASS means the mapped backend structure and interfaces are internally coherent. It does not replace product proof, independent review, or release authority.
 
-## What is inside
-
-The complete callable registry lives at [`src/skills/index.mjs`](src/skills/index.mjs), with the core procedures in [`src/skills/catalog.mjs`](src/skills/catalog.mjs).
-
-Current skills include:
-
-```text
-setup-vibe         configure a repo for Vibe skills
-ask-vibe           choose the right workflow
-grill              get clear before coding
-grill-idea         pressure-test an idea
-language           create shared project language
-map                break down large work
-spec               turn intent into a build contract
-tickets            split work into small end-to-end pieces
-build              implement a complete slice
-test-first         red / green / refactor
-debug              diagnose with evidence
-prototype          learn with throwaway code
-research           answer questions from strong sources
-module-design      make interfaces smaller and clearer
-architecture-check find structural code problems
-review             review the work against the spec
-merge              resolve conflicts by intent
-triage             decide what an issue needs next
-human-step         guide steps only a person can perform
-handoff            let another agent continue cleanly
-teach              explain without dumping information
-ask-human          create a focused questionnaire
-explain            translate confusing system language
-interview          reusable question loop
-agent-docs         write instructions agents can follow
-stop-slop          catch generic and unfinished AI output
-human-voice        remove robotic AI writing
-deep-work          stop premature completion
-taste              check design judgment
-proof              verify important claims
-ship               release exact proven revisions
-```
-
 ## Open source and attribution
 
 Vibe Engineering is MIT licensed.
 
-The system was informed by useful ideas from other MIT-licensed open-source projects, including:
+The system is deliberately informed by open engineering and design work, with source and license recorded before a pattern becomes canonical. Important influences include:
 
-- `blader/humanizer`
-- `Leonxlnx/unlazy`
-- `mattpocock/skills`
+- Google Engineering Practices;
+- `mattpocock/skills`;
+- ICM / Jake Van Clief;
+- `alibaba/open-code-review` through `executiveusa/open-code-review`;
+- Gauntlet Loop;
+- `blader/humanizer`;
+- `Leonxlnx/unlazy`;
+- Impeccable and anti-default design work.
 
-The Vibe versions are re-authored and adapted to fit the Vibe Engineering method rather than copied and silently renamed.
+Vibe does not claim these upstream systems as original Vibe work. Vibe's contribution is the way they are adapted, attributed, bounded, and composed under one studio operating system with ICM, owner authority, independent review, proof, taste, Stop Slop, and exact-revision release rules.
 
 See [`docs/UPSTREAM-INSPIRATION.md`](docs/UPSTREAM-INSPIRATION.md) and [`docs/governance/SOURCE-PROVENANCE-LEDGER.md`](docs/governance/SOURCE-PROVENANCE-LEDGER.md).
 
@@ -202,7 +219,8 @@ npm run vibe -- explain
 npm run vibe -- map
 npm run vibe -- walk
 npm run vibe -- skills
-npm run vibe -- skill grill
+npm run vibe -- skill project-review
+npm run vibe -- run project-review "review the candidate"
 npm run vibe -- run stop-slop "review this homepage"
 ```
 
@@ -234,9 +252,9 @@ Example:
 
 ```json
 {
-  "id": "stop-slop",
+  "id": "project-review",
   "input": {
-    "artifact": "landing page copy"
+    "revision": "candidate-sha"
   }
 }
 ```
@@ -286,7 +304,7 @@ The main router skill is:
 skills/vibe/SKILL.md
 ```
 
-Core direct skills are committed under `skills/`.
+Core direct skills are committed under `skills/`, including `skills/project-review/SKILL.md`.
 
 To materialize missing or empty generated skill files:
 
@@ -302,7 +320,8 @@ The exporter refuses to overwrite a non-empty `SKILL.md` by default. Use `npm ru
 VIBE ENGINEERING
   ├─ human intent + taste
   ├─ ICM walk/router
-  ├─ callable skill registry
+  ├─ 32-skill callable registry
+  ├─ OpenCodeReview project review
   ├─ Stop Slop checks
   ├─ ICM stage contracts
   ├─ truth artifacts
