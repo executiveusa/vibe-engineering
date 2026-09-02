@@ -7,6 +7,10 @@ This is a Vibe Engineering project for {{PROJECT_AUDIENCE}} in the domain of {{P
 ## Non-negotiable laws
 
 - Verify It Before Everything.
+- The filesystem is the source of truth. Agents are adapters, not architecture.
+- Any capable agent must be able to enter through `AGENTS.md → ICMR.yaml → CONTEXT.md`.
+- Durable rules and decisions belong in files, not chat memory or vendor-specific hidden prompts.
+- Do not add an orchestrator, persona, or agent swarm when a file, skill, stage contract, or adapter is enough.
 - Detect and compile ICMR before substantial work.
 - Inspect before changing.
 - Reuse before adding.
@@ -17,6 +21,8 @@ This is a Vibe Engineering project for {{PROJECT_AUDIENCE}} in the domain of {{P
 - Never confuse a build, CI result, or deployment request with verified production.
 - The builder cannot approve its own work.
 - Use the Vibe Engineering mandatory engineering workflow for software changes.
+
+**No agent soup. One walkable system. Any capable agent can use it.**
 
 ## Mandatory Step 0 — ICMR
 
@@ -66,7 +72,7 @@ Engineering completion alone cannot authorize release. Council/Judge, ownership,
 
 ## Audience rule
 
-Explain each consequential decision in plain language first, then give the exact technical term. Use respectful examples drawn from daily life, health, science, nature, ecology, community work, or positive technology use. Never talk down to the reader.
+Explain each consequential decision in plain language first, then give the exact technical term. Lead with the next useful action. Suppress tangents. Keep the current state visible. Use respectful examples and never talk down to the reader.
 
 ## Completion rule
 
