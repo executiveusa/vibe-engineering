@@ -36,6 +36,11 @@ async function exists(root, relative) {
   }
 }
 
+function directHandlerPath(route) {
+  const pathname = route.slice(route.indexOf(' ') + 1);
+  return pathname.replace(/^\//, '').replace(/:([^/]+)/g, '[$1]') + '.mjs';
+}
+
 export async function runIcmWalk({ root = process.cwd() } = {}) {
   const pathChecks = await Promise.all(ICM_REQUIRED_PATHS.map(async (relative) => ({ path: relative, ok: await exists(root, relative) })));
   const missing = pathChecks.filter((item) => !item.ok).map((item) => item.path);
@@ -51,8 +56,14 @@ export async function runIcmWalk({ root = process.cwd() } = {}) {
   const skills = listSkills();
   const expectedMcp = ICM_BACKEND_MAP.interfaces.mcp.tools;
   const missingMcp = expectedMcp.filter((name) => !mcpSource.includes(`name: '${name}'`) && !mcpSource.includes(`name === '${name}'`));
-  const expectedHttp = ICM_BACKEND_MAP.interfaces.http;
-  const missingHttp = expectedHttp.filter((route) => !vercelSource.includes(`\"source\": \"${route}\"`) && !vercelSource.includes(route));
+  const expectedHttp = ICM_BACKEND_MAP.interfaces.http.routes;
+  const httpChecks = await Promise.all(expectedHttp.map(async (route) => {
+    const pathname = route.slice(route.indexOf(' ') + 1);
+    const rewriteOk = vercelSource.includes(`\"source\": \"${pathname}\"`);
+    const directOk = await exists(root, directHandlerPath(route));
+    return { route, ok: rewriteOk || directOk };
+  }));
+  const missingHttp = httpChecks.filter((item) => !item.ok).map((item) => item.route);
 
   return {
     ok: missing.length === 0 && lifecycleOk && releaseAuthorityOk && skills.length >= 31 && missingMcp.length === 0 && missingHttp.length === 0,
