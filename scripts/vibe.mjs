@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import process from 'node:process';
 import { VibeTruthClient } from '../packages/truth-sdk/index.mjs';
-import { getSkill, listSkills, runSkill } from '../src/skills/index.mjs';
+import { getIcmBackendMap, getSkill, listSkills, runIcmWalk, runSkill } from '../icm/backend/index.mjs';
 
 const [command, ...args] = process.argv.slice(2);
 const client = new VibeTruthClient({ baseUrl: process.env.VIBE_TRUTH_API_URL ?? 'http://localhost:4317' });
@@ -10,7 +10,13 @@ function print(value) {
   console.log(JSON.stringify(value, null, 2));
 }
 
-if (command === 'method') {
+if (command === 'map') {
+  print(getIcmBackendMap());
+} else if (command === 'walk') {
+  const result = await runIcmWalk();
+  print(result);
+  if (!result.ok) process.exitCode = 1;
+} else if (command === 'method') {
   print(await client.method());
 } else if (command === 'manifest') {
   print(await client.manifest());
@@ -23,10 +29,7 @@ if (command === 'method') {
 } else if (command === 'context') {
   const repository = args[0] ?? null;
   const consequenceLevel = args[1] ?? 'medium';
-  print(await client.resolveContext({
-    project: { repository, mode: 'brownfield' },
-    task: { type: 'software-change', consequenceLevel },
-  }));
+  print(await client.resolveContext({ project: { repository, mode: 'brownfield' }, task: { type: 'software-change', consequenceLevel } }));
 } else if (command === 'skills') {
   print({ skills: listSkills() });
 } else if (command === 'skill') {
@@ -44,11 +47,12 @@ if (command === 'method') {
   print({
     what: 'Vibe Engineering is an open-source set of skills for building with AI without letting speed turn into slop.',
     why: 'AI can generate fast. It cannot decide what you meant, what good looks like, or whether the result actually works. Vibe keeps those human decisions visible and makes agents prove important claims before they call work done.',
-    start: ['vibe skills', 'vibe run grill "my idea"', 'vibe run stop-slop "review this"', 'vibe run proof "check this release"'],
+    start: ['vibe map', 'vibe walk', 'vibe skills', 'vibe run grill "my idea"', 'vibe run stop-slop "review this"', 'vibe run proof "check this release"'],
   });
 } else {
-  console.error('Usage: vibe <explain|skills|skill|run|method|manifest|truth|workflow|context> [arguments]');
-  console.error('  vibe explain                       Plain-English overview');
+  console.error('Usage: vibe <explain|map|walk|skills|skill|run|method|manifest|truth|workflow|context> [arguments]');
+  console.error('  vibe map                           Print the ICM backend map');
+  console.error('  vibe walk                          Run the deterministic ICM walk test');
   console.error('  vibe skills                        List callable Vibe skills');
   console.error('  vibe skill grill                   Read one skill');
   console.error('  vibe run stop-slop "review copy"   Get an execution packet');
