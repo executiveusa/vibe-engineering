@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Vibe Truth, Skills, and ICM API
-  version: 1.2.0
+  version: 1.2.1
   description: Versioned interface to approved Vibe Engineering truth, workflows, ICM navigation, context, and deterministic skill execution packets.
 servers:
   - url: /api/v1
@@ -173,9 +173,9 @@ components:
         artifacts:
           type: array
           items: { $ref: '#/components/schemas/ArtifactSummary' }
-    SkillSummary:
+    SkillBase:
       type: object
-      required: [id, title, summary, invocation, category, aliases, outputs, attribution, stepCount]
+      required: [id, title, summary, invocation, category, aliases, outputs, attribution]
       properties:
         id: { type: string }
         title: { type: string }
@@ -185,10 +185,16 @@ components:
         aliases: { type: array, items: { type: string } }
         outputs: { type: array, items: { type: string } }
         attribution: { type: string }
-        stepCount: { type: integer, minimum: 1 }
+    SkillSummary:
+      allOf:
+        - $ref: '#/components/schemas/SkillBase'
+        - type: object
+          required: [stepCount]
+          properties:
+            stepCount: { type: integer, minimum: 1 }
     Skill:
       allOf:
-        - $ref: '#/components/schemas/SkillSummary'
+        - $ref: '#/components/schemas/SkillBase'
         - type: object
           required: [steps]
           properties:
