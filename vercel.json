@@ -8,7 +8,7 @@
   "functions": {
     "api/**/*.mjs": {
       "maxDuration": 10,
-      "includeFiles": "{truth/sources/**,AGENTS.md,ICMR.yaml,icm/**,src/mcp/**,src/skills/**,src/icmr/**,factory/icm/**,scripts/vibe.mjs,scripts/truth-api.mjs,api/mcp.mjs,openapi/vibe-truth-api-v1.yaml,vercel.json}"
+      "includeFiles": "{truth/sources/**,AGENTS.md,ICMR.yaml,icm/**,src/mcp/**,src/skills/**,src/icmr/**,factory/icm/**,scripts/vibe.mjs,scripts/truth-api.mjs,api/mcp.mjs,api/v1/**,openapi/vibe-truth-api-v1.yaml,vercel.json}"
     }
   },
   "rewrites": [
