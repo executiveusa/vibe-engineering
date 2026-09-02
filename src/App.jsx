@@ -67,7 +67,7 @@ function App() {
         <div className="hero-layout studio-hero-layout">
           <div className="hero-intro">
             <p className="eyebrow">FREE / OPEN SOURCE / WORKS WITH YOUR AGENT</p>
-            <h1>Verify before<br /><em>everything.</em></h1>
+            <h1>Verify It Before<br /><em>Everything.</em></h1>
             <p className="hero-copy">Bring the idea. Vibe helps your AI get clear, make it, check it, and prove it works—before you ship.</p>
             <div className="hero-actions">
               <a className="primary-cta" href="https://github.com/executiveusa/vibe-engineering" target="_blank" rel="noreferrer">Get Vibe free <span aria-hidden="true">↗</span></a>
@@ -139,7 +139,7 @@ function App() {
             <span className="section-label">Start here</span>
             <p>Give your agent the repo and one instruction:</p>
           </div>
-          <code>Read AGENTS.md. Follow Vibe. Verify before everything.</code>
+          <code>Read AGENTS.md. Follow Vibe. Verify It Before Everything.</code>
           <a className="primary-cta dark-cta" href="https://github.com/executiveusa/vibe-engineering" target="_blank" rel="noreferrer">Open the repo <span aria-hidden="true">↗</span></a>
         </div>
       </section>
