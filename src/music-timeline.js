@@ -5,6 +5,11 @@ function numberFromEnv(name, fallback) {
   return Number.isFinite(value) && value > 0 ? value : fallback;
 }
 
+function positiveIntegerFromEnv(name, fallback) {
+  const value = Number(env[name]);
+  return Number.isInteger(value) && value > 0 ? value : fallback;
+}
+
 export const MUSIC_TIMELINE = Object.freeze({
   // 96.774 BPM preserves the previous .62s visual pulse as a safe fallback.
   // For release-grade sync, calibrate the owner-authorized track and set the env values below.
@@ -12,7 +17,7 @@ export const MUSIC_TIMELINE = Object.freeze({
   beatOffset: Number.isFinite(Number(env.VITE_VIBE_SOUNDTRACK_BEAT_OFFSET))
     ? Number(env.VITE_VIBE_SOUNDTRACK_BEAT_OFFSET)
     : 0,
-  beatsPerBar: numberFromEnv('VITE_VIBE_SOUNDTRACK_BEATS_PER_BAR', 4),
+  beatsPerBar: positiveIntegerFromEnv('VITE_VIBE_SOUNDTRACK_BEATS_PER_BAR', 4),
 });
 
 export function beatDurationSeconds(bpm = MUSIC_TIMELINE.bpm) {
