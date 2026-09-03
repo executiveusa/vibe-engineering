@@ -87,7 +87,7 @@ test('five-link resource rail reserves Substack and media slots are ready for ge
   for (const label of ['01 / Get Vibe free', '02 / Live skills API', '03 / Read AGENTS.md', '04 / Substack', '05 / Brand system']) {
     assert.match(app, new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'));
   }
-  for (const slot of ['scene-idea', 'scene-bar', 'scene-icm', 'scene-verify', 'image', 'video', 'saas', 'design']) {
-    assert.match(app, new RegExp(`data-media-slot=[^\n]*${slot}`, 'i'));
-  }
+  assert.match(app, /data-media-slot=\{`scene-\$\{scene\.id\}`\}/);
+  for (const id of ['idea', 'bar', 'icm', 'verify']) assert.match(app, new RegExp(`id: '${id}'`));
+  for (const slot of ['image', 'video', 'saas', 'design']) assert.match(app, new RegExp(`data-media-slot="${slot}"`, 'i'));
 });
