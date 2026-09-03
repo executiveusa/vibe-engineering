@@ -694,8 +694,8 @@
 .proof-stamps i:nth-child(4) { right: 4%; bottom: 10%; transform: rotate(-7deg); background: var(--ink); color: var(--paper); }
 
 .make-anything {
-  background: var(--oxide);
-  color: var(--ink);
+  background: var(--oxide-dark);
+  color: var(--paper-strong);
   padding: clamp(100px, 14vw, 210px) 0;
 }
 
@@ -715,8 +715,8 @@
 }
 
 .make-shell > p {
-  color: var(--ink);
-  opacity: .72;
+  color: var(--paper-strong);
+  opacity: .82;
 }
 
 .make-shell h2 {
@@ -728,7 +728,7 @@
 }
 
 .make-shell h2 em {
-  color: var(--paper-strong);
+  color: var(--bone);
 }
 
 .make-copy {
@@ -755,7 +755,7 @@
 
 .mini-flow span {
   padding: 8px 10px;
-  border: 1px solid rgba(23, 21, 18, .42);
+  border: 1px solid rgba(247, 241, 231, .44);
 }
 
 .mini-flow b { padding: 8px 0; }
@@ -775,6 +775,7 @@
   padding: 18px;
   border: 2px solid var(--ink);
   background: var(--paper-strong);
+  color: var(--ink);
   box-shadow: 7px 7px 0 var(--ink);
 }
 
