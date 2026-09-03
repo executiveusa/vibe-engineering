@@ -18,8 +18,8 @@ const MEDIA = Object.freeze({
     mobile: 'https://v3b.fal.media/files/b/0aa8f1a5/WfC4CZSzryh7QogLI5E2k_video.mp4',
   },
   image: {
-    desktop: 'https://v3b.fal.media/files/b/0aa8f1ad/YBHF-Mb0Xkohge5MB2s_-_video.mp4',
-    mobile: 'https://v3b.fal.media/files/b/0aa8f19a/5Bma_425CcaDzUkG5ThEH_video.mp4',
+    desktop: 'https://v3b.fal.media/files/b/0aa8f1b9/C8G87G3BskHiQBWk1LUoJ_video.mp4',
+    mobile: 'https://v3b.fal.media/files/b/0aa8f1b9/C8G87G3BskHiQBWk1LUoJ_video.mp4',
   },
   video: {
     desktop: 'https://v3b.fal.media/files/b/0aa8f19b/R8zBT7p_00spX_fPX41wd_video.mp4',
