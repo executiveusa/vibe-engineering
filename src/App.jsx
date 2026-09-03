@@ -272,6 +272,14 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = entered ? previousOverflow : 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [entered]);
+
+  useEffect(() => {
     document.documentElement.style.setProperty('--beat-duration', `${beatDurationSeconds(MUSIC_TIMELINE.bpm)}s`);
   }, []);
 
