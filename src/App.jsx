@@ -13,6 +13,9 @@ import './studio.css';
 gsap.registerPlugin(ScrollTrigger);
 
 const REPO = 'https://github.com/executiveusa/vibe-engineering';
+const AGENTS = `${REPO}/blob/main/AGENTS.md`;
+const BRAND_BOARD = '/vibe-brand-board.svg';
+const SUBSTACK = (import.meta.env.VITE_VIBE_SUBSTACK_URL || '').trim();
 const TRACK = (import.meta.env.VITE_VIBE_SOUNDTRACK_URL || 'https://www.youtube.com/embed/MxgOjbhG2Go').trim();
 let youtubeApiPromise;
 
@@ -258,9 +261,9 @@ function OutputWorld() {
 
 function BarVisual() {
   return (
-    <div className="bar-visual" aria-label="Reference bar comparison illustration">
-      <div className="reference-panel"><span>THE BAR</span><strong>Specific.<br />Useful.<br />Yours.</strong><small>Set the result before the model decides for you.</small></div>
-      <div className="compare-stack"><div className="compare-card reject"><span>FIRST TRY</span><b>Looks done.</b><i>REJECT</i></div><div className="compare-card proof"><span>VERIFIED</span><b>Proves it.</b><i>MOVE FORWARD</i></div></div>
+    <div className="bar-visual" aria-label="Vibe Engineering standard bar illustration">
+      <div className="reference-panel"><span>FOR US, THE OUTCOME MUST BE</span><strong>Specific.<br />Secure.<br />Useful.<br />Sovereign.<br />Repeatable.</strong><small>Only you know your highest standard. Set your bar before the machine starts moving fast.</small></div>
+      <div className="compare-stack"><div className="compare-card reject"><span>INPUT</span><b>Garbage in.</b><i>REJECT</i></div><div className="compare-card proof"><span>STANDARD</span><b>Your bar.</b><i>BUILD TO IT</i></div></div>
     </div>
   );
 }
@@ -289,19 +292,47 @@ function ProofVisual() {
 function OutputPosters() {
   return (
     <div className="output-posters" aria-label="Four examples of what Vibe Engineering can help create">
-      <article className="output-poster poster-image"><span>IMAGE</span><div className="poster-art"><i /><b /></div><small>Concept → reference → render → verify</small></article>
-      <article className="output-poster poster-video"><span>VIDEO</span><div className="poster-art"><i /><b /></div><small>Story → shots → edit → proof</small></article>
-      <article className="output-poster poster-saas"><span>SAAS</span><div className="poster-art"><i /><b /></div><small>Outcome → system → build → test</small></article>
-      <article className="output-poster poster-design"><span>DESIGN</span><div className="poster-art"><i /><b /></div><small>Intent → bar → taste → refine</small></article>
+      <article className="output-poster poster-image" data-media-slot="image"><span>IMAGE</span><div className="poster-art"><i /><b /></div><small>Concept → reference → render → verify</small></article>
+      <article className="output-poster poster-video" data-media-slot="video"><span>VIDEO</span><div className="poster-art"><i /><b /></div><small>Story → shots → edit → proof</small></article>
+      <article className="output-poster poster-saas" data-media-slot="saas"><span>SAAS</span><div className="poster-art"><i /><b /></div><small>Outcome → system → build → test</small></article>
+      <article className="output-poster poster-design" data-media-slot="design"><span>DESIGN</span><div className="poster-art"><i /><b /></div><small>Intent → bar → taste → refine</small></article>
     </div>
   );
 }
 
 const SCENES = [
-  { id: 'idea', eyebrow: '01 / THE SHIFT', title: <>AI can make almost <em>anything.</em></>, copy: 'Images. Video. SaaS. Websites. Agents. Brands. The new problem is not access to tools. It is knowing what good should be—and proving you got there.', visual: <OutputWorld />, caption: 'NOT JUST SOFTWARE. A WAY OF MAKING.' },
-  { id: 'bar', eyebrow: '02 / SET THE BAR', title: <>Do not ask AI to decide <em>good.</em></>, copy: 'Show it the target. Name the standard. Keep your point of view. Vibe gives every build something real to aim at before the first draft becomes the default.', visual: <BarVisual />, caption: 'INTENT → STANDARD → EVIDENCE' },
-  { id: 'icm', eyebrow: '03 / KEEP IT WALKABLE', title: <>The method lives in <em>files.</em></>, copy: 'ICM keeps the work understandable. Any capable agent can enter the same project, read the same laws, find the current stage, and continue without a swarm of personalities.', visual: <IcmVisual />, caption: 'ONE SYSTEM. ANY AGENT.' },
-  { id: 'verify', eyebrow: '04 / THE HABIT', title: <>Verify It Before <em>Everything.</em></>, copy: 'Check the idea before scale. Check the design before polish. Check the code before release. Check the proof before the claim. The system does the heavy work; you keep the final call.', visual: <ProofVisual />, caption: 'MAKE → CHECK → PROVE → DECIDE' },
+  {
+    id: 'idea',
+    eyebrow: '01 / THE SHIFT',
+    title: <>AI can help create almost <em>anything you have the courage to imagine.</em></>,
+    copy: 'Images. Video. SaaS. Websites. Agents. Brands. Frontier models have unlocked even greater possibilities. The new challenge is no longer access to tools. It is how we transfer that unlock to people from every walk of life—not just locally, but globally.',
+    visual: <OutputWorld />,
+    caption: 'NOT JUST SOFTWARE. A WAY OF MAKING.',
+  },
+  {
+    id: 'bar',
+    eyebrow: '02 / THE RESPONSIBILITY',
+    title: <>You set your own <em>bar.</em></>,
+    copy: 'You do not need to be technical. You are encouraged to explore, study, test and learn for yourself. This is authentic systems thinking mixed with your own vibes and vision. Be clear about your highest standard before you build anything significant. AI is no different—just faster. Garbage in, garbage out. These workflows help you build toward the standard you choose.',
+    visual: <BarVisual />,
+    caption: 'SET THE BAR BEFORE YOU BUILD.',
+  },
+  {
+    id: 'icm',
+    eyebrow: '03 / ICM METHOD',
+    title: <>One method. <em>One system.</em></>,
+    copy: 'The ICM Method is one of the most useful concepts we have had the privilege to use. Built by Jake Van Clief, the process reduces complex work to files, folders, context and proof—not fancy agent swarms or hype. Any capable agent you already use can enter the same project, read the same laws, find the current stage and continue the same process. Most people can reach extraordinary heights with one strong agent, good context and disciplined token management. We did not design ICM. We use it because it works, and Jake Van Clief’s public teachings are there for anyone who wants to go further.',
+    visual: <IcmVisual />,
+    caption: 'FILES + FOLDERS / ONE SYSTEM / ANY AGENT.',
+  },
+  {
+    id: 'verify',
+    eyebrow: '04 / THE PROCESS',
+    title: <>V.I.B.E. <em>Verify It Before Everything.</em></>,
+    copy: 'That has become our in-house law. We test everything. These workflows have saved us countless hours and help prevent the AI slop soup flooding every feed. Check ideas before scale. Create on-brand, high-level outcomes. Build payment, media and content systems. Keep your creative and critical thinking. Use systems for the heavy work; you control the final call.',
+    visual: <ProofVisual />,
+    caption: 'CHECK → TEST → TASTE → PROVE → DECIDE.',
+  },
 ];
 
 function App() {
@@ -404,8 +435,8 @@ function App() {
         <nav className="nav journey-nav" aria-label="Primary navigation"><a className="brand" href="#top" aria-label="Vibe Engineering home"><Mark /><span>Vibe Engineering</span></a><span>SCROLL TO MOVE ↓</span></nav>
         <div className="hero-lockup">
           <p>FREE / OPEN SOURCE / BUILT FOR THE NEW WAVE</p>
-          <div className="beat-reactive hero-title"><h1>Build the vibe.<br /><em>Prove the result.</em></h1></div>
-          <p className="hero-copy">Vibe Engineering is a way to make things with AI without letting AI choose the standard for you.</p>
+          <div className="beat-reactive hero-title"><h1>Find your <em>vibe.</em><br />Follow the process.</h1></div>
+          <p className="hero-copy">Vibe Engineering was designed for non-technical operators and founders to turn what they feel, see and imagine into usable outcomes—without giving up judgment, ownership or the final call.</p>
           <div className="hero-actions"><a className="primary-cta" href="#story">Start the journey ↓</a><a className="text-link" href={REPO} target="_blank" rel="noreferrer">Get Vibe free ↗</a></div>
         </div>
         <div className={`beat-line ${sound ? 'running' : ''}`} aria-hidden="true">{Array.from({ length: 16 }).map((_, index) => <i key={index} />)}</div>
@@ -416,7 +447,7 @@ function App() {
           <article className={`story-scene scene-${scene.id}`} key={scene.id}>
             <div className="scene-shell">
               <div className="scene-copy"><p>{scene.eyebrow}</p><h2>{scene.title}</h2><span>{scene.copy}</span></div>
-              <div className="scene-visual"><div className="comic-caption">{scene.caption}</div><div className="visual-stage beat-reactive">{scene.visual}</div><div className="scene-number" aria-hidden="true">0{index + 1}</div></div>
+              <div className="scene-visual" data-media-slot={`scene-${scene.id}`}><div className="comic-caption">{scene.caption}</div><div className="visual-stage beat-reactive">{scene.visual}</div><div className="scene-number" aria-hidden="true">0{index + 1}</div></div>
             </div>
           </article>
         ))}
@@ -424,9 +455,9 @@ function App() {
 
       <section className="make-anything">
         <div className="make-shell">
-          <p>05 / SAME METHOD. DIFFERENT OUTPUT.</p>
-          <h2>Make more.<br /><em>Lower the guesswork.</em></h2>
-          <div className="make-copy"><p>The output changes. The discipline does not. Tell it what you want. Set the bar. Make it. Check it. Prove it.</p><div className="mini-flow"><span>TELL IT</span><b>→</b><span>SET THE BAR</span><b>→</b><span>MAKE IT</span><b>→</b><span>PROVE IT</span></div></div>
+          <p>05 / USE THE SAME METHOD</p>
+          <h2>Image.<br />Video.<br />SaaS.<br /><em>Design.</em></h2>
+          <div className="make-copy"><p>The output changes. The discipline does not. Each workflow is designed to create a repeatable process that is easy to use with any capable agent or LLM you choose.</p><div className="mini-flow"><span>TELL IT</span><b>→</b><span>SET THE BAR</span><b>→</b><span>MAKE IT</span><b>→</b><span>PROVE IT</span></div></div>
           <OutputPosters />
         </div>
       </section>
@@ -435,9 +466,15 @@ function App() {
         <div className="close-mark"><Mark /></div>
         <p>THE SYSTEM IS FREE</p>
         <h2>Use our process<br /><em>before you hire us.</em></h2>
-        <p className="close-copy">Files + folders. Plugin. CLI. API. MCP. Claude Code, Codex, Cursor, OpenCode, or your own agent. No agent soup.</p>
-        <div className="close-actions"><a className="primary-cta light-cta" href={REPO} target="_blank" rel="noreferrer">Get Vibe free ↗</a><a className="text-link" href="/api/v1/skills">See the live skills API ↗</a></div>
-        <code>Read AGENTS.md. Follow Vibe. Verify It Before Everything.</code>
+        <p className="close-copy">Files + folders. Plugin. CLI. API. MCP. Claude Code, Codex, Cursor, OpenCode, or your own agent. No agent soup. Many of our builds and workflows are free and open source because useful systems should be learnable, inspectable and portable.</p>
+        <div className="close-actions" aria-label="Five ways to explore Vibe Engineering">
+          <a className="primary-cta light-cta" href={REPO} target="_blank" rel="noreferrer">01 / Get Vibe free ↗</a>
+          <a className="text-link" href="/api/v1/skills">02 / Live skills API ↗</a>
+          <a className="text-link" href={AGENTS} target="_blank" rel="noreferrer">03 / Read AGENTS.md ↗</a>
+          {SUBSTACK ? <a className="text-link" href={SUBSTACK} target="_blank" rel="noreferrer">04 / Substack ↗</a> : <span className="text-link" aria-disabled="true">04 / Substack / coming soon</span>}
+          <a className="text-link" href={BRAND_BOARD} target="_blank" rel="noreferrer">05 / Brand system ↗</a>
+        </div>
+        <code>Vibe Engineering / Verify It Before Everything. Copy it. Update it. Make it yours.</code>
       </section>
 
       <footer><span>Vibe Engineering / The Pauli Effect</span><span>Verify It Before Everything.</span></footer>
