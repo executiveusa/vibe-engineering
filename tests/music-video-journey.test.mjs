@@ -73,3 +73,21 @@ test('journey remains image-led and ends in the open-source product', () => {
   assert.match(app, /Files \+ folders/i);
   assert.match(app, /Verify It Before Everything\./i);
 });
+
+test('public story reflects operator-first copy and credits the ICM source', () => {
+  assert.match(app, /Find your <em>vibe\.<\/em>/i);
+  assert.match(app, /non-technical operators and founders/i);
+  assert.match(app, /Jake Van Clief/i);
+  assert.match(app, /We did not design ICM\. We use it because it works/i);
+  assert.match(app, /Specific\.<br \/>Secure\.<br \/>Useful\.<br \/>Sovereign\.<br \/>Repeatable\./i);
+});
+
+test('five-link resource rail reserves Substack and media slots are ready for generated video', () => {
+  assert.match(app, /VITE_VIBE_SUBSTACK_URL/);
+  for (const label of ['01 / Get Vibe free', '02 / Live skills API', '03 / Read AGENTS.md', '04 / Substack', '05 / Brand system']) {
+    assert.match(app, new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'));
+  }
+  for (const slot of ['scene-idea', 'scene-bar', 'scene-icm', 'scene-verify', 'image', 'video', 'saas', 'design']) {
+    assert.match(app, new RegExp(`data-media-slot=[^\n]*${slot}`, 'i'));
+  }
+});
