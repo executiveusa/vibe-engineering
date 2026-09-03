@@ -17,6 +17,16 @@ test('soundtrack starts behind an explicit visitor choice and remains toggleable
   assert.match(app, /getCurrentTime/);
 });
 
+test('YouTube player fails closed and can retry without replacing React-owned host', () => {
+  assert.match(app, /script\.addEventListener\('error', fail/);
+  assert.match(app, /youtubeApiPromise = undefined/);
+  assert.match(app, /\.catch\(\(\) => \{/);
+  assert.match(app, /document\.createElement\('div'\)/);
+  assert.match(app, /new YT\.Player\(mount/);
+  assert.match(app, /host\.replaceChildren\(\)/);
+  assert.match(app, /setApiAttempt/);
+});
+
 test('music video timing is derived from playback time and configurable beat metadata', () => {
   assert.match(timeline, /VITE_VIBE_SOUNDTRACK_BPM/);
   assert.match(timeline, /VITE_VIBE_SOUNDTRACK_BEAT_OFFSET/);
@@ -28,12 +38,22 @@ test('music video timing is derived from playback time and configurable beat met
   assert.match(architecture, /soundtrack controls impact timing/i);
 });
 
-test('mobile journey has explicit safe-area, small-screen, and reduced-motion contracts', () => {
+test('beat pre-roll waits for the configured first beat and slower tempos are not capped', () => {
+  assert.match(timeline, /if \(seconds < timeline\.beatOffset\) return -1/);
+  assert.match(timeline, /timeline\.beatOffset - seconds/);
+  assert.match(timeline, /beatIndex >= 0/);
+  assert.doesNotMatch(app, /Math\.min\(msUntilNextBeat/);
+  assert.match(app, /soundRef\.current \? msUntilNextBeat/);
+  assert.match(app, /\}, \[entered\]\);/);
+});
+
+test('mobile journey has explicit safe-area, touch-target, small-screen, and reduced-motion contracts', () => {
   assert.match(css, /env\(safe-area-inset-top\)/);
-  assert.match(css, /@media \(max-width: 820px\)/);
-  assert.match(css, /@media \(max-width: 600px\)/);
-  assert.match(css, /@media \(max-width: 390px\)/);
-  assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
+  assert.match(css, /\.sound-toggle\{[^}]*min-height:44px/s);
+  assert.match(css, /@media\(max-width:820px\)/);
+  assert.match(css, /@media\(max-width:600px\)/);
+  assert.match(css, /@media\(max-width:390px\)/);
+  assert.match(css, /@media\(prefers-reduced-motion:reduce\)/);
   assert.match(architecture, /no horizontal overflow at 320px/i);
   assert.match(architecture, /native 9:16 chain/i);
 });
