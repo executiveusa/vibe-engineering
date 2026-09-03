@@ -1,0 +1,55 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+
+const app = await readFile(new URL('../src/App.jsx', import.meta.url), 'utf8');
+const css = await readFile(new URL('../src/studio.css', import.meta.url), 'utf8');
+const timeline = await readFile(new URL('../src/music-timeline.js', import.meta.url), 'utf8');
+const architecture = await readFile(new URL('../docs/experience/MUSIC-VIDEO-ARCHITECTURE.md', import.meta.url), 'utf8');
+const brandBoard = await readFile(new URL('../public/vibe-brand-board.svg', import.meta.url), 'utf8');
+
+test('soundtrack starts behind an explicit visitor choice and remains toggleable', () => {
+  assert.match(app, /Enter with sound/i);
+  assert.match(app, /Continue silent/i);
+  assert.match(app, /Turn soundtrack off/i);
+  assert.match(app, /Turn soundtrack on/i);
+  assert.match(app, /youtube\.com\/iframe_api/i);
+  assert.match(app, /getCurrentTime/);
+});
+
+test('music video timing is derived from playback time and configurable beat metadata', () => {
+  assert.match(timeline, /VITE_VIBE_SOUNDTRACK_BPM/);
+  assert.match(timeline, /VITE_VIBE_SOUNDTRACK_BEAT_OFFSET/);
+  assert.match(timeline, /VITE_VIBE_SOUNDTRACK_BEATS_PER_BAR/);
+  assert.match(app, /msUntilNextBeat/);
+  assert.match(app, /isDownbeat/);
+  assert.match(app, /\?calibrate|calibrate/);
+  assert.match(architecture, /Scroll decides where the visitor is in the story/i);
+  assert.match(architecture, /soundtrack controls impact timing/i);
+});
+
+test('mobile journey has explicit safe-area, small-screen, and reduced-motion contracts', () => {
+  assert.match(css, /env\(safe-area-inset-top\)/);
+  assert.match(css, /@media \(max-width: 820px\)/);
+  assert.match(css, /@media \(max-width: 600px\)/);
+  assert.match(css, /@media \(max-width: 390px\)/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
+  assert.match(architecture, /no horizontal overflow at 320px/i);
+  assert.match(architecture, /native 9:16 chain/i);
+});
+
+test('public visual identity stays inside Quiet Signal instead of reverting to neon', () => {
+  assert.match(brandBoard, /#171512/i);
+  assert.match(brandBoard, /#EFE8DC/i);
+  assert.match(brandBoard, /#B65F3D/i);
+  assert.match(brandBoard, /#7C3C27/i);
+  assert.doesNotMatch(brandBoard, /#C9FF38/i);
+  assert.doesNotMatch(css, /#C9FF38/i);
+});
+
+test('journey remains image-led and ends in the open-source product', () => {
+  for (const word of ['IMAGE', 'VIDEO', 'SAAS', 'DESIGN']) assert.match(app, new RegExp(word));
+  assert.match(app, /Get Vibe free/i);
+  assert.match(app, /Files \+ folders/i);
+  assert.match(app, /Verify It Before Everything\./i);
+});
