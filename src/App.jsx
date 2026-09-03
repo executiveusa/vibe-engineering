@@ -29,20 +29,44 @@ function getYouTubeId(url) {
 function loadYouTubeApi() {
   if (window.YT?.Player) return Promise.resolve(window.YT);
   if (youtubeApiPromise) return youtubeApiPromise;
-  youtubeApiPromise = new Promise((resolve) => {
+
+  youtubeApiPromise = new Promise((resolve, reject) => {
     const previous = window.onYouTubeIframeAPIReady;
+    let script = document.querySelector('script[data-vibe-youtube-api]');
+    let settled = false;
+
+    const finish = (callback, value) => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timeout);
+      script?.removeEventListener('error', fail);
+      callback(value);
+    };
+
+    const fail = () => {
+      youtubeApiPromise = undefined;
+      if (script?.dataset.vibeYoutubeApi === 'true') script.remove();
+      finish(reject, new Error('YouTube IFrame API failed to load'));
+    };
+
     window.onYouTubeIframeAPIReady = () => {
       if (typeof previous === 'function') previous();
-      resolve(window.YT);
+      if (window.YT?.Player) finish(resolve, window.YT);
+      else fail();
     };
-    if (!document.querySelector('script[data-vibe-youtube-api]')) {
-      const script = document.createElement('script');
+
+    if (!script) {
+      script = document.createElement('script');
       script.src = 'https://www.youtube.com/iframe_api';
       script.async = true;
       script.dataset.vibeYoutubeApi = 'true';
       document.head.appendChild(script);
     }
+    script.addEventListener('error', fail, { once: true });
+
+    const timeout = window.setTimeout(fail, 12000);
   });
+
   return youtubeApiPromise;
 }
 
@@ -61,6 +85,7 @@ function SoundSystem({ playing, setPlaying, onTime }) {
   const playerRef = useRef(null);
   const audioRef = useRef(null);
   const playingRef = useRef(playing);
+  const [apiAttempt, setApiAttempt] = useState(0);
 
   useEffect(() => {
     playingRef.current = playing;
@@ -70,42 +95,55 @@ function SoundSystem({ playing, setPlaying, onTime }) {
     if (!youtubeId || !playerHostRef.current) return undefined;
     let cancelled = false;
     let timer;
+    const host = playerHostRef.current;
+    const mount = document.createElement('div');
+    host.replaceChildren(mount);
 
-    loadYouTubeApi().then((YT) => {
-      if (cancelled || !playerHostRef.current) return;
-      playerRef.current = new YT.Player(playerHostRef.current, {
-        videoId: youtubeId,
-        width: 1,
-        height: 1,
-        playerVars: {
-          autoplay: playingRef.current ? 1 : 0,
-          controls: 0,
-          disablekb: 1,
-          loop: 1,
-          playlist: youtubeId,
-          playsinline: 1,
-          rel: 0,
-        },
-        events: {
-          onReady: (event) => {
-            event.target.setVolume(48);
-            if (playingRef.current) event.target.playVideo();
+    loadYouTubeApi()
+      .then((YT) => {
+        if (cancelled || !host.isConnected) return;
+        playerRef.current = new YT.Player(mount, {
+          videoId: youtubeId,
+          width: 1,
+          height: 1,
+          playerVars: {
+            autoplay: playingRef.current ? 1 : 0,
+            controls: 0,
+            disablekb: 1,
+            loop: 1,
+            playlist: youtubeId,
+            playsinline: 1,
+            rel: 0,
           },
-        },
+          events: {
+            onReady: (event) => {
+              event.target.setVolume(48);
+              if (playingRef.current) event.target.playVideo();
+            },
+            onError: () => setPlaying(false),
+          },
+        });
+        timer = window.setInterval(() => {
+          const time = playerRef.current?.getCurrentTime?.();
+          if (Number.isFinite(time)) onTime(time);
+        }, 50);
+      })
+      .catch(() => {
+        if (!cancelled) setPlaying(false);
       });
-      timer = window.setInterval(() => {
-        const time = playerRef.current?.getCurrentTime?.();
-        if (Number.isFinite(time)) onTime(time);
-      }, 50);
-    });
 
     return () => {
       cancelled = true;
       if (timer) window.clearInterval(timer);
-      playerRef.current?.destroy?.();
+      try {
+        playerRef.current?.destroy?.();
+      } catch {
+        // The YouTube API can already have removed its iframe during teardown.
+      }
       playerRef.current = null;
+      host.replaceChildren();
     };
-  }, [youtubeId, onTime]);
+  }, [youtubeId, onTime, setPlaying, apiAttempt]);
 
   useEffect(() => {
     if (youtubeId) {
@@ -134,6 +172,11 @@ function SoundSystem({ playing, setPlaying, onTime }) {
     return () => window.cancelAnimationFrame(frame);
   }, [youtubeId, onTime]);
 
+  const toggle = () => {
+    if (youtubeId && !playing && !playerRef.current) setApiAttempt((value) => value + 1);
+    setPlaying((value) => !value);
+  };
+
   return (
     <>
       {youtubeId ? <div className="sound-player" ref={playerHostRef} aria-hidden="true" /> : null}
@@ -141,7 +184,7 @@ function SoundSystem({ playing, setPlaying, onTime }) {
       <button
         type="button"
         className={`sound-toggle ${playing ? 'is-on' : ''}`}
-        onClick={() => setPlaying((value) => !value)}
+        onClick={toggle}
         aria-pressed={playing}
         aria-label={playing ? 'Turn soundtrack off' : 'Turn soundtrack on'}
       >
@@ -264,12 +307,17 @@ const SCENES = [
 function App() {
   const page = useRef(null);
   const currentTime = useRef(0);
+  const soundRef = useRef(false);
   const [entered, setEntered] = useState(false);
   const [sound, setSound] = useState(false);
 
   const updateTrackTime = useMemo(() => (seconds) => {
     currentTime.current = seconds;
   }, []);
+
+  useEffect(() => {
+    soundRef.current = sound;
+  }, [sound]);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -287,7 +335,7 @@ function App() {
     if (!entered || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
     const timers = [];
     const scheduleImpact = (scene) => {
-      const delay = sound ? Math.min(msUntilNextBeat(currentTime.current), 700) : 0;
+      const delay = soundRef.current ? msUntilNextBeat(currentTime.current) : 0;
       const timer = window.setTimeout(() => {
         const stage = scene.querySelector('.visual-stage');
         const title = scene.querySelector('h2');
@@ -316,7 +364,7 @@ function App() {
       timers.forEach((timer) => window.clearTimeout(timer));
       ctx.revert();
     };
-  }, [entered, sound]);
+  }, [entered]);
 
   useEffect(() => {
     if (!entered || !sound || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
@@ -324,7 +372,7 @@ function App() {
     let lastBeat = -1;
     const tick = () => {
       const beat = beatIndexAt(currentTime.current);
-      if (beat !== lastBeat) {
+      if (beat >= 0 && beat !== lastBeat) {
         lastBeat = beat;
         const downbeat = isDownbeat(beat);
         const targets = gsap.utils.toArray('.beat-reactive');
