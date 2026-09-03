@@ -102,6 +102,17 @@ function SoundSystem({ playing, setPlaying, onTime }) {
     const mount = document.createElement('div');
     host.replaceChildren(mount);
 
+    const resetFailedPlayer = () => {
+      try {
+        playerRef.current?.destroy?.();
+      } catch {
+        // The YouTube API may already have torn down the iframe.
+      }
+      playerRef.current = null;
+      setPlaying(false);
+      setApiAttempt((value) => value + 1);
+    };
+
     loadYouTubeApi()
       .then((YT) => {
         if (cancelled || !host.isConnected) return;
@@ -123,7 +134,8 @@ function SoundSystem({ playing, setPlaying, onTime }) {
               event.target.setVolume(48);
               if (playingRef.current) event.target.playVideo();
             },
-            onError: () => setPlaying(false),
+            onError: resetFailedPlayer,
+            onAutoplayBlocked: () => setPlaying(false),
           },
         });
         timer = window.setInterval(() => {
@@ -175,9 +187,36 @@ function SoundSystem({ playing, setPlaying, onTime }) {
     return () => window.cancelAnimationFrame(frame);
   }, [youtubeId, onTime]);
 
+  useEffect(() => {
+    const playFromGesture = () => {
+      if (youtubeId) {
+        playerRef.current?.playVideo?.();
+        return;
+      }
+      if (!audioRef.current) return;
+      audioRef.current.volume = 0.48;
+      audioRef.current.play().catch(() => setPlaying(false));
+    };
+    window.addEventListener('vibe:sound-intent', playFromGesture);
+    return () => window.removeEventListener('vibe:sound-intent', playFromGesture);
+  }, [youtubeId, setPlaying]);
+
   const toggle = () => {
-    if (youtubeId && !playing && !playerRef.current) setApiAttempt((value) => value + 1);
-    setPlaying((value) => !value);
+    const nextPlaying = !playing;
+    if (nextPlaying) {
+      if (youtubeId) {
+        if (!playerRef.current) setApiAttempt((value) => value + 1);
+        else playerRef.current.playVideo?.();
+      } else if (audioRef.current) {
+        audioRef.current.volume = 0.48;
+        audioRef.current.play().catch(() => setPlaying(false));
+      }
+    } else if (youtubeId) {
+      playerRef.current?.pauseVideo?.();
+    } else {
+      audioRef.current?.pause?.();
+    }
+    setPlaying(nextPlaying);
   };
 
   return (
@@ -417,6 +456,7 @@ function App() {
   }, [entered, sound]);
 
   const enter = (withSound) => {
+    if (withSound) window.dispatchEvent(new Event('vibe:sound-intent'));
     setSound(withSound);
     setEntered(true);
   };
