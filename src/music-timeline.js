@@ -20,18 +20,22 @@ export function beatDurationSeconds(bpm = MUSIC_TIMELINE.bpm) {
 }
 
 export function beatIndexAt(seconds, timeline = MUSIC_TIMELINE) {
+  if (seconds < timeline.beatOffset) return -1;
   const duration = beatDurationSeconds(timeline.bpm);
-  return Math.max(0, Math.floor((seconds - timeline.beatOffset) / duration));
+  return Math.floor((seconds - timeline.beatOffset) / duration);
 }
 
 export function msUntilNextBeat(seconds, timeline = MUSIC_TIMELINE) {
+  if (seconds < timeline.beatOffset) {
+    return Math.max(0, (timeline.beatOffset - seconds) * 1000);
+  }
   const duration = beatDurationSeconds(timeline.bpm);
-  const shifted = Math.max(0, seconds - timeline.beatOffset);
+  const shifted = seconds - timeline.beatOffset;
   const phase = shifted % duration;
   if (phase < 0.012 || duration - phase < 0.012) return 0;
   return Math.max(0, (duration - phase) * 1000);
 }
 
 export function isDownbeat(beatIndex, timeline = MUSIC_TIMELINE) {
-  return beatIndex % timeline.beatsPerBar === 0;
+  return beatIndex >= 0 && beatIndex % timeline.beatsPerBar === 0;
 }
