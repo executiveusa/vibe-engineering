@@ -33,10 +33,20 @@ if (command === 'install' || command === 'init') {
     written: result.written,
     preserved: result.skipped,
     skillsInstalled: result.skills,
-    next: 'Run `vibe journey`, then tell your agent: Read AGENTS.md. Follow Vibe. Verify It Before Everything.',
+    next: 'Run `vibe journey` for guided mode or `vibe loop` for long-running Loop Engineering mode.',
   });
 } else if (command === 'journey' || command === 'zero-to-product') {
   print(ZERO_TO_PRODUCT_WORKFLOW);
+} else if (command === 'loop' || command === 'long-run' || command === 'loop-engineering') {
+  const request = args.join(' ');
+  const result = runSkill('loop-engineering', request ? { request } : {});
+  if (!result) throw new Error('Loop Engineering skill is not registered.');
+  print({
+    mode: 'loop-engineering',
+    pluginCommand: '/vibe-loop',
+    lifecycle: 'INTENT -> BAR -> LOCK -> EVIDENCE -> GRAPH -> SPEC -> SLICE -> BUILD -> VERIFY -> GAUNTLET -> RELEASE -> LEARN',
+    execution: result,
+  });
 } else if (command === 'status') {
   print(await getJourneyStatus(process.cwd()));
 } else if (command === 'verify-stage') {
@@ -86,12 +96,14 @@ if (command === 'install' || command === 'init') {
   print({
     what: 'Vibe Engineering is an open-source quality layer for building with AI without letting speed turn into slop.',
     why: 'AI can generate fast. Vibe keeps intent, standards, evidence, ownership, and proof visible so capable agents can work inside one walkable filesystem.',
-    start: ['vibe install .', 'vibe journey', 'vibe status', 'vibe verify-stage', 'vibe run grill-idea "my idea"', 'vibe run review "review the candidate"'],
+    modes: ['vibe journey — guided stage-by-stage mode', 'vibe loop — long-running Loop Engineering mode'],
+    start: ['vibe install .', 'vibe journey', 'vibe loop "build the product end to end"', 'vibe status', 'vibe verify-stage', 'vibe run review "review the candidate"'],
   });
 } else {
-  console.error('Usage: vibe <install|init|journey|zero-to-product|status|verify-stage|explain|map|walk|skills|skill|run|method|manifest|truth|workflow|context> [arguments]');
+  console.error('Usage: vibe <install|init|journey|zero-to-product|loop|long-run|loop-engineering|status|verify-stage|explain|map|walk|skills|skill|run|method|manifest|truth|workflow|context> [arguments]');
   console.error('  vibe install .                     Install Vibe into the current project');
-  console.error('  vibe journey                       Show the beginner zero-to-product workflow');
+  console.error('  vibe journey                       Guided zero-to-product workflow');
+  console.error('  vibe loop "goal"                    Long-running Loop Engineering mode');
   console.error('  vibe status                        Show current ICM journey level and gates');
   console.error('  vibe verify-stage                  Execute current stage gates automatically; HOLD or advance');
   console.error('  vibe verify-stage --candidate SHA  Bind review/proof evidence to an exact candidate');
