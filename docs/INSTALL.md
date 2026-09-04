@@ -9,7 +9,7 @@ The canonical product is the filesystem. Claude Code, Codex, Cursor, OpenCode, C
 From the project you want to improve:
 
 ```bash
-npx --yes github:executiveusa/vibe-engineering install .
+npx --yes --package=github:executiveusa/vibe-engineering vibe install .
 ```
 
 Then tell your agent:
@@ -44,21 +44,21 @@ AGENTS.md → ICMR.yaml → CONTEXT.md
 ## Existing project
 
 ```bash
-npx --yes github:executiveusa/vibe-engineering install .
+npx --yes --package=github:executiveusa/vibe-engineering vibe install .
 ```
 
-If `AGENTS.md`, `ICMR.yaml`, `CONTEXT.md`, `CLAUDE.md`, or the Cursor rule already exists, Vibe preserves it and reports the file as skipped.
+If `AGENTS.md`, `ICMR.yaml`, `CONTEXT.md`, `CLAUDE.md`, or the Cursor rule already exists, Vibe preserves it and reports the file as skipped. It also writes `.vibe/INSTALL-NOTES.md` when owner-controlled project law needs to be merged by intent.
 
 Use `--force` only when you intentionally want Vibe to refresh managed files:
 
 ```bash
-npx --yes github:executiveusa/vibe-engineering install . --force
+npx --yes --package=github:executiveusa/vibe-engineering vibe install . --force
 ```
 
 ## Minimal install without portable skills
 
 ```bash
-npx --yes github:executiveusa/vibe-engineering install . --no-skills
+npx --yes --package=github:executiveusa/vibe-engineering vibe install . --no-skills
 ```
 
 ## Local clone
@@ -103,9 +103,9 @@ No vendor switch should require redesigning the project.
 The same package exposes the Vibe CLI:
 
 ```bash
-npx --yes github:executiveusa/vibe-engineering skills
-npx --yes github:executiveusa/vibe-engineering run grill "my idea"
-npx --yes github:executiveusa/vibe-engineering run proof "prove this release"
+npx --yes --package=github:executiveusa/vibe-engineering vibe skills
+npx --yes --package=github:executiveusa/vibe-engineering vibe run grill "my idea"
+npx --yes --package=github:executiveusa/vibe-engineering vibe run proof "prove this release"
 ```
 
 ## MCP
