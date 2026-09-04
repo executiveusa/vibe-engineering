@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { VibeTruthClient } from '../packages/truth-sdk/index.mjs';
 import { getIcmBackendMap, getSkill, listSkills, runIcmWalk, runSkill } from '../icm/backend/index.mjs';
+import { ZERO_TO_PRODUCT_WORKFLOW } from '../src/workflows/zero-to-product.mjs';
 import { installVibe } from './install-vibe.mjs';
 
 const [command, ...args] = process.argv.slice(2);
@@ -26,8 +27,10 @@ if (command === 'install' || command === 'init') {
     written: result.written,
     preserved: result.skipped,
     skillsInstalled: result.skills,
-    next: 'Read AGENTS.md. Follow Vibe. Verify It Before Everything.',
+    next: 'Run `vibe journey`, then tell your agent: Read AGENTS.md. Follow Vibe. Verify It Before Everything.',
   });
+} else if (command === 'journey' || command === 'zero-to-product') {
+  print(ZERO_TO_PRODUCT_WORKFLOW);
 } else if (command === 'map') {
   print(getIcmBackendMap());
 } else if (command === 'walk') {
@@ -65,16 +68,17 @@ if (command === 'install' || command === 'init') {
   print({
     what: 'Vibe Engineering is an open-source quality layer for building with AI without letting speed turn into slop.',
     why: 'AI can generate fast. Vibe keeps intent, standards, evidence, ownership, and proof visible so capable agents can work inside one walkable filesystem.',
-    start: ['vibe install .', 'vibe map', 'vibe walk', 'vibe skills', 'vibe run grill "my idea"', 'vibe run proof "check this release"'],
+    start: ['vibe install .', 'vibe journey', 'vibe run grill-idea "my idea"', 'vibe run spec "define the target"', 'vibe run review "review the candidate"', 'vibe run proof "prove this release"'],
   });
 } else {
-  console.error('Usage: vibe <install|init|explain|map|walk|skills|skill|run|method|manifest|truth|workflow|context> [arguments]');
+  console.error('Usage: vibe <install|init|journey|zero-to-product|explain|map|walk|skills|skill|run|method|manifest|truth|workflow|context> [arguments]');
   console.error('  vibe install .                     Install Vibe into the current project');
+  console.error('  vibe journey                       Show the beginner zero-to-product workflow');
   console.error('  vibe install ./app --force         Refresh Vibe-managed files intentionally');
   console.error('  vibe map                           Print the ICM backend map');
   console.error('  vibe walk                          Run the deterministic ICM walk test');
   console.error('  vibe skills                        List callable Vibe skills');
   console.error('  vibe skill grill                   Read one skill');
-  console.error('  vibe run stop-slop "review copy"   Get an execution packet');
+  console.error('  vibe run review "review PR 12"     Use the dominant OpenCodeReview-backed review skill');
   process.exitCode = 1;
 }
