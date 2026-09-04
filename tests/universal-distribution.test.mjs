@@ -1,11 +1,14 @@
 import assert from 'node:assert/strict';
+import { execFile } from 'node:child_process';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
+import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import { installVibe } from '../scripts/install-vibe.mjs';
 
+const execFileAsync = promisify(execFile);
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 async function withTempProject(fn) {
@@ -61,5 +64,23 @@ test('installs portable skills under the Vibe namespace', async () => {
     assert.equal(report.skills, true);
     const proofSkill = await readFile(path.join(root, '.vibe/skills/proof/SKILL.md'), 'utf8');
     assert.match(proofSkill, /proof/i);
+  });
+});
+
+test('vibe install CLI creates a usable project contract', async () => {
+  await withTempProject(async (root) => {
+    const { stdout } = await execFileAsync(process.execPath, [
+      path.join(repoRoot, 'scripts/vibe.mjs'),
+      'install',
+      root,
+      '--no-skills',
+    ], { cwd: repoRoot });
+
+    const result = JSON.parse(stdout);
+    assert.equal(result.ok, true);
+    assert.equal(result.target, root);
+    assert.equal(result.skillsInstalled, false);
+    assert.match(result.next, /Verify It Before Everything/);
+    assert.match(await readFile(path.join(root, 'AGENTS.md'), 'utf8'), /filesystem is the source of truth/);
   });
 });
