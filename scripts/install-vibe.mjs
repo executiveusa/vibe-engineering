@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { cp, mkdir, readFile, stat, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -46,10 +46,10 @@ function projectName(target) {
   return path.basename(path.resolve(target)) || 'Vibe Project';
 }
 
-function coreFiles(name) {
+function coreFiles(name, mode) {
   return {
     'AGENTS.md': `# ${name} — Vibe Engineering law\n\n## Entry point\n\nRead this file, then \`ICMR.yaml\`, then \`CONTEXT.md\`.\n\n## Non-negotiable laws\n\n- Verify It Before Everything.\n- The filesystem is the source of truth. Agents are adapters, not architecture.\n- Inspect before changing. Reuse before adding. Specify before building.\n- Keep durable decisions and proof in files, not chat memory.\n- No agent soup. One walkable system. Any capable agent can use it.\n- Build one verifiable slice at a time.\n- Never expose secrets.\n- Preserve owner control of code, data, accounts, credentials, infrastructure, and documentation.\n- The builder cannot approve its own consequential release.\n- Never call work done without evidence and rollback.\n\n## Working rhythm\n\n\`INTENT → STANDARD → BUILD → CHECK → PROVE → DECIDE\`\n\nFor consequential software changes use:\n\n\`DEFINE → PLAN → BUILD → VERIFY → REVIEW → SHIP\`\n\n## Skills\n\nPortable Vibe procedures live in \`.vibe/skills/\`. Use the smallest skill that fits the work.\n\nSource: ${REPO}\n`,
-    'ICMR.yaml': `schemaVersion: 1\nmethod: Vibe Engineering / ICM\nproject:\n  name: ${JSON.stringify(name)}\n  mode: brownfield\nentry:\n  order:\n    - AGENTS.md\n    - ICMR.yaml\n    - CONTEXT.md\nlifecycle:\n  - DEFINE\n  - PLAN\n  - BUILD\n  - VERIFY\n  - REVIEW\n  - SHIP\ndecisionContract:\n  - Intent\n  - Standard\n  - Evidence\npaths:\n  context: CONTEXT.md\n  proof: PROOF/\n  skills: .vibe/skills/\n  manifest: .vibe/manifest.json\nrelease:\n  humanFinalCall: true\n  requireProof: true\n  requireRollback: true\n`,
+    'ICMR.yaml': `schemaVersion: 1\nmethod: Vibe Engineering / ICM\nproject:\n  name: ${JSON.stringify(name)}\n  mode: ${mode}\nentry:\n  order:\n    - AGENTS.md\n    - ICMR.yaml\n    - CONTEXT.md\nlifecycle:\n  - DEFINE\n  - PLAN\n  - BUILD\n  - VERIFY\n  - REVIEW\n  - SHIP\ndecisionContract:\n  - Intent\n  - Standard\n  - Evidence\npaths:\n  context: CONTEXT.md\n  proof: PROOF/\n  skills: .vibe/skills/\n  manifest: .vibe/manifest.json\nrelease:\n  humanFinalCall: true\n  requireProof: true\n  requireRollback: true\n`,
     'CONTEXT.md': `# Current context\n\n## Status\n\nVibe is installed. The next action is to describe the outcome you want, the standard it must meet, and the evidence that would prove it works.\n\n## Start here\n\n1. State the outcome in one sentence.\n2. Define what good looks like.\n3. Identify constraints and owner-only decisions.\n4. Choose the smallest verifiable slice.\n5. Put evidence in \`PROOF/\`.\n\n## Agent instruction\n\nFollow \`AGENTS.md\`. Verify It Before Everything.\n`,
   };
 }
@@ -68,9 +68,11 @@ async function writeManagedFile(target, relativePath, content, force, report) {
 export async function installVibe({ target, force = false, skills = true }, sourceRoot) {
   const root = path.resolve(target);
   await mkdir(root, { recursive: true });
+  const entriesBeforeInstall = (await readdir(root)).filter((entry) => entry !== '.git');
+  const mode = entriesBeforeInstall.length === 0 ? 'greenfield' : 'brownfield';
   const name = projectName(root);
-  const report = { target: root, written: [], skipped: [], skills: false };
-  const files = coreFiles(name);
+  const report = { target: root, mode, written: [], skipped: [], skills: false };
+  const files = coreFiles(name, mode);
 
   for (const relativePath of ROOT_FILES) {
     await writeManagedFile(root, relativePath, files[relativePath], force, report);
@@ -87,6 +89,7 @@ export async function installVibe({ target, force = false, skills = true }, sour
     version: packageJson.version,
     source: REPO,
     installedAt: new Date().toISOString(),
+    mode,
     canonicalEntry: ['AGENTS.md', 'ICMR.yaml', 'CONTEXT.md'],
     adapters: ['filesystem', 'claude-code', 'codex', 'cursor', 'opencode', 'cli', 'mcp', 'api'],
   }, null, 2)}\n`, true, report);
@@ -107,6 +110,12 @@ export async function installVibe({ target, force = false, skills = true }, sour
     }
   }
 
+  const ownerControlledConflicts = report.skipped.filter((item) => ['AGENTS.md', 'ICMR.yaml', 'CONTEXT.md', 'CLAUDE.md', '.cursor/rules/vibe.mdc'].includes(item));
+  if (ownerControlledConflicts.length > 0) {
+    const notes = `# Vibe install notes\n\nVibe preserved owner-controlled files instead of overwriting them:\n\n${ownerControlledConflicts.map((item) => `- \`${item}\``).join('\n')}\n\nReview those files and add this entry instruction where appropriate:\n\n\`Read AGENTS.md → ICMR.yaml → CONTEXT.md. Follow Vibe. Verify It Before Everything.\`\n\nDo not replace existing project law blindly. Merge by intent.\n`;
+    await writeManagedFile(root, '.vibe/INSTALL-NOTES.md', notes, true, report);
+  }
+
   return report;
 }
 
@@ -117,6 +126,7 @@ async function main() {
   const report = await installVibe(options, sourceRoot);
   console.log('Vibe Engineering installed.');
   console.log(`Target: ${report.target}`);
+  console.log(`Mode: ${report.mode}`);
   console.log(`Written: ${report.written.length}`);
   if (report.skipped.length) console.log(`Preserved existing files: ${report.skipped.join(', ')}`);
   console.log('Next: tell your agent — "Read AGENTS.md. Follow Vibe. Verify It Before Everything."');
