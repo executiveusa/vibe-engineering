@@ -4,6 +4,13 @@ title: Zero to Finished Product
 audience: non-technical founders and operators
 promise: Start with a fuzzy idea and finish with a proven, reviewable, releasable product.
 entry: AGENTS.md -> ICMR.yaml -> CONTEXT.md
+advancement:
+  rule: A stage advances only when all declared gates pass and durable proof or a receipt is written.
+  fail_state: HOLD
+  allow_manual_skip: false
+  allow_agent_self_approval: false
+  require_receipt: true
+  adapter_may_bypass_gates: false
 review_engine:
   repository: https://github.com/executiveusa/open-code-review
   role: primary-code-review-engine
@@ -46,3 +53,4 @@ completion:
   require_proof: true
   require_human_release_authority: true
   require_rollback: true
+  require_all_stage_receipts: true
