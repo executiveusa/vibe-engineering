@@ -6,13 +6,29 @@ export const ZERO_TO_PRODUCT_WORKFLOW = Object.freeze({
   audience: 'Non-technical founders and operators using any capable AI agent.',
   promise: 'Start with a fuzzy idea and finish with a proven, reviewable, releasable product without needing an agent swarm.',
   entry: 'Read AGENTS.md. Follow Vibe. Verify It Before Everything.',
+  executionModes: Object.freeze({
+    guided: Object.freeze({
+      default: true,
+      interface: 'Vibe Journey',
+      behavior: 'Human-guided, stage-by-stage progression with explicit verification at each level.',
+    }),
+    loopEngineering: Object.freeze({
+      default: false,
+      skill: 'loop-engineering',
+      pluginCommand: '/vibe-loop',
+      behavior: 'Long-running end-to-end execution that may traverse the full workflow autonomously between human gates.',
+      lifecycle: 'INTENT -> BAR -> LOCK -> EVIDENCE -> GRAPH -> SPEC -> SLICE -> BUILD -> VERIFY -> GAUNTLET -> RELEASE -> LEARN',
+      mayBypassGates: false,
+      maySelfApprove: false,
+    }),
+  }),
   reviewEngine: Object.freeze({
     repository: 'https://github.com/executiveusa/open-code-review',
     role: 'primary-code-review-engine',
     note: 'OpenCodeReview owns deterministic code-review execution. Vibe adds product intent, system impact, taste, proof, sovereignty, and human release authority around it.',
   }),
   phases: Object.freeze([
-    phase('00-start', 'Start', 'Get the project walkable and understand what Vibe is doing.', ['setup-vibe', 'ask-vibe'], ['explain', 'teach']),
+    phase('00-start', 'Start', 'Get the project walkable and understand what Vibe is doing.', ['setup-vibe', 'ask-vibe'], ['explain', 'teach', 'loop-engineering']),
     phase('01-discover', 'Discover the idea', 'Turn feelings, goals, and assumptions into explicit decisions.', ['grill-idea', 'grill'], ['interview', 'ask-human', 'research', 'language']),
     phase('02-define', 'Define the target', 'Name the outcome, standard, boundaries, and proof before building.', ['map', 'spec'], ['prototype']),
     phase('03-plan', 'Plan the build', 'Turn the approved target into small, ordered, verifiable work.', ['tickets'], ['architecture-check', 'module-design', 'triage']),
