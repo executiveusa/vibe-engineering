@@ -6,9 +6,20 @@ import { ZERO_TO_PRODUCT_SKILL_IDS, ZERO_TO_PRODUCT_WORKFLOW } from '../src/work
 test('zero-to-product workflow covers every callable Vibe skill', () => {
   const registered = new Set(SKILLS.map((skill) => skill.id));
   const journey = new Set(ZERO_TO_PRODUCT_SKILL_IDS);
-  assert.equal(registered.size, 32);
+  assert.ok(registered.size >= 33);
   assert.deepEqual([...registered].filter((id) => !journey.has(id)), []);
   assert.deepEqual([...journey].filter((id) => !registered.has(id)), []);
+});
+
+test('Loop Engineering is available as a separate optional long-running execution mode', () => {
+  const loop = getSkill('loop-engineering');
+  assert.equal(loop?.id, 'loop-engineering');
+  assert.equal(getSkill('vibe-loop')?.id, 'loop-engineering');
+  assert.equal(ZERO_TO_PRODUCT_WORKFLOW.executionModes.guided.default, true);
+  assert.equal(ZERO_TO_PRODUCT_WORKFLOW.executionModes.loopEngineering.default, false);
+  assert.equal(ZERO_TO_PRODUCT_WORKFLOW.executionModes.loopEngineering.pluginCommand, '/vibe-loop');
+  assert.equal(ZERO_TO_PRODUCT_WORKFLOW.executionModes.loopEngineering.mayBypassGates, false);
+  assert.equal(ZERO_TO_PRODUCT_WORKFLOW.executionModes.loopEngineering.maySelfApprove, false);
 });
 
 test('review skill is OpenCodeReview-first and cannot self-authorize release', () => {
