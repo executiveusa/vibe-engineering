@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 import process from 'node:process';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { VibeTruthClient } from '../packages/truth-sdk/index.mjs';
 import { getIcmBackendMap, getSkill, listSkills, runIcmWalk, runSkill } from '../icm/backend/index.mjs';
+import { installVibe } from './install-vibe.mjs';
 
 const [command, ...args] = process.argv.slice(2);
 const client = new VibeTruthClient({ baseUrl: process.env.VIBE_TRUTH_API_URL ?? 'http://localhost:4317' });
@@ -10,7 +13,22 @@ function print(value) {
   console.log(JSON.stringify(value, null, 2));
 }
 
-if (command === 'map') {
+if (command === 'install' || command === 'init') {
+  const force = args.includes('--force');
+  const skills = !args.includes('--no-skills');
+  const targetArg = args.find((arg) => !arg.startsWith('--')) ?? process.cwd();
+  const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+  const sourceRoot = path.resolve(scriptDir, '..');
+  const result = await installVibe({ target: targetArg, force, skills }, sourceRoot);
+  print({
+    ok: true,
+    target: result.target,
+    written: result.written,
+    preserved: result.skipped,
+    skillsInstalled: result.skills,
+    next: 'Read AGENTS.md. Follow Vibe. Verify It Before Everything.',
+  });
+} else if (command === 'map') {
   print(getIcmBackendMap());
 } else if (command === 'walk') {
   const result = await runIcmWalk();
@@ -45,12 +63,14 @@ if (command === 'map') {
   print(result);
 } else if (command === 'explain') {
   print({
-    what: 'Vibe Engineering is an open-source set of skills for building with AI without letting speed turn into slop.',
-    why: 'AI can generate fast. It cannot decide what you meant, what good looks like, or whether the result actually works. Vibe keeps those human decisions visible and makes agents prove important claims before they call work done.',
-    start: ['vibe map', 'vibe walk', 'vibe skills', 'vibe run grill "my idea"', 'vibe run stop-slop "review this"', 'vibe run proof "check this release"'],
+    what: 'Vibe Engineering is an open-source quality layer for building with AI without letting speed turn into slop.',
+    why: 'AI can generate fast. Vibe keeps intent, standards, evidence, ownership, and proof visible so capable agents can work inside one walkable filesystem.',
+    start: ['vibe install .', 'vibe map', 'vibe walk', 'vibe skills', 'vibe run grill "my idea"', 'vibe run proof "check this release"'],
   });
 } else {
-  console.error('Usage: vibe <explain|map|walk|skills|skill|run|method|manifest|truth|workflow|context> [arguments]');
+  console.error('Usage: vibe <install|init|explain|map|walk|skills|skill|run|method|manifest|truth|workflow|context> [arguments]');
+  console.error('  vibe install .                     Install Vibe into the current project');
+  console.error('  vibe install ./app --force         Refresh Vibe-managed files intentionally');
   console.error('  vibe map                           Print the ICM backend map');
   console.error('  vibe walk                          Run the deterministic ICM walk test');
   console.error('  vibe skills                        List callable Vibe skills');
