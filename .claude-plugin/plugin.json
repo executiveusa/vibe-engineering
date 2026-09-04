@@ -1,7 +1,7 @@
 {
   "name": "vibe-engineering",
-  "description": "Open-source AI building skills with built-in stop-slop, plain-language planning, design judgment, proof, CLI, API, and MCP access.",
-  "version": "2.2.0",
+  "description": "Guided zero-to-product Vibe Journey for Claude Code: stage-by-stage ICM gates, anti-slop review, durable proof receipts, OpenCodeReview-backed code review, and human-controlled release.",
+  "version": "2.3.0",
   "author": {
     "name": "The Pauli Effect"
   },
@@ -9,12 +9,13 @@
   "license": "MIT",
   "keywords": [
     "vibe-engineering",
-    "agent-skills",
-    "stop-slop",
+    "claude-code",
+    "icm",
+    "stage-gates",
+    "anti-slop",
+    "open-code-review",
     "verification",
-    "design",
-    "mcp",
-    "cli",
+    "proof",
     "open-source"
   ]
 }
