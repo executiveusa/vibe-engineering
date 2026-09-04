@@ -19,7 +19,7 @@ You do **not** need to learn the machinery underneath before using it.
 From the project you want to improve:
 
 ```bash
-npx --yes github:executiveusa/vibe-engineering install .
+npx --yes --package=github:executiveusa/vibe-engineering vibe install .
 ```
 
 Then tell your agent:
@@ -30,7 +30,7 @@ Read AGENTS.md. Follow Vibe. Verify It Before Everything.
 
 That is the entire public onboarding contract.
 
-The installer is brownfield-safe by default: existing project-law files are preserved unless you explicitly pass `--force`.
+The installer is brownfield-safe by default: existing project-law files are preserved unless you explicitly pass `--force`. When it preserves owner-controlled files, it leaves `.vibe/INSTALL-NOTES.md` instead of pretending Vibe law was automatically merged.
 
 See [`docs/INSTALL.md`](docs/INSTALL.md) for the install contract and adapter details.
 
@@ -55,11 +55,11 @@ The installer also adds `PROOF/`, portable skills under `.vibe/skills/`, and thi
 The filesystem is canonical:
 
 ```text
-AGENTS.md          law and boundaries
-ICMR.yaml          portable runtime contract
-CONTEXT.md         current state + next action
-PROOF/             evidence
-.vibe/skills/      portable procedures
+AGENTS.md           law and boundaries
+ICMR.yaml           portable runtime contract
+CONTEXT.md          current state + next action
+PROOF/              evidence
+.vibe/skills/       portable procedures
 .vibe/manifest.json install provenance
 ```
 
@@ -82,10 +82,10 @@ npm run skills:export
 Use the GitHub package directly:
 
 ```bash
-npx --yes github:executiveusa/vibe-engineering install .
-npx --yes github:executiveusa/vibe-engineering skills
-npx --yes github:executiveusa/vibe-engineering run grill "my idea"
-npx --yes github:executiveusa/vibe-engineering run proof "prove this is ready"
+npx --yes --package=github:executiveusa/vibe-engineering vibe install .
+npx --yes --package=github:executiveusa/vibe-engineering vibe skills
+npx --yes --package=github:executiveusa/vibe-engineering vibe run grill "my idea"
+npx --yes --package=github:executiveusa/vibe-engineering vibe run proof "prove this is ready"
 ```
 
 Or work from a clone:
