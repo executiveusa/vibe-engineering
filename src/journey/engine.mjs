@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { ZERO_TO_PRODUCT_WORKFLOW } from '../workflows/zero-to-product.mjs';
+import { runAutomaticGateChecks } from './automatic-gates.mjs';
 
 const STATE_DIR = '.vibe';
 const RECEIPTS_DIR = path.join(STATE_DIR, 'receipts');
@@ -81,6 +82,7 @@ export async function verifyJourneyStage({ root = process.cwd(), gateResults = {
       stage: state.currentStage,
       failed: evaluation.failed,
       next: null,
+      evidence,
       message: 'Stage cannot advance until every declared gate passes.',
     };
   }
@@ -94,7 +96,7 @@ export async function verifyJourneyStage({ root = process.cwd(), gateResults = {
     candidate,
     approvedBy,
     gates: evaluation.results,
-    evidence,
+    evidence: [...new Set(evidence)],
     next: nextStage?.id ?? null,
     createdAt: new Date().toISOString(),
   };
@@ -120,6 +122,18 @@ export async function verifyJourneyStage({ root = process.cwd(), gateResults = {
     next: nextStage?.id ?? null,
     state: nextState,
   };
+}
+
+export async function verifyJourneyStageAutomatically({ root = process.cwd(), candidate = null, approvedBy = null, commandRunner } = {}) {
+  const state = await readJourney(root);
+  const automatic = await runAutomaticGateChecks({ root, stageId: state.currentStage, candidate, commandRunner });
+  return verifyJourneyStage({
+    root,
+    gateResults: automatic.gateResults,
+    evidence: automatic.evidence,
+    candidate,
+    approvedBy,
+  });
 }
 
 export { DEFAULT_GATES };
