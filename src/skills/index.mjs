@@ -24,7 +24,7 @@ const PROJECT_REVIEW = Object.freeze({
   summary: 'Run an independent, system-aware review before serious work can be called finished or ready to ship.',
   invocation: 'both',
   category: 'governance',
-  aliases: ['open-code-review', 'ocr'],
+  aliases: ['system-review'],
   outputs: ['structured review findings', 'system-impact review evidence'],
   steps: [
     'Review the exact candidate revision or changed range; do not review an approximate or stale diff.',
@@ -43,7 +43,7 @@ const DOMINANT_REVIEW = Object.freeze({
   summary: 'Run OpenCodeReview as the dominant code-review engine, then apply Vibe product and system judgment before work can advance.',
   invocation: 'both',
   category: 'engineering',
-  aliases: ['code-review', 'ocr-review'],
+  aliases: ['open-code-review', 'ocr', 'code-review', 'ocr-review'],
   outputs: ['OpenCodeReview findings', 'resolved review ledger', 're-reviewed exact candidate'],
   steps: [
     'Freeze the exact commit, branch range, or workspace diff being reviewed. Never review an approximate or stale candidate.',
