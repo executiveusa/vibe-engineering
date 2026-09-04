@@ -91,7 +91,17 @@ async function durableGate(root, stageId, gateId, options = {}) {
   if (options.requireHuman && !['human', 'owner', 'judge'].includes(String(evidence.authority ?? '').toLowerCase())) {
     return { pass: false, reason: `${gateId} requires human/owner/Judge authority in ${relative}` };
   }
-  return { pass: true, evidence: relative, recordedBy: evidence.recordedBy ?? null, authority: evidence.authority ?? null };
+  if (options.candidate) {
+    if (!evidence.candidate) return { pass: false, reason: `${gateId} must name candidate ${options.candidate} in ${relative}` };
+    if (evidence.candidate !== options.candidate) return { pass: false, reason: `${gateId} evidence is for ${evidence.candidate}, not exact candidate ${options.candidate}` };
+  }
+  return {
+    pass: true,
+    evidence: relative,
+    recordedBy: evidence.recordedBy ?? null,
+    authority: evidence.authority ?? null,
+    candidate: evidence.candidate ?? null,
+  };
 }
 
 async function checkProjectWalkable(root) {
@@ -122,7 +132,7 @@ export async function runAutomaticGateChecks({ root = process.cwd(), stageId, ca
     return result;
   };
 
-  const judgement = async (gateId, options) => {
+  const judgement = async (gateId, options = {}) => {
     const result = await durableGate(root, stageId, gateId, options);
     checks[gateId] = result.pass === true;
     if (result.evidence) evidence.push(result.evidence);
@@ -150,28 +160,28 @@ export async function runAutomaticGateChecks({ root = process.cwd(), stageId, ca
       await judgement('proof-defined');
       break;
     case '04-build':
-      await judgement('slice-complete');
+      await judgement('slice-complete', candidate ? { candidate } : {});
       await record('tests-pass', await runNpmScript(root, 'test', commandRunner));
       await record('build-pass', await runNpmScript(root, 'build', commandRunner));
       break;
     case '05-review':
       await record('open-code-review-pass', await runOpenCodeReview(root, candidate, commandRunner), 'open-code-review');
-      await judgement('material-findings-resolved');
-      await judgement('stop-slop-pass');
-      await judgement('taste-pass');
+      await judgement('material-findings-resolved', candidate ? { candidate } : {});
+      await judgement('stop-slop-pass', candidate ? { candidate } : {});
+      await judgement('taste-pass', candidate ? { candidate } : {});
       break;
     case '06-prove':
-      await judgement('claims-mapped-to-evidence');
-      await judgement('exact-candidate-proven');
+      await judgement('claims-mapped-to-evidence', candidate ? { candidate } : {});
+      await judgement('exact-candidate-proven', candidate ? { candidate } : {});
       break;
     case '07-integrate':
-      await judgement('integration-coherent');
+      await judgement('integration-coherent', candidate ? { candidate } : {});
       await record('affected-tests-pass', await runNpmScript(root, 'test', commandRunner));
       break;
     case '08-release':
-      await judgement('owner-ship-authority', { requireHuman: true });
-      await judgement('rollback-ready');
-      await judgement('production-smoke-pass');
+      await judgement('owner-ship-authority', { requireHuman: true, ...(candidate ? { candidate } : {}) });
+      await judgement('rollback-ready', candidate ? { candidate } : {});
+      await judgement('production-smoke-pass', candidate ? { candidate } : {});
       break;
     case '09-learn':
       await judgement('handoff-written');
