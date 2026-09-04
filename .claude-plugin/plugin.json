@@ -1,7 +1,7 @@
 {
   "name": "vibe-engineering",
-  "description": "Guided zero-to-product Vibe Journey for Claude Code: stage-by-stage ICM gates, anti-slop review, durable proof receipts, OpenCodeReview-backed code review, and human-controlled release.",
-  "version": "2.3.0",
+  "description": "Vibe Engineering for Claude Code: guided zero-to-product Journey plus optional long-running Loop Engineering, with ICM stage gates, anti-slop review, durable proof receipts, OpenCodeReview-backed code review, and human-controlled release.",
+  "version": "2.4.0",
   "author": {
     "name": "The Pauli Effect"
   },
@@ -12,6 +12,8 @@
     "claude-code",
     "icm",
     "stage-gates",
+    "loop-engineering",
+    "long-running-tasks",
     "anti-slop",
     "open-code-review",
     "verification",
