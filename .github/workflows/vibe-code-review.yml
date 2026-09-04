@@ -1,0 +1,22 @@
+name: Vibe Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  models: read
+
+jobs:
+  review:
+    if: github.event.pull_request.draft == false
+    uses: executiveusa/open-code-review/.github/workflows/vibe-review-standard.yml@main
+    with:
+      model: openai/gpt-4.1
+      review_concurrency: "3"
+      route_severity_below: low
+      route_categories: style,documentation
+      upload_artifacts: true
