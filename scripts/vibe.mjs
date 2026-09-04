@@ -33,7 +33,7 @@ if (command === 'install' || command === 'init') {
     written: result.written,
     preserved: result.skipped,
     skillsInstalled: result.skills,
-    next: 'Run `vibe journey` for guided mode or `vibe loop` for long-running Loop Engineering mode.',
+    next: 'Verify It Before Everything. Run `vibe journey` for guided mode or `vibe loop` for long-running Loop Engineering mode.',
   });
 } else if (command === 'journey' || command === 'zero-to-product') {
   print(ZERO_TO_PRODUCT_WORKFLOW);
