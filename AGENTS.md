@@ -30,6 +30,26 @@ Therefore:
 
 **No agent soup. One walkable system. Any capable agent can use it.**
 
+## Constitutional advancement law
+
+**A project does not advance because an AI, builder, plugin, reviewer, or user says the stage is done. It advances only when the current ICM stage has satisfied its declared gates and durable proof has been written.**
+
+This is a hard Vibe rule.
+
+For every governed stage:
+
+- the current stage contract defines the required artifacts, acceptance gates, proof, approvals, and allowed next stage;
+- mechanical gates must be checked mechanically when they can be;
+- judgment gates must use the designated Vibe skills and reviewers rather than generic confidence language;
+- code-review stages must use the configured dominant review engine and re-review the exact final candidate after fixes;
+- consequential stages cannot be self-approved by the builder;
+- failed or missing gates produce `HOLD`, not optimistic continuation;
+- a passing transition must create durable evidence or a receipt in the filesystem before the next stage becomes active;
+- adapters may guide or visualize progression, but they may never bypass, weaken, auto-waive, or silently mark a gate complete;
+- only authorized human authority may satisfy gates explicitly marked human/owner/Judge authority.
+
+**Slop cannot advance simply because an agent says it is finished. Every consequential stage must earn the next stage through evidence.**
+
 ## Mandatory Step 0 — ICMR
 
 Before substantial work, run the ICMR Universal Compiler contract in `skills/icmr-universal-compiler/SKILL.md`.
@@ -100,6 +120,8 @@ Default model output is not a product decision. For consequential work ask:
 
 Use project context, a real reference where appropriate, deterministic detectors where useful, fresh review, and actual evidence. Anti-slop tools do not replace taste or judgment.
 
+A stage-level anti-slop claim is invalid unless its declared gates have actually passed. Presentation quality, agent confidence, a successful local build, or a clean-looking demo can never substitute for missing stage proof.
+
 ## Commands
 
 ```bash
@@ -147,6 +169,8 @@ The owner must be able to understand, export, move, replace providers/builders, 
 ## Prohibited changes
 
 - Do not begin substantial governed work without a valid `ICMR.yaml` Step 0 contract.
+- Do not advance an ICM stage when any declared gate is failed, missing, unverified, or lacks required authority/proof.
+- Do not let an adapter, plugin, agent, builder, reviewer, or UI mark a governed stage complete without writing the required durable receipt/evidence.
 - Do not rewrite unrelated product surfaces during infrastructure tickets.
 - Do not add another orchestrator when an adapter to the existing Vibe/ICM core is sufficient.
 - Do not commit secrets or `.sandcastle/.env`.
