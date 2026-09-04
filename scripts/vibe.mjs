@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { VibeTruthClient } from '../packages/truth-sdk/index.mjs';
 import { getIcmBackendMap, getSkill, listSkills, runIcmWalk, runSkill } from '../icm/backend/index.mjs';
-import { getJourneyStatus, verifyJourneyStage } from '../src/journey/engine.mjs';
+import { getJourneyStatus, verifyJourneyStage, verifyJourneyStageAutomatically } from '../src/journey/engine.mjs';
 import { ZERO_TO_PRODUCT_WORKFLOW } from '../src/workflows/zero-to-product.mjs';
 import { installVibe } from './install-vibe.mjs';
 
@@ -13,6 +13,11 @@ const client = new VibeTruthClient({ baseUrl: process.env.VIBE_TRUTH_API_URL ?? 
 
 function print(value) {
   console.log(JSON.stringify(value, null, 2));
+}
+
+function option(name) {
+  const index = args.indexOf(name);
+  return index >= 0 ? args[index + 1] ?? null : null;
 }
 
 if (command === 'install' || command === 'init') {
@@ -35,8 +40,15 @@ if (command === 'install' || command === 'init') {
 } else if (command === 'status') {
   print(await getJourneyStatus(process.cwd()));
 } else if (command === 'verify-stage') {
-  const payload = args[0] ? JSON.parse(args.join(' ')) : {};
-  print(await verifyJourneyStage({ root: process.cwd(), ...payload }));
+  const candidate = option('--candidate');
+  const approvedBy = option('--approved-by');
+  if (args.includes('--manual')) {
+    const payloadText = option('--manual');
+    const payload = payloadText ? JSON.parse(payloadText) : {};
+    print(await verifyJourneyStage({ root: process.cwd(), ...payload, candidate: payload.candidate ?? candidate, approvedBy: payload.approvedBy ?? approvedBy }));
+  } else {
+    print(await verifyJourneyStageAutomatically({ root: process.cwd(), candidate, approvedBy }));
+  }
 } else if (command === 'map') {
   print(getIcmBackendMap());
 } else if (command === 'walk') {
@@ -74,14 +86,16 @@ if (command === 'install' || command === 'init') {
   print({
     what: 'Vibe Engineering is an open-source quality layer for building with AI without letting speed turn into slop.',
     why: 'AI can generate fast. Vibe keeps intent, standards, evidence, ownership, and proof visible so capable agents can work inside one walkable filesystem.',
-    start: ['vibe install .', 'vibe journey', 'vibe status', 'vibe run grill-idea "my idea"', 'vibe run spec "define the target"', 'vibe run review "review the candidate"', 'vibe run proof "prove this release"'],
+    start: ['vibe install .', 'vibe journey', 'vibe status', 'vibe verify-stage', 'vibe run grill-idea "my idea"', 'vibe run review "review the candidate"'],
   });
 } else {
   console.error('Usage: vibe <install|init|journey|zero-to-product|status|verify-stage|explain|map|walk|skills|skill|run|method|manifest|truth|workflow|context> [arguments]');
   console.error('  vibe install .                     Install Vibe into the current project');
   console.error('  vibe journey                       Show the beginner zero-to-product workflow');
   console.error('  vibe status                        Show current ICM journey level and gates');
-  console.error('  vibe verify-stage <json>           Verify declared gates; HOLD or write a receipt and advance');
+  console.error('  vibe verify-stage                  Execute current stage gates automatically; HOLD or advance');
+  console.error('  vibe verify-stage --candidate SHA  Bind review/proof evidence to an exact candidate');
+  console.error('  vibe verify-stage --manual JSON    Legacy/manual gate injection for controlled tests only');
   console.error('  vibe install ./app --force         Refresh Vibe-managed files intentionally');
   console.error('  vibe map                           Print the ICM backend map');
   console.error('  vibe walk                          Run the deterministic ICM walk test');
