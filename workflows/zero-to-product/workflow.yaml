@@ -1,9 +1,22 @@
 id: zero-to-product
-version: 1.1.0
+version: 1.2.0
 title: Zero to Finished Product
 audience: non-technical founders and operators
 promise: Start with a fuzzy idea and finish with a proven, reviewable, releasable product.
 entry: AGENTS.md -> ICMR.yaml -> CONTEXT.md
+execution_modes:
+  guided:
+    default: true
+    interface: Vibe Journey
+    behavior: Human-guided, stage-by-stage progression with explicit verification at each level.
+  loop-engineering:
+    default: false
+    skill: loop-engineering
+    plugin_command: /vibe-loop
+    behavior: Long-running end-to-end execution that may traverse the full workflow autonomously between human gates.
+    lifecycle: INTENT -> BAR -> LOCK -> EVIDENCE -> GRAPH -> SPEC -> SLICE -> BUILD -> VERIFY -> GAUNTLET -> RELEASE -> LEARN
+    may_bypass_gates: false
+    may_self_approve: false
 advancement:
   rule: A stage advances only when all declared gates pass and durable proof or a receipt is written.
   state_file: .vibe/CURRENT.json
@@ -21,7 +34,7 @@ review_engine:
 phases:
   - id: 00-start
     primary: [setup-vibe, ask-vibe]
-    support: [explain, teach]
+    support: [explain, teach, loop-engineering]
     gates: [project-walkable, owner-intent-named]
   - id: 01-discover
     primary: [grill-idea, grill]
