@@ -17,6 +17,12 @@ Claude Code users can select:
 
 The command loads `skills/loop-engineering/SKILL.md` as the router and follows the Loop lifecycle.
 
+## CLI option
+
+`vibe loop "<goal>"`
+
+Aliases: `vibe long-run`, `vibe loop-engineering`.
+
 ## Lifecycle
 
 `INTENT -> BAR -> LOCK -> EVIDENCE -> GRAPH -> SPEC -> SLICE -> BUILD -> VERIFY -> GAUNTLET -> RELEASE -> LEARN`
