@@ -61,6 +61,7 @@ Existing packages may retain their current structure while adding `workflow.yaml
 
 ### Build safely
 
+- **Zero to Finished Product** — the default beginner path. Organizes all callable Vibe skills into a primary lane plus conditional support skills and makes OpenCodeReview the dominant engine for code review.
 - A2A Autonomous Software Factory
 - Brownfield Vibe Rescue Sprint
 - Greenfield Sovereign Launch
