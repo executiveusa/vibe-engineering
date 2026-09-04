@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { VibeTruthClient } from '../packages/truth-sdk/index.mjs';
 import { getIcmBackendMap, getSkill, listSkills, runIcmWalk, runSkill } from '../icm/backend/index.mjs';
+import { getJourneyStatus, verifyJourneyStage } from '../src/journey/engine.mjs';
 import { ZERO_TO_PRODUCT_WORKFLOW } from '../src/workflows/zero-to-product.mjs';
 import { installVibe } from './install-vibe.mjs';
 
@@ -31,6 +32,11 @@ if (command === 'install' || command === 'init') {
   });
 } else if (command === 'journey' || command === 'zero-to-product') {
   print(ZERO_TO_PRODUCT_WORKFLOW);
+} else if (command === 'status') {
+  print(await getJourneyStatus(process.cwd()));
+} else if (command === 'verify-stage') {
+  const payload = args[0] ? JSON.parse(args.join(' ')) : {};
+  print(await verifyJourneyStage({ root: process.cwd(), ...payload }));
 } else if (command === 'map') {
   print(getIcmBackendMap());
 } else if (command === 'walk') {
@@ -68,12 +74,14 @@ if (command === 'install' || command === 'init') {
   print({
     what: 'Vibe Engineering is an open-source quality layer for building with AI without letting speed turn into slop.',
     why: 'AI can generate fast. Vibe keeps intent, standards, evidence, ownership, and proof visible so capable agents can work inside one walkable filesystem.',
-    start: ['vibe install .', 'vibe journey', 'vibe run grill-idea "my idea"', 'vibe run spec "define the target"', 'vibe run review "review the candidate"', 'vibe run proof "prove this release"'],
+    start: ['vibe install .', 'vibe journey', 'vibe status', 'vibe run grill-idea "my idea"', 'vibe run spec "define the target"', 'vibe run review "review the candidate"', 'vibe run proof "prove this release"'],
   });
 } else {
-  console.error('Usage: vibe <install|init|journey|zero-to-product|explain|map|walk|skills|skill|run|method|manifest|truth|workflow|context> [arguments]');
+  console.error('Usage: vibe <install|init|journey|zero-to-product|status|verify-stage|explain|map|walk|skills|skill|run|method|manifest|truth|workflow|context> [arguments]');
   console.error('  vibe install .                     Install Vibe into the current project');
   console.error('  vibe journey                       Show the beginner zero-to-product workflow');
+  console.error('  vibe status                        Show current ICM journey level and gates');
+  console.error('  vibe verify-stage <json>           Verify declared gates; HOLD or write a receipt and advance');
   console.error('  vibe install ./app --force         Refresh Vibe-managed files intentionally');
   console.error('  vibe map                           Print the ICM backend map');
   console.error('  vibe walk                          Run the deterministic ICM walk test');
