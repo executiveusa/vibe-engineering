@@ -73,14 +73,16 @@ export function evaluateGateResults(stageId, gateResults = {}) {
   return { required, results, failed, pass: failed.length === 0 };
 }
 
-export async function verifyJourneyStage({ root = process.cwd(), gateResults = {}, evidence = [], candidate = null, approvedBy = null } = {}) {
+export async function verifyJourneyStage({ root = process.cwd(), gateResults = {}, evidence = [], diagnostics = {}, candidate = null, approvedBy = null } = {}) {
   const state = await readJourney(root);
   const evaluation = evaluateGateResults(state.currentStage, gateResults);
   if (!evaluation.pass) {
+    const failedDiagnostics = Object.fromEntries(evaluation.failed.map((id) => [id, diagnostics[id] ?? { pass: false }]));
     return {
       verdict: 'HOLD',
       stage: state.currentStage,
       failed: evaluation.failed,
+      diagnostics: failedDiagnostics,
       next: null,
       evidence,
       message: 'Stage cannot advance until every declared gate passes.',
@@ -131,6 +133,7 @@ export async function verifyJourneyStageAutomatically({ root = process.cwd(), ca
     root,
     gateResults: automatic.gateResults,
     evidence: automatic.evidence,
+    diagnostics: automatic.diagnostics,
     candidate,
     approvedBy,
   });
