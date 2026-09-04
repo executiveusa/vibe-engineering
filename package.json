@@ -5,7 +5,8 @@
   "type": "module",
   "license": "MIT",
   "bin": {
-    "vibe": "scripts/vibe.mjs"
+    "vibe": "scripts/vibe.mjs",
+    "vibe-engineering": "scripts/vibe.mjs"
   },
   "engines": {
     "node": ">=22"
