@@ -115,6 +115,7 @@ export async function runAutomaticGateChecks({ root = process.cwd(), stageId, ca
   if (!stageId) throw new Error('stageId is required');
 
   const checks = {};
+  const diagnostics = {};
   const evidence = [];
   const record = async (gateId, result, source = 'automatic') => {
     const payload = {
@@ -128,6 +129,7 @@ export async function runAutomaticGateChecks({ root = process.cwd(), stageId, ca
     };
     const relative = await writeEvidence(root, stageId, gateId, payload);
     checks[gateId] = result.pass === true;
+    diagnostics[gateId] = result;
     evidence.push(relative);
     return result;
   };
@@ -135,6 +137,7 @@ export async function runAutomaticGateChecks({ root = process.cwd(), stageId, ca
   const judgement = async (gateId, options = {}) => {
     const result = await durableGate(root, stageId, gateId, options);
     checks[gateId] = result.pass === true;
+    diagnostics[gateId] = result;
     if (result.evidence) evidence.push(result.evidence);
     return result;
   };
@@ -191,5 +194,5 @@ export async function runAutomaticGateChecks({ root = process.cwd(), stageId, ca
       throw new Error(`Unknown journey stage: ${stageId}`);
   }
 
-  return { gateResults: checks, evidence: [...new Set(evidence)] };
+  return { gateResults: checks, diagnostics, evidence: [...new Set(evidence)] };
 }
