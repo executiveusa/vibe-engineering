@@ -1,0 +1,48 @@
+id: zero-to-product
+version: 1.0.0
+title: Zero to Finished Product
+audience: non-technical founders and operators
+promise: Start with a fuzzy idea and finish with a proven, reviewable, releasable product.
+entry: AGENTS.md -> ICMR.yaml -> CONTEXT.md
+review_engine:
+  repository: https://github.com/executiveusa/open-code-review
+  role: primary-code-review-engine
+  skill: review
+  rerun_after_fixes: true
+phases:
+  - id: 00-start
+    primary: [setup-vibe, ask-vibe]
+    support: [explain, teach]
+  - id: 01-discover
+    primary: [grill-idea, grill]
+    support: [interview, ask-human, research, language]
+  - id: 02-define
+    primary: [map, spec]
+    support: [prototype]
+  - id: 03-plan
+    primary: [tickets]
+    support: [architecture-check, module-design, triage]
+  - id: 04-build
+    primary: [build]
+    support: [test-first, debug, deep-work]
+  - id: 05-review
+    primary: [review, project-review]
+    support: [stop-slop, taste, human-voice, agent-docs]
+  - id: 06-prove
+    primary: [proof]
+    support: []
+  - id: 07-integrate
+    primary: [merge]
+    support: [handoff]
+  - id: 08-release
+    primary: [ship]
+    support: [human-step]
+  - id: 09-learn
+    primary: [handoff]
+    support: [teach, ask-vibe]
+completion:
+  require_exact_candidate: true
+  require_review: true
+  require_proof: true
+  require_human_release_authority: true
+  require_rollback: true
