@@ -1,11 +1,13 @@
 id: zero-to-product
-version: 1.0.0
+version: 1.1.0
 title: Zero to Finished Product
 audience: non-technical founders and operators
 promise: Start with a fuzzy idea and finish with a proven, reviewable, releasable product.
 entry: AGENTS.md -> ICMR.yaml -> CONTEXT.md
 advancement:
   rule: A stage advances only when all declared gates pass and durable proof or a receipt is written.
+  state_file: .vibe/CURRENT.json
+  receipts_dir: .vibe/receipts
   fail_state: HOLD
   allow_manual_skip: false
   allow_agent_self_approval: false
@@ -20,33 +22,43 @@ phases:
   - id: 00-start
     primary: [setup-vibe, ask-vibe]
     support: [explain, teach]
+    gates: [project-walkable, owner-intent-named]
   - id: 01-discover
     primary: [grill-idea, grill]
     support: [interview, ask-human, research, language]
+    gates: [user-and-problem-clear, critical-assumptions-recorded]
   - id: 02-define
     primary: [map, spec]
     support: [prototype]
+    gates: [outcome-clear, standard-clear, acceptance-testable, non-goals-recorded]
   - id: 03-plan
     primary: [tickets]
     support: [architecture-check, module-design, triage]
+    gates: [slices-ordered, dependencies-visible, proof-defined]
   - id: 04-build
     primary: [build]
     support: [test-first, debug, deep-work]
+    gates: [slice-complete, tests-pass, build-pass]
   - id: 05-review
     primary: [review, project-review]
     support: [stop-slop, taste, human-voice, agent-docs]
+    gates: [open-code-review-pass, material-findings-resolved, stop-slop-pass, taste-pass]
   - id: 06-prove
     primary: [proof]
     support: []
+    gates: [claims-mapped-to-evidence, exact-candidate-proven]
   - id: 07-integrate
     primary: [merge]
     support: [handoff]
+    gates: [integration-coherent, affected-tests-pass]
   - id: 08-release
     primary: [ship]
     support: [human-step]
+    gates: [owner-ship-authority, rollback-ready, production-smoke-pass]
   - id: 09-learn
     primary: [handoff]
     support: [teach, ask-vibe]
+    gates: [handoff-written, retrospective-written]
 completion:
   require_exact_candidate: true
   require_review: true
