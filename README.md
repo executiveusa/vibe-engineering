@@ -2,7 +2,7 @@
 
 **V.I.B.E. = Verify It Before Everything.**
 
-A free, open-source way to make AI-built software more intentional, more reviewable, and easier to trust.
+A free, open-source quality layer for building with AI without letting speed turn into slop.
 
 Bring the idea. Vibe helps your AI:
 
@@ -14,25 +14,39 @@ Bring the idea. Vibe helps your AI:
 
 You do **not** need to learn the machinery underneath before using it.
 
-## Start in one sentence
+## Get Vibe in under 60 seconds
 
-Give this repository to the agent you already use and say:
+From the project you want to improve:
+
+```bash
+npx --yes github:executiveusa/vibe-engineering install .
+```
+
+Then tell your agent:
 
 ```text
 Read AGENTS.md. Follow Vibe. Verify It Before Everything.
 ```
 
-Repository:
+That is the entire public onboarding contract.
 
-```text
-https://github.com/executiveusa/vibe-engineering
-```
+The installer is brownfield-safe by default: existing project-law files are preserved unless you explicitly pass `--force`.
 
-That is the agent-neutral entry point.
+See [`docs/INSTALL.md`](docs/INSTALL.md) for the install contract and adapter details.
+
+## One filesystem. Any capable agent.
 
 Vibe is built so Claude Code, Codex, Cursor, OpenCode, custom agents, and future tools can all enter the same filesystem instead of each needing a different architecture.
 
-**No agent soup. One walkable system.**
+The installed entry order is always:
+
+```text
+AGENTS.md → ICMR.yaml → CONTEXT.md
+```
+
+The installer also adds `PROOF/`, portable skills under `.vibe/skills/`, and thin adapter files for Claude Code, Codex, Cursor, and OpenCode. Those adapters point back to the same canonical files instead of duplicating the law.
+
+**No agent soup. One walkable system. Any capable agent can use it.**
 
 ## Use Vibe four ways
 
@@ -41,18 +55,19 @@ Vibe is built so Claude Code, Codex, Cursor, OpenCode, custom agents, and future
 The filesystem is canonical:
 
 ```text
-AGENTS.md      law and boundaries
-ICMR.yaml      detected runtime contract
-CONTEXT.md     workspace routing
-skills/        portable procedures
-icm/           walkable system map
+AGENTS.md          law and boundaries
+ICMR.yaml          portable runtime contract
+CONTEXT.md         current state + next action
+PROOF/             evidence
+.vibe/skills/      portable procedures
+.vibe/manifest.json install provenance
 ```
 
 Agents are adapters to those files. Durable truth does not live in one vendor's hidden prompt or chat memory.
 
 ### 2. Plugin / skills
 
-Portable skills live under `skills/` and plugin metadata lives under `.claude-plugin/`.
+Portable skills live under `skills/` in this repository and install under `.vibe/skills/` in a target project. Plugin metadata lives under `.claude-plugin/`.
 
 Claude Code and other skill-compatible agents can use the same committed procedures. The direct Vibe skills include setup, interview/grill, Project Review, Stop Slop, Human Voice, Deep Work, Taste, Proof, and Ship, backed by the full callable registry.
 
@@ -64,13 +79,22 @@ npm run skills:export
 
 ### 3. CLI
 
+Use the GitHub package directly:
+
+```bash
+npx --yes github:executiveusa/vibe-engineering install .
+npx --yes github:executiveusa/vibe-engineering skills
+npx --yes github:executiveusa/vibe-engineering run grill "my idea"
+npx --yes github:executiveusa/vibe-engineering run proof "prove this is ready"
+```
+
+Or work from a clone:
+
 ```bash
 git clone https://github.com/executiveusa/vibe-engineering.git
 cd vibe-engineering
 npm ci
 npm run vibe -- skills
-npm run vibe -- run setup-vibe "configure this repo"
-npm run vibe -- run proof "prove this is ready"
 ```
 
 ### 4. API + MCP
@@ -93,7 +117,7 @@ Local MCP stdio adapter:
 npm run mcp
 ```
 
-The CLI, API, MCP, and plugin surfaces resolve back to the same Vibe rules and skill definitions.
+The CLI, API, MCP, plugin, and installed-files surfaces resolve back to the same Vibe rules and skill definitions.
 
 ## The five-step public workflow
 
@@ -194,18 +218,7 @@ ICM makes the filesystem the map.
 
 A new human or agent should be able to enter a project and know where to look next without loading a swarm of personas or relying on previous chat history.
 
-Start here:
-
-```text
-AGENTS.md                Layer 0: law
-ICMR.yaml                Step 0: runtime contract
-CONTEXT.md               Layer 1: routing
-stages/NN_name/CONTEXT.md Layer 2: current-stage contract
-_config/ references/ shared/ Layer 3: stable context
-output/                  Layer 4: working proof and artifacts
-```
-
-The reusable project template lives under `factory/icm/template/` and carries the same agent-neutral filesystem law into new projects.
+The reusable full project template lives under `factory/icm/template/`. The lightweight universal installer uses the same filesystem law without forcing a new application's source tree into a pre-existing project.
 
 ## Why it is free
 
