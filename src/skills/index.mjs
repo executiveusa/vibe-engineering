@@ -57,9 +57,31 @@ const DOMINANT_REVIEW = Object.freeze({
   attribution: 'Primary engine: executiveusa/open-code-review, derived from Alibaba OpenCodeReview (Apache-2.0). Vibe Engineering supplies spec fidelity, system impact, product quality, proof, sovereignty, and release-governance overlays.',
 });
 
+const LOOP_ENGINEERING = Object.freeze({
+  id: 'loop-engineering',
+  title: 'Loop Engineering',
+  summary: 'Run the owner-provided ICM-based zero-to-verified lifecycle as an optional long-running Vibe execution mode.',
+  invocation: 'both',
+  category: 'engineering',
+  aliases: ['loop', 'vibe-loop', 'long-run'],
+  outputs: ['durable run state', 'stage evidence', 'gauntlet verdict', 'release evidence', 'learning receipt'],
+  steps: [
+    'Read `skills/loop-engineering/SKILL.md` and treat it as the canonical router contract for this mode.',
+    'Determine greenfield or brownfield mode and inspect existing reality before asking avoidable questions.',
+    'Establish a real quality bar before substantial work, then create or resume one durable run packet.',
+    'Move through INTENT -> BAR -> LOCK -> EVIDENCE -> GRAPH -> SPEC -> SLICE -> BUILD -> VERIFY -> GAUNTLET -> RELEASE -> LEARN.',
+    'Operate autonomously between required human gates, but never override owner, Judge, release, rights, credential, or destructive-action authority.',
+    'Route only the Vibe skills required by the active stage; do not preload the full catalog or create an agent swarm.',
+    'At verification and gauntlet stages, use fresh review context and the dominant OpenCodeReview-backed review skill for code review.',
+    'Repeat only the failed slice when evidence does not clear the bar; preserve successful proof and avoid unnecessary rework.',
+    'Never claim production completion from code presence, CI, preview, or deployment alone. Require rollback and exact-revision runtime proof for PRODUCTION VERIFIED.',
+  ],
+  attribution: 'Owner-provided Loop Engineering v1.0.0 skill package; canonical SKILL.md preserved verbatim under skills/loop-engineering/SKILL.md.',
+});
+
 const ORDERED_CORE_SKILLS = CORE_SKILLS.map((item) => item.id === 'review' ? DOMINANT_REVIEW : item);
 
-export const SKILLS = Object.freeze([SETUP_VIBE, PROJECT_REVIEW, ...ORDERED_CORE_SKILLS]);
+export const SKILLS = Object.freeze([SETUP_VIBE, PROJECT_REVIEW, LOOP_ENGINEERING, ...ORDERED_CORE_SKILLS]);
 
 const BY_ID = new Map(SKILLS.map((item) => [item.id, item]));
 for (const item of SKILLS) for (const alias of item.aliases ?? []) BY_ID.set(alias, item);
