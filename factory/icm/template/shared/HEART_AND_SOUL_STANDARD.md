@@ -2,6 +2,16 @@
 
 Layer 3 stable design doctrine for Vibe Engineering and ICM-governed products.
 
+This doctrine inherits `VIBE_HOUSE_STANDARD.md`. It governs design and human experience inside the global House lifecycle; it does not create a parallel process.
+
+Canonical route:
+
+`INTENT → SPEC → PLAN → BUILD → PROOF → COUNCIL → JUDGE → SHIP → OPERATE`
+
+Use the current upstream House Skill when reachable:
+
+`https://raw.githubusercontent.com/executiveusa/vibe-engineering/main/skills/vibe-engineering/SKILL.md`
+
 ## Purpose
 
 Design is not decoration added after engineering. It is the deliberate shaping of human attention, effort, confidence, emotion, and control around a real outcome.
@@ -16,14 +26,15 @@ Minimalism is optional. Essentiality is mandatory.
 
 Before choosing interface, style, motion, component, or feature, identify:
 
-- the human outcome;
+- the approved human outcome from INTENT;
 - the reason it matters now;
 - the primary journey;
 - the desired feeling;
 - the trust the user needs;
-- the control the user must retain.
+- the control the user must retain;
+- the evidence that will prove the design works.
 
-If the primary job cannot be stated plainly, the design is not ready to expand.
+If the primary job cannot be stated plainly, the design is not ready to expand or enter BUILD.
 
 ## Soul
 
@@ -52,6 +63,8 @@ Do not expose implementation complexity merely because the system contains it.
 Automation removes unnecessary work, not accountability.
 
 Require review or explicit confirmation when actions are consequential, ambiguous, difficult to reverse, externally visible, financially meaningful, privacy-sensitive, or likely to benefit from human judgment.
+
+House authority still applies: builders cannot self-approve, Council challenges material work, and Judge returns only `SHIP` or `HOLD`.
 
 ## Seven design lenses
 
@@ -115,7 +128,7 @@ Taste is not reduced to one metric, but design claims still require evidence app
 - trust/recovery behavior;
 - independent critique.
 
-Confidence is not evidence.
+Confidence is not evidence. A polished render is not PROOF by itself.
 
 ## Stopping rule
 
@@ -123,7 +136,7 @@ Do not stop because the artifact looks polished or because a builder is tired of
 
 Stop subtraction when the critic can name the protected quality that the next removal would damage.
 
-That protected quality must connect to the approved Intent → Standard → Evidence contract.
+That protected quality must connect to the approved Intent → Standard → Evidence contract and the current House stage gate.
 
 ## Client Zero
 
