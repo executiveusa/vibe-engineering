@@ -3,7 +3,7 @@ name: vibe-engineering
 description: Govern product and software work with V.I.B.E. — Verify It Before Everything. Canonical house skill for project intake, ICM context, intent/spec/plan artifacts, implementation, verification, Council/Judge review, release, operations, formatting, and agent handoff. Reads the smallest relevant ICM stage instead of loading the whole method.
 license: MIT
 metadata:
-  version: "3.0.0"
+  version: "3.0.1"
   tags: "Vibe Engineering, ICM, house architecture, product, engineering, verification, systems thinking, critical thinking"
 ---
 
@@ -11,7 +11,7 @@ metadata:
 
 V.I.B.E. means **Verify It Before Everything**.
 
-This is the canonical router for the Vibe Engineering house system. Use this one skill when the user says `VIBE`, `HOUSE`, `LOCK`, asks to use Vibe Engineering, or asks to take a product from intent through production proof.
+This is the canonical router for the Vibe Engineering House system. Use this one skill when the user says `VIBE`, `HOUSE`, `LOCK`, asks to use Vibe Engineering, or asks to take a product from intent through production proof.
 
 Do not create a parallel methodology. Route through the project-local ICM workspace and call smaller procedures only when the current stage requires them.
 
@@ -27,13 +27,39 @@ Compatible physical ICM stage route:
 
 `00_intake → 01_vision → 02_blueprint → 03_build → 04_verify → 05_council → 06_judge → 07_ship → 08_improve`
 
+## Canonical upstream
+
+The canonical House method lives at:
+
+```text
+https://github.com/executiveusa/vibe-engineering
+https://raw.githubusercontent.com/executiveusa/vibe-engineering/main/skills/vibe-engineering/SKILL.md
+```
+
+When upstream is reachable, inspect the current upstream House Skill before material work. A local copy makes Vibe portable; it does not silently become a separate methodology.
+
+If shell access is available in a target repository, install or refresh the portable contract with:
+
+```bash
+npx --yes --package=github:executiveusa/vibe-engineering vibe install .
+```
+
+Do not use `--force` unless existing owner-controlled project-law files have been inspected and an intentional merge plan exists.
+
+If local Vibe law differs from upstream:
+
+1. upstream owns the general House method;
+2. the target repository owns project-specific facts, owner decisions, requirements, evidence, credentials boundaries, and deployment reality;
+3. merge by intent, not blind replacement;
+4. record intentional deviations explicitly.
+
 ## First action
 
-If the project contains a Vibe ICM workspace, read its root `CONTEXT.md`, then read only the current stage contract and the references that stage names.
-
-If the Vibe MCP server is available, call `vibe_method` for the canonical method or `vibe_context` for task-scoped context. Do not load every artifact by default.
-
-If neither is available, use this skill as the router and follow the project-local source of truth.
+1. Inspect the repository before changing it.
+2. Refresh or inspect current upstream House law when reachable.
+3. Read project-local `AGENTS.md`, `ICMR.yaml`, and `CONTEXT.md` when present.
+4. Read only the current ICM stage contract and references that stage names.
+5. If Vibe MCP is available, use `vibe_method` for the canonical method or `vibe_context` for task-scoped context instead of loading every artifact.
 
 ## House architecture contract
 
@@ -43,136 +69,110 @@ The layers have one job each:
 2. **ICM** — interpretable context: where facts, contracts, artifacts, evidence, and state live.
 3. **Artifact lifecycle** — motion: `INTENT → SPEC → PLAN → BUILD → PROOF → COUNCIL → JUDGE → SHIP → OPERATE`.
 4. **Hermes / orchestrator** — execution routing: which worker acts next and whether the stage gate passed.
-5. **Workers** — Claude, Codex, GPT, Gemini, Orca, humans, or other tools. Workers are replaceable and cannot redefine the house architecture.
+5. **Workers** — Claude, Codex, GPT, Gemini, Orca, humans, or other tools. Workers are replaceable and cannot redefine the House architecture.
 
 The filesystem is the durable source of truth. Chat history, model memory, and vendor-specific prompts are adapters, not architecture.
 
-### Semantic stage meanings
+## Stage meanings
 
-- `INTENT` — mode, outcome, target, constraints, proof, commercial value, ownership, and rollback requirement.
-- `SPEC` — exact behavior, design, interfaces, acceptance criteria, and named reference bars.
-- `PLAN` — bounded slices, file/change order, risks, dependencies, tests, and rollback.
+- `INTENT` — mode, outcome, target, constraints, proof, commercial value, ownership, authority, and rollback.
+- `SPEC` — exact behavior, design, interfaces, acceptance criteria, architecture boundaries, and named reference bars.
+- `PLAN` — bounded slices, file/change order, risks, dependencies, tests, proof, and rollback.
 - `BUILD` — one independently verifiable slice at a time.
-- `PROOF` — deterministic checks plus relevant runtime/browser/security/accessibility evidence.
-- `COUNCIL` — independent review of value, architecture, failure, security/privacy, taste/accessibility, sovereignty, and proof.
+- `PROOF` — deterministic checks plus relevant runtime/browser/security/accessibility/integration evidence.
+- `COUNCIL` — independent review of value, architecture, failure, security/privacy, taste/accessibility, sovereignty, maintainability, and proof.
 - `JUDGE` — release verdict only: `SHIP` or `HOLD`. Judge does not rewrite the work it judges.
 - `SHIP` — exact proven revision, authorized release, live-environment verification, and tested rollback.
 - `OPERATE` — monitor outcomes/incidents and create a new intent when change is needed.
 
-### Visual semantics
+## Decision contract
 
-When a project contains `_config/stage-system.yaml`, use those tokens as the canonical stage colors for diagrams, dashboards, status surfaces, and generated architecture maps. Color communicates stage meaning; it is not decorative branding.
+Before substantial work, establish and persist:
 
-### Formatting law
+```text
+MODE
+OUTCOME
+TARGET
+CONSTRAINTS
+PROOF
+COMMERCIAL VALUE
+OWNER / AUTHORITY
+ROLLBACK
+```
 
-Use project-local formatter/linter rules. In the canonical Vibe factory, Prettier normalizes supported text/code formatting; it does not define semantic colors. Formatting gates must never be represented as behavioral or production proof.
-
-## The decision contract
-
-For every material decision, record:
+For every material decision record:
 
 1. **Intent** — What are we trying to change, for whom, and why?
 2. **Standard** — What does good look like before the builder becomes attached to the answer?
 3. **Evidence** — What observable result would make the claim true?
 
-Confidence, effort, and model agreement are not evidence.
+Separate verified facts from assumptions. Confidence, effort, model agreement, and formatting are not behavioral evidence.
 
-## Four thinking habits
+## Working rules
 
-- **Question the answer** — critical thinking.
-- **See what connects** — systems thinking. Name dependencies, downstream effects, people affected, recurring cost, and what the choice makes normal.
-- **Get back to what is true** — first principles. Separate facts, constraints, assumptions, and inherited convention.
-- **Build one piece and prove it** — discipline.
+- Inspect before change.
+- Reuse before inventing.
+- Work one independently verifiable vertical slice at a time.
+- Keep rollback.
+- Keep ICM artifacts and documentation synchronized with reality.
+- Do not broaden scope because another idea or defect becomes visible.
+- Use project-local formatter/linter rules. Prettier controls formatting, not lifecycle meaning or proof.
+- When `_config/stage-system.yaml` exists, use its semantic stage colors in diagrams/status surfaces. Text labels remain authoritative.
 
-Use the plain phrase before the technical term when working with non-technical users or young creators.
+Truth rules:
 
-## Stage rules
+```text
+BUILT ≠ VERIFIED
+CI PASS ≠ CUSTOMER VALUE
+DEPLOYED ≠ PRODUCTION PROOF
+FORMAT PASS ≠ BEHAVIORAL PROOF
+```
 
-### Choose / Intake / Intent
+## PROOF
 
-Inspect reality before changing it. Capture baseline, outcome, target, constraints, proof, commercial value, rollback, source rights, and greenfield/brownfield mode.
+Run the checks appropriate to the claim: tests, type checks, lint/build, browser/runtime, accessibility, security/privacy, performance, permissions, source/rights, mobile, integration, data, failure/recovery, deployment, and live-environment checks where relevant.
 
-When a market/product idea is materially unproven, separate the durable human instinct from the first product shape. Research what is already proven, what can be made better, and what remains genuinely new.
+A build, preview, merge, formatter pass, or deployment submission is not production proof by itself.
 
-### See + Shape / Vision + Blueprint / Spec
+When a reference bar exists, compare the real artifact against the real reference with fresh context and name the largest remaining gap.
 
-Name the smallest valuable human outcome, primary user journey, success signal, ownership promise, and what is intentionally out of scope. Create one buildable product/architecture contract. Reuse existing systems before adding new ones. For taste-sensitive work, name a real reference bar.
+## COUNCIL
 
-Choose a divergence mode:
-
-- `STANDARD`: factual work, approved implementation, verification, security conclusions, migrations, destructive operations, and release.
-- `DIVERGE`: about five materially different options for product, UX, positioning, creative direction, architecture alternatives, or debugging hypotheses.
-- `FRONTIER`: broader tail exploration only for bounded, reversible experiments where novelty is worth the risk.
-
-Verbalized Sampling may be used for `DIVERGE` or `FRONTIER`. Never treat a low verbalized probability as evidence of quality or truth.
-
-Converge to one approved slice before Build.
-
-### Plan
-
-Turn the approved spec into independently verifiable slices. Name the files/surfaces likely to change, dependencies, risks, checks, proof, rollback, and human gates. The plan should be sufficient for a fresh worker to act without reconstructing the originating conversation.
-
-### Make / Build
-
-Implement one independently verifiable vertical slice. Inspect before editing. Reuse before adding. Keep rollback. Do not broaden scope because another idea or defect becomes visible.
-
-Route engineering through the project’s canonical skills/workflow, but do not let a skill override ICM authority, scope, Council, Judge, rights, or human approval gates.
-
-### Prove / Verify
-
-Run native tests and the checks appropriate to the changed surface: browser/runtime, accessibility, security, performance, source/rights, code review, and no-slop review.
-
-When a reference bar exists, compare the real artifact against the real reference with fresh context. Name the largest remaining gap.
-
-A build, preview, merge, or deployment submission is not production proof.
-
-### Challenge / Council
-
-Use separately accountable perspectives for user value/commercial reality, architecture, failure, security/privacy, accessibility/taste, sovereignty/ownership, and proof proportional to consequence.
+Material work requires independent challenge proportional to consequence. Review user/commercial value, architecture, failure modes, security/privacy, operations, accessibility/taste, sovereignty/ownership, maintainability, and evidence.
 
 The builder may answer findings but may not be the only reviewer deciding readiness.
 
-### Decide / Judge
+## JUDGE
 
-Re-read Intent → Standard → Evidence. Apply hard stops before averaging scores. Missing proof, failed security/reliability/ownership gates, unresolved HOLDs, missing rights, or missing rollback produce `HOLD`.
+Re-read Intent → Standard → Evidence. Missing proof, failed security/reliability/ownership gates, unresolved material findings, missing rights, or missing rollback produce `HOLD`.
 
-Judge returns `SHIP` or `HOLD`; Judge does not rewrite the work it judges.
+Judge returns `SHIP` or `HOLD`. Judge does not rewrite the work it judges.
 
-### Release / Ship
+## SHIP
 
-Verify destination, branch, environment, domains, data/credential ownership, public-asset rights, monitoring, backup, rollback, and post-release checks. Production release requires authorized human approval. After release, verify the live target environment before claiming production success.
+Verify destination, branch, environment, domains, data/credential ownership, public-asset rights, monitoring, backup, rollback, and post-release checks.
 
-### Operate / Learn / Improve
+Ship only the exact proven revision. Production release requires authorized human approval where the project contract requires it. After release, verify the live target before claiming production success.
 
-Compare the promise with actual use. Measure customer/user outcome, cost, incidents, accessibility, revenue/savings/validated learning, ownership health, and why people stay or leave.
+## OPERATE
 
-Production signals may open a new `INTENT`, but consequential remediation still follows the same gates. Autonomous maintenance does not bypass Council, Judge, ownership, or rollback requirements.
+Compare the promise with actual use. Measure user/customer outcomes, cost, incidents, accessibility, revenue/savings/validated learning, ownership health, and why people stay or leave.
 
-Retention is earned through:
-
-`measure → show → explain → improve → teach → measure again`
-
-Do not use lock-in as a retention strategy.
+Production signals may open a new `INTENT`, but consequential remediation follows the same gates. Autonomous maintenance does not bypass Council, Judge, ownership, or rollback.
 
 ## No-slop rule
 
 AI slop is any important output that exists because the model defaulted to it instead of because the project chose it.
 
-Check idea, strategy, copy, UI, architecture, code, business, and production output. Use context + reference + detector + fresh review + reality. A banned-pattern list or detector is evidence to inspect, not a substitute for judgment.
+Check strategy, copy, UI, architecture, code, business logic, and production output. Ask:
 
-Ask: **What part of this exists because we chose it, and what part exists because the model defaulted to it?**
+**What part of this exists because we chose it, and what part exists because the model defaulted to it?**
 
-## Reference bar rule
+A detector or banned-pattern list is evidence to inspect, not a substitute for judgment.
 
-When taste or comparative quality matters, the bar must be:
+## Reference and rights rule
 
-1. named;
-2. fetchable;
-3. comparable.
-
-Pair it with a measurable standard when one exists. A fresh critic inspects both artifacts and names the largest remaining gap. Do not use adjectives like “premium” or “award-winning” as the quality bar.
-
-## Source and rights rule
+When taste or comparative quality matters, the bar must be named, fetchable, and comparable.
 
 Record material external methods, code, text, design references, datasets, images, audio, and other third-party inputs with source, owner, license/terms, what was used, what changed, and distribution impact.
 
@@ -184,12 +184,12 @@ Before release, the owner should be able to find and control the code, data, rep
 
 ## Invocation contract
 
-Use one of these equivalent entry instructions:
+Equivalent entry instructions:
 
 - `Use Vibe Engineering.`
 - `HOUSE this project.`
-- `LOCK this into the Vibe house architecture.`
-- `Read the Vibe Engineering skill and continue from current ICM state.`
+- `LOCK this into the Vibe House architecture.`
+- `Refresh upstream and continue from current ICM state.`
 
 The skill decides the current stage from repository state. It does not restart completed work or ask the user to repeat context already present in the filesystem.
 
