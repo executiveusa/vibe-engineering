@@ -4,6 +4,28 @@
 
 The canonical product is the filesystem. Claude Code, Codex, Cursor, OpenCode, CLI, MCP, API, and future agents are adapters to the same Vibe Engineering House architecture.
 
+## Upstream source of truth
+
+Canonical repository:
+
+```text
+https://github.com/executiveusa/vibe-engineering
+```
+
+Canonical House Skill:
+
+```text
+https://raw.githubusercontent.com/executiveusa/vibe-engineering/main/skills/vibe-engineering/SKILL.md
+```
+
+When upstream is reachable, inspect the current House Skill before material work. Local copies exist for portability, not to silently fork the methodology.
+
+For a complete copy/paste repository-agent instruction, use:
+
+```text
+docs/PROJECT-START-PROMPT.md
+```
+
 ## Claude Code — one-command plugin
 
 ```bash
@@ -13,7 +35,7 @@ claude plugin marketplace add executiveusa/vibe-engineering && claude plugin ins
 Then invoke:
 
 ```text
-Use Vibe Engineering.
+Use Vibe Engineering. Refresh from the canonical upstream first and continue from current ICM state.
 ```
 
 The plugin installs the canonical `vibe-engineering` House Skill plus supporting procedures.
@@ -29,12 +51,12 @@ npx --yes --package=github:executiveusa/vibe-engineering vibe install .
 Then tell Codex:
 
 ```text
-Read AGENTS.md. Use the Vibe Engineering house skill. Continue from current ICM state.
+Read AGENTS.md. Use the Vibe Engineering House Skill. Refresh upstream first and continue from current ICM state.
 ```
 
 Codex enters through the same filesystem contract as every other agent.
 
-## Any capable agent — 60-second install
+## Any capable agent — one command
 
 ```bash
 npx --yes --package=github:executiveusa/vibe-engineering vibe install .
@@ -43,18 +65,14 @@ npx --yes --package=github:executiveusa/vibe-engineering vibe install .
 Then use:
 
 ```text
-Read AGENTS.md. Use Vibe Engineering. Continue from current ICM state.
+Read AGENTS.md. Use Vibe Engineering. Refresh the House contract from upstream and continue from current ICM state.
 ```
 
-The installer is brownfield-safe by default. Existing project files are preserved unless you explicitly pass `--force`.
+The installer is brownfield-safe by default. Existing owner-controlled project files are preserved unless you explicitly pass `--force`.
 
 ## Download the House Skill directly
 
-Raw skill file:
-
-```text
-https://raw.githubusercontent.com/executiveusa/vibe-engineering/main/skills/vibe-engineering/SKILL.md
-```
+**[Download the canonical House Skill](https://raw.githubusercontent.com/executiveusa/vibe-engineering/main/skills/vibe-engineering/SKILL.md)**
 
 Repository path:
 
@@ -65,7 +83,7 @@ skills/vibe-engineering/SKILL.md
 ## What gets installed
 
 ```text
-AGENTS.md                         project/house law
+AGENTS.md                         project / house law
 ICMR.yaml                         portable runtime + lifecycle contract
 CONTEXT.md                        current state + next action
 PROOF/                            evidence and release proof
@@ -79,17 +97,27 @@ CLAUDE.md                         Claude Code adapter
 .vibe/OPENCODE.md                 OpenCode adapter
 ```
 
-The entry order is always:
+Entry order:
 
 ```text
-AGENTS.md → ICMR.yaml → CONTEXT.md
+AGENTS.md → ICMR.yaml → CONTEXT.md → .vibe/skills/vibe-engineering/SKILL.md
 ```
 
-The canonical lifecycle is:
+Canonical lifecycle:
 
 ```text
 INTENT → SPEC → PLAN → BUILD → PROOF → COUNCIL → JUDGE → SHIP → OPERATE
 ```
+
+## Upstream reconciliation rule
+
+If the project-local House Skill differs from current upstream:
+
+1. Upstream owns the general Vibe House method.
+2. The local repository owns project-specific facts, owner decisions, requirements, evidence, credentials boundaries, and deployment reality.
+3. Merge by intent rather than blind replacement.
+4. Record intentional deviations explicitly.
+5. Never use `--force` as a substitute for inspection.
 
 ## Existing project
 
@@ -97,7 +125,7 @@ INTENT → SPEC → PLAN → BUILD → PROOF → COUNCIL → JUDGE → SHIP → 
 npx --yes --package=github:executiveusa/vibe-engineering vibe install .
 ```
 
-If `AGENTS.md`, `ICMR.yaml`, `CONTEXT.md`, `CLAUDE.md`, or the Cursor rule already exists, Vibe preserves it and reports the file as skipped. It also writes `.vibe/INSTALL-NOTES.md` when owner-controlled project law needs to be merged by intent.
+If `AGENTS.md`, `ICMR.yaml`, `CONTEXT.md`, `CLAUDE.md`, or the Cursor rule already exists, Vibe preserves it and reports the file as skipped. It writes `.vibe/INSTALL-NOTES.md` when owner-controlled project law needs intentional reconciliation.
 
 Use `--force` only when you intentionally want Vibe to refresh managed files:
 
@@ -111,11 +139,11 @@ npx --yes --package=github:executiveusa/vibe-engineering vibe install . --force
 npx --yes --package=github:executiveusa/vibe-engineering vibe install . --no-skills
 ```
 
-This mode installs the filesystem contract and adapters but intentionally omits `.vibe/skills/`.
+This installs the filesystem contract and adapters but intentionally omits `.vibe/skills/`.
 
 ## Full ICM factory workspace
 
-For a new project where you want the full numbered ICM stage structure rather than the lightweight brownfield installer:
+For a new project where you want the full numbered ICM stage structure:
 
 ```bash
 git clone https://github.com/executiveusa/vibe-engineering.git
@@ -124,13 +152,13 @@ npm ci
 npm run factory:new -- --name "My Project" --mode greenfield
 ```
 
-The full factory preserves the compatible physical stage folders while mapping them to the House lifecycle.
+The full factory preserves the compatible physical stage folders while mapping them to the semantic House lifecycle.
 
-## Use with agents
+## Agent adapters
 
 ### Claude Code
 
-The plugin is the cleanest install. The universal filesystem installer also creates a small `CLAUDE.md` adapter that points back to the canonical root files and House Skill.
+The plugin is the cleanest install. The universal filesystem installer also creates `CLAUDE.md`, which points back to the canonical root files and House Skill.
 
 ### Codex
 
@@ -142,14 +170,14 @@ Codex enters through root `AGENTS.md`. `.vibe/CODEX.md` points to the same ICM s
 
 ### OpenCode
 
-`.vibe/OPENCODE.md` documents the same filesystem entry. Vibe does not require an OpenCode-specific orchestration layer.
+`.vibe/OPENCODE.md` documents the same filesystem entry. Vibe does not require an OpenCode-specific orchestration architecture.
 
 ### Any other capable agent
 
-Give it the repository and this instruction:
+Give it the repository plus `docs/PROJECT-START-PROMPT.md`. The essential instruction is:
 
 ```text
-Read AGENTS.md, then ICMR.yaml, then CONTEXT.md. Use .vibe/skills/vibe-engineering/SKILL.md as the canonical router. Verify It Before Everything.
+Retrieve the current upstream Vibe Engineering House Skill. Then read AGENTS.md, ICMR.yaml, CONTEXT.md, and the local House Skill. Reconcile upstream by intent, preserve project-specific truth, and Verify It Before Everything.
 ```
 
 No vendor switch should require redesigning the project.
@@ -164,7 +192,7 @@ npx --yes --package=github:executiveusa/vibe-engineering vibe run proof "prove t
 
 ## MCP
 
-For a local clone:
+Local clone:
 
 ```bash
 npm run mcp
@@ -184,7 +212,13 @@ Skills:
 GET https://vibe-engineering-lime.vercel.app/api/v1/skills
 ```
 
-The API, MCP, CLI, plugin surface, and installed files resolve back to the same Vibe rules and skills.
+## Production app
+
+```text
+https://vibe-engineering-lime.vercel.app
+```
+
+The API, MCP, CLI, plugin surface, and installed files resolve back to the same House rules and skills.
 
 ## Rule
 
