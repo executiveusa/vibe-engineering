@@ -2,11 +2,11 @@
 
 **V.I.B.E. = Verify It Before Everything.**
 
-A free, open-source quality and architecture layer for building with AI without letting speed turn into slop.
+Vibe Engineering is a free, open-source quality and architecture layer for building with AI without letting speed turn into slop.
 
-Bring the idea. Vibe gives Claude Code, Codex, Cursor, OpenCode, custom agents, and humans the same walkable project system: one filesystem, one house skill, one artifact lifecycle, and proof before release.
+It gives Claude Code, Codex, Cursor, OpenCode, custom agents, and humans the same walkable project system: one filesystem, one House Skill, one artifact lifecycle, and proof before release.
 
-## Install Vibe
+## Start a project
 
 ### Claude Code — one-command plugin
 
@@ -14,54 +14,68 @@ Bring the idea. Vibe gives Claude Code, Codex, Cursor, OpenCode, custom agents, 
 claude plugin marketplace add executiveusa/vibe-engineering && claude plugin install vibe-engineering@vibe-engineering
 ```
 
-Then invoke the canonical router with:
+Then say:
 
 ```text
-Use Vibe Engineering.
+Use Vibe Engineering. Refresh from the canonical upstream first, continue from current ICM state, and take this through the next valid gate without skipping proof.
 ```
 
-### Codex — one command
+### Codex / any repository agent — one command
 
-Run this from the project you want Codex to work on:
+Run this inside the project:
 
 ```bash
 npx --yes --package=github:executiveusa/vibe-engineering vibe install .
 ```
 
-Then tell Codex:
+Then say:
 
 ```text
-Read AGENTS.md. Use the Vibe Engineering house skill. Continue from current ICM state.
+Read AGENTS.md. Use the Vibe Engineering House Skill. Refresh upstream first and continue from current ICM state.
 ```
 
-### Any capable agent — one command
+The installer is brownfield-safe by default. Existing owner-controlled project-law files are preserved unless you explicitly use `--force`.
 
-```bash
-npx --yes --package=github:executiveusa/vibe-engineering vibe install .
+## Copy the full upstream-first AI prompt
+
+Use the canonical project-start prompt when you want another AI repository worker to pull the latest Vibe contract before it works:
+
+**[`docs/PROJECT-START-PROMPT.md`](docs/PROJECT-START-PROMPT.md)**
+
+Canonical upstream:
+
+```text
+https://github.com/executiveusa/vibe-engineering
 ```
 
-The installer is brownfield-safe by default. Existing owner-controlled project-law files are preserved unless you explicitly pass `--force`.
+Canonical House Skill:
 
-### Download the single House Skill
+```text
+https://raw.githubusercontent.com/executiveusa/vibe-engineering/main/skills/vibe-engineering/SKILL.md
+```
+
+The rule is simple: **when upstream is reachable, inspect the current House Skill before material work.** Local copies make Vibe portable; they do not silently become a separate methodology.
+
+## Download the single House Skill
 
 **[Download `Vibe Engineering — House Skill`](https://raw.githubusercontent.com/executiveusa/vibe-engineering/main/skills/vibe-engineering/SKILL.md)**
 
-Or browse it first: [`skills/vibe-engineering/SKILL.md`](skills/vibe-engineering/SKILL.md).
+Repository path:
 
-The umbrella skill is the canonical router. Smaller skills remain available as internal procedures, but they do not create competing architectures.
+```text
+skills/vibe-engineering/SKILL.md
+```
 
-See [`docs/INSTALL.md`](docs/INSTALL.md) for the complete installation contract.
+The umbrella skill is the canonical router. Smaller skills are supporting procedures, not competing frameworks.
 
-## The Vibe Engineering house architecture
-
-Vibe Engineering is the governance layer. ICM is the interpretable context architecture. The artifact lifecycle is how work moves. Orchestrators route work. Workers execute bounded slices.
+## The House architecture
 
 ```text
 VIBE ENGINEERING
 Governance / Constitution
         ↓
 ICM
-Context / durable state
+Interpretable context / durable state
         ↓
 INTENT → SPEC → PLAN → BUILD → PROOF → COUNCIL → JUDGE → SHIP → OPERATE
         ↓
@@ -70,47 +84,39 @@ HERMES / ORCHESTRATOR
 CLAUDE / CODEX / GPT / GEMINI / ORCA / HUMANS
 ```
 
-The canonical artifact lifecycle is:
+The layers have one job each:
+
+- **Vibe Engineering** — governance, ownership, release law, proof requirements.
+- **ICM** — where facts, assumptions, artifacts, evidence, and current state live.
+- **Artifact lifecycle** — how work moves through the project.
+- **Orchestrator** — routes approved work to the next worker/stage.
+- **Workers** — replaceable implementation agents or humans.
+
+The filesystem is the durable source of truth. Chat history and model memory are adapters, not architecture.
+
+## Canonical lifecycle
 
 ```text
 INTENT → SPEC → PLAN → BUILD → PROOF → COUNCIL → JUDGE → SHIP → OPERATE
 ```
 
-Existing full-factory workspaces keep the compatible physical ICM folders:
+Existing full-factory workspaces keep the compatible physical stage folders:
 
 ```text
-00_intake → 01_vision → 02_blueprint → 03_build → 04_verify
-→ 05_council → 06_judge → 07_ship → 08_improve
+00_intake      → INTENT
+01_vision      → SPEC
+02_blueprint   → PLAN
+03_build       → BUILD
+04_verify      → PROOF
+05_council     → COUNCIL
+06_judge       → JUDGE
+07_ship        → SHIP
+08_improve     → OPERATE
 ```
 
-Those directory names are mapped to the house lifecycle instead of being renamed, so existing workspaces do not need migration.
+The physical names remain for compatibility. The semantic House lifecycle is authoritative.
 
-The canonical source lives in:
-
-```text
-skills/vibe-engineering/SKILL.md        one house router
-_config/stage-system.yaml              lifecycle semantics + visual tokens
-factory/icm/template/                  full project anatomy
-docs/architecture/VIBE-HOUSE-ARCHITECTURE.md
-```
-
-## Semantic stage colors
-
-`_config/stage-system.yaml` defines the canonical meaning and color token for each stage. The same tokens can drive Mermaid diagrams, dashboards, documentation, CLI status, and future Jarvis/Hermes surfaces.
-
-Color communicates lifecycle state. It is not random decoration.
-
-Prettier is separate: it normalizes code and supported text formatting. A formatter pass is never behavioral or production proof.
-
-## One filesystem. Any capable agent.
-
-The installed entry order is always:
-
-```text
-AGENTS.md → ICMR.yaml → CONTEXT.md
-```
-
-A universal install adds:
+## What gets installed
 
 ```text
 AGENTS.md                         house law
@@ -127,34 +133,49 @@ CLAUDE.md                         Claude Code adapter
 .vibe/OPENCODE.md                 OpenCode adapter
 ```
 
-Adapters point back to the same canonical filesystem instead of duplicating the law.
+Installed entry order:
+
+```text
+AGENTS.md → ICMR.yaml → CONTEXT.md → .vibe/skills/vibe-engineering/SKILL.md
+```
 
 **No agent soup. One walkable system. Any capable agent can use it.**
+
+## Semantic stage colors
+
+`_config/stage-system.yaml` defines the canonical meaning and color token for each lifecycle stage. Those tokens can drive Mermaid diagrams, dashboards, documentation, CLI status, and orchestration interfaces.
+
+Color communicates lifecycle meaning. It is not random decoration.
+
+Prettier is separate: it normalizes supported code/text formatting. A formatter pass is never behavioral or production proof.
+
+## Truth rules
+
+```text
+BUILT ≠ VERIFIED
+CI PASS ≠ CUSTOMER VALUE
+DEPLOYED ≠ PRODUCTION PROOF
+FORMAT PASS ≠ BEHAVIORAL PROOF
+```
+
+Builders cannot approve themselves. Council provides independent challenge. Judge is release authority only and returns `SHIP` or `HOLD`.
 
 ## Use Vibe four ways
 
 ### 1. Files + folders
 
-Works with any capable agent. Durable truth lives in the repository, not one vendor's hidden prompt or chat memory.
+Works with any capable agent. Durable truth lives in the repository rather than in one vendor's hidden prompt or previous chat.
 
-### 2. House skill / plugin
+### 2. House Skill / plugin
 
-The canonical umbrella skill is:
-
-```text
-skills/vibe-engineering/SKILL.md
-```
-
-Use any of these equivalent instructions:
+Invoke with any of these:
 
 ```text
 Use Vibe Engineering.
 HOUSE this project.
-LOCK this into the Vibe house architecture.
-Read the Vibe Engineering skill and continue from current ICM state.
+LOCK this into the Vibe House architecture.
+Refresh upstream and continue from current ICM state.
 ```
-
-Supporting skills include setup, grill, Project Review, Stop Slop, Human Voice, Deep Work, Taste, Proof, Ship, Loop Engineering, and the broader callable registry.
 
 ### 3. CLI
 
@@ -165,21 +186,18 @@ npx --yes --package=github:executiveusa/vibe-engineering vibe run grill "my idea
 npx --yes --package=github:executiveusa/vibe-engineering vibe run proof "prove this is ready"
 ```
 
-Or work from a clone:
-
-```bash
-git clone https://github.com/executiveusa/vibe-engineering.git
-cd vibe-engineering
-npm ci
-npm run vibe -- skills
-```
-
 ### 4. API + MCP
+
+Production app:
+
+```text
+https://vibe-engineering-lime.vercel.app
+```
 
 Live skills API:
 
 ```text
-https://vibe-engineering-lime.vercel.app/api/v1/skills
+GET https://vibe-engineering-lime.vercel.app/api/v1/skills
 ```
 
 Remote MCP endpoint:
@@ -188,59 +206,37 @@ Remote MCP endpoint:
 POST https://vibe-engineering-lime.vercel.app/api/mcp
 ```
 
-Local MCP stdio adapter:
+Local MCP:
 
 ```bash
 npm run mcp
 ```
 
-The CLI, API, MCP, plugin, and installed-files surfaces resolve back to the same Vibe rules and skill definitions.
+The CLI, API, MCP, plugin, and installed-files surfaces resolve back to the same House rules and skill definitions.
 
-## The simple public workflow
+## Full factory workspace
 
-For people who do not need the machinery underneath:
+For a new project that should start with the complete numbered ICM structure:
 
-```text
-TELL IT → SET THE STANDARD → MAKE IT → CHECK IT → PROVE IT
+```bash
+git clone https://github.com/executiveusa/vibe-engineering.git
+cd vibe-engineering
+npm ci
+npm run factory:new -- --name "My Project" --mode greenfield
 ```
 
-For every material decision:
+## Core docs
 
-```text
-Intent → Standard → Evidence
-```
-
-**Intent:** What are we actually trying to do?
-
-**Standard:** What should good look like?
-
-**Evidence:** What proves we got there?
-
-## We did the research so you do not have to
-
-Vibe Engineering came from a practical problem: AI made building dramatically easier, but it did not automatically make judgment, review, usability, security, design taste, ownership, or production proof easier.
-
-We studied experienced engineers, designers, open-source communities, review systems, and real production practices. Useful methods are adapted under one system, their sources stay visible, and no upstream work is silently renamed as original Vibe work.
-
-Important influences include:
-
-- Google Engineering Practices;
-- `mattpocock/skills`;
-- ICM / Jake Van Clief;
-- Alibaba OpenCodeReview through `executiveusa/open-code-review`;
-- Gauntlet Loop;
-- `blader/humanizer`;
-- `Leonxlnx/unlazy`;
-- Impeccable and anti-default design work;
-- `ayghri/i-have-adhd` for action-first, low-friction communication patterns.
-
-See [`docs/governance/SOURCE-PROVENANCE-LEDGER.md`](docs/governance/SOURCE-PROVENANCE-LEDGER.md) and [`docs/UPSTREAM-INSPIRATION.md`](docs/UPSTREAM-INSPIRATION.md).
+- [`docs/PROJECT-START-PROMPT.md`](docs/PROJECT-START-PROMPT.md) — upstream-first prompt for repository agents.
+- [`docs/METHOD.md`](docs/METHOD.md) — canonical lifecycle and stage contracts.
+- [`docs/INSTALL.md`](docs/INSTALL.md) — installation/adapters.
+- [`docs/architecture/VIBE-HOUSE-ARCHITECTURE.md`](docs/architecture/VIBE-HOUSE-ARCHITECTURE.md) — architecture contract.
+- [`docs/agent-context.md`](docs/agent-context.md) — current repository context for agents.
+- [`skills/vibe-engineering/SKILL.md`](skills/vibe-engineering/SKILL.md) — canonical House router.
 
 ## Callable procedures
 
-You do not need to memorize these. The House Skill chooses the smallest procedure required by the current ICM stage.
-
-Core procedures include:
+The House Skill chooses the smallest procedure required by the current ICM stage. Core procedures include:
 
 ```text
 vibe-engineering   canonical house router
@@ -248,45 +244,29 @@ setup-vibe         configure a repo
 project-review     independent system-aware review
 grill              get clear before coding
 spec               turn intent into a build contract
-build              implement a complete slice
+build              implement a bounded slice
 proof              verify important claims
 review             review against the spec
 merge              resolve conflicts by intent
 stop-slop          catch generic AI output
 taste              check design judgment
 ship               release exact proven revisions
-loop-engineering   bounded long-running execution mode
+loop-engineering   bounded long-running execution
 ```
 
-The broader callable registry remains available through the CLI/API/MCP.
+## Upstream influences
 
-## Project Review
+Vibe Engineering combines practical lessons from engineering, design, review, and open-source systems under one explicit governance model. Useful methods remain attributed rather than silently renamed.
 
-`project-review` is Vibe's dedicated completion-review procedure.
+Important influences include Google Engineering Practices, `mattpocock/skills`, ICM / Jake Van Clief, Alibaba OpenCodeReview via `executiveusa/open-code-review`, Gauntlet Loop, `blader/humanizer`, `Leonxlnx/unlazy`, Impeccable/anti-default design practices, and `ayghri/i-have-adhd` for action-first low-friction communication.
 
-When available, Vibe standardizes on [`executiveusa/open-code-review`](https://github.com/executiveusa/open-code-review), a Vibe-enabled fork of Alibaba OpenCodeReview (Apache-2.0), for deterministic changed-file selection and structured AI review.
-
-Vibe then adds system-impact checks, Stop Slop, taste, proof, ownership, rollback, and human release authority.
-
-The review engine cannot authorize its own production release.
-
-## ICM: the portable structure underneath Vibe
-
-ICM makes the filesystem the map. A new human or agent should be able to enter a project and know where to look next without loading a swarm of personas or relying on previous chat history.
-
-The reusable full project template lives under `factory/icm/template/`. The lightweight universal installer uses the same filesystem law without forcing a new application's source tree into a pre-existing project.
-
-## Why it is free
-
-Vibe Engineering is the operating system behind The Pauli Effect's AI-native product studio.
-
-Giving the system away lets builders use our process before they ever hire us. The repository is inspectable. The rules are editable. Your code stays yours.
+See [`docs/governance/SOURCE-PROVENANCE-LEDGER.md`](docs/governance/SOURCE-PROVENANCE-LEDGER.md) and [`docs/UPSTREAM-INSPIRATION.md`](docs/UPSTREAM-INSPIRATION.md).
 
 ## License
 
 MIT.
 
-Use it, fork it, inspect it, improve it, and keep the attribution required by the upstream sources we rely on.
+Use it, fork it, inspect it, improve it, and preserve attribution required by upstream sources.
 
 ## Client Zero
 
