@@ -44,8 +44,8 @@ test('installs the canonical filesystem entry and agent adapters', async () => {
     assert.match(context, /Vibe House is installed/);
     assert.match(claude, /vibe-engineering\/SKILL\.md/);
     assert.match(codex, /vibe-engineering\/SKILL\.md/);
-    assert.match(stageSystem, /intent:/);
-    assert.match(stageSystem, /judge:/);
+    assert.match(stageSystem, /id: intent/);
+    assert.match(stageSystem, /id: judge/);
     assert.match(cursor, /alwaysApply: true/);
     assert.deepEqual(manifest.canonicalEntry, ['AGENTS.md', 'ICMR.yaml', 'CONTEXT.md']);
     assert.equal(manifest.houseSkill, '.vibe/skills/vibe-engineering/SKILL.md');
