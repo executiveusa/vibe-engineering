@@ -6,181 +6,170 @@ V.I.B.E. means **Verify It Before Everything**.
 
 This repository develops and proves Vibe Engineering itself. Treat it as Client Zero: the method must survive the same requirements it applies to client work.
 
-## Authority
+## Canonical House authority
 
-This repository inherits the authoritative studio policy in `docs/STUDIO-SYSTEM-PROMPT.md`.
+The current method source is:
 
-For Vibe v2 method decisions, also read `docs/VIBE-ENGINEERING-V2-DOCTRINE.md`. It adds plain-language public framing, Intent → Standard → Evidence, controlled divergence, no-slop quality, source/provenance, earned retention, and Client Zero rules without weakening existing studio authority.
+- `skills/vibe-engineering/SKILL.md` — canonical House Skill/router;
+- `factory/icm/template/shared/VIBE_HOUSE_STANDARD.md` — global Layer 3 House doctrine inherited by generated projects;
+- `docs/architecture/VIBE-HOUSE-ARCHITECTURE.md` — architecture contract;
+- `_config/stage-system.yaml` — machine-readable lifecycle and visual semantics;
+- `docs/STUDIO-SYSTEM-PROMPT.md` — studio-level authority where applicable.
+
+`docs/VIBE-ENGINEERING-V2-DOCTRINE.md` is retained as historical doctrine and explanatory source. When terminology differs, the current House Skill and House Standard govern the general method.
+
+Canonical lifecycle:
+
+`INTENT → SPEC → PLAN → BUILD → PROOF → COUNCIL → JUDGE → SHIP → OPERATE`
+
+Compatible physical ICM route:
+
+`00_intake → 01_vision → 02_blueprint → 03_build → 04_verify → 05_council → 06_judge → 07_ship → 08_improve`
+
+## Upstream-first law
+
+This repository is the upstream. Downstream projects should inspect the current House Skill before material work when upstream is reachable.
+
+Upstream owns the general House method. A downstream project owns its project-specific facts, owner decisions, credentials boundaries, product requirements, evidence, and intentional deviations. Reconcile by intent; never overwrite project law blindly.
 
 ## Universal filesystem law
 
-Vibe Engineering is **agent-neutral by default**.
+Vibe Engineering is agent-neutral by default.
 
 The canonical system is the repository filesystem: files, folders, contracts, skills, proof, and durable decisions. Claude Code, Codex, Cursor, OpenCode, MCP clients, CLIs, APIs, and future agents are adapters to that system. They are not separate sources of truth.
 
 Therefore:
 
 - a new agent must be able to enter through `AGENTS.md → ICMR.yaml → CONTEXT.md` and understand what to do next;
-- durable rules belong in files, not in chat memory or one vendor's hidden prompt;
+- durable rules belong in files, not chat memory or one vendor's hidden prompt;
 - adapters may translate access, but they must not duplicate or fork canonical law;
-- do not add another orchestrator, persona, sub-agent hierarchy, or agent swarm when a file, skill, stage contract, or adapter is enough;
-- changing agent vendors must not require redesigning the project architecture;
-- public onboarding must lead with the smallest useful action and keep implementation detail underneath;
-- every supported entry point—files, plugin, CLI, API, or MCP—must resolve to the same Vibe rules and skill definitions.
+- do not add another orchestrator, persona, sub-agent hierarchy, or swarm when a file, skill, stage contract, or adapter is enough;
+- changing agent vendors must not require redesigning project architecture;
+- every supported entry point—files, plugin, CLI, API, or MCP—must resolve to the same House rules and skill definitions.
 
 **No agent soup. One walkable system. Any capable agent can use it.**
 
 ## Constitutional advancement law
 
-**A project does not advance because an AI, builder, plugin, reviewer, or user says the stage is done. It advances only when the current ICM stage has satisfied its declared gates and durable proof has been written.**
-
-This is a hard Vibe rule.
+A project advances only when the current ICM stage satisfies its declared gates and durable proof exists.
 
 For every governed stage:
 
-- the current stage contract defines the required artifacts, acceptance gates, proof, approvals, and allowed next stage;
-- mechanical gates must be checked mechanically when they can be;
-- judgment gates must use the designated Vibe skills and reviewers rather than generic confidence language;
-- code-review stages must use the configured dominant review engine and re-review the exact final candidate after fixes;
+- the stage contract defines required artifacts, acceptance gates, proof, approvals, and allowed next stage;
+- mechanical gates are checked mechanically when possible;
+- judgment gates use designated Vibe review procedures rather than confidence language;
+- code-review stages re-review the exact final candidate after fixes;
 - consequential stages cannot be self-approved by the builder;
-- failed or missing gates produce `HOLD`, not optimistic continuation;
-- a passing transition must create durable evidence or a receipt in the filesystem before the next stage becomes active;
-- adapters may guide or visualize progression, but they may never bypass, weaken, auto-waive, or silently mark a gate complete;
-- only authorized human authority may satisfy gates explicitly marked human/owner/Judge authority.
-
-**Slop cannot advance simply because an agent says it is finished. Every consequential stage must earn the next stage through evidence.**
+- failed or missing gates produce `HOLD`;
+- a passing transition creates durable evidence before the next stage becomes active;
+- adapters may guide or visualize progression but may not bypass, auto-waive, or silently complete a gate;
+- only authorized human authority may satisfy gates explicitly marked human/owner authority.
 
 ## Mandatory Step 0 — ICMR
 
-Before substantial work, run the ICMR Universal Compiler contract in `skills/icmr-universal-compiler/SKILL.md`.
+Before substantial governed work, run the ICMR Universal Compiler contract in `skills/icmr-universal-compiler/SKILL.md`.
 
-The order is:
+The House route is:
 
-`DETECT → ICMR → INTAKE/SPEC → SLICE → BUILD → PROOF → SHIP`
-
-For a governed workspace, `ICMR.yaml` is the portable runtime representation of the detected work topology, roles, authority, routing, context boundaries, proof, sovereignty, and rollback. No substantial work should enter `00_intake` until the manifest exists and its Step 0 validation passes.
+`DETECT → ICMR → INTENT → SPEC → PLAN → BUILD → PROOF → COUNCIL → JUDGE → SHIP → OPERATE`
 
 For brownfield work, Step 0 inventories reality before restructuring or migration. If evidence shows the work is not a simple project pipeline, update the detected ICM form rather than forcing the default scaffold.
 
 ## Required reading
 
-Before substantial work, read only what the task requires, starting with:
+Read only what the task requires, starting with:
 
 1. `ICMR.yaml` when working inside a governed workspace;
-2. `icm/README.md` and `icm/backend/map.mjs` when orienting to backend code or interfaces;
-3. `CONTEXT.md`;
-4. `PROJECT.yaml`;
-5. the approved issue/specification;
-6. the current ICM stage contract and references it names;
-7. `docs/STUDIO-SYSTEM-PROMPT.md` and `docs/VIBE-ENGINEERING-V2-DOCTRINE.md` when governance or method behavior is involved;
-8. `docs/governance/ENGINEERING-WORKFLOW.md` for software implementation;
-9. `ARCHITECTURE.md`, `RUNBOOK.md`, or `SECURITY.md` when the task touches those boundaries.
+2. `CONTEXT.md`;
+3. `skills/vibe-engineering/SKILL.md` when method behavior matters;
+4. `factory/icm/template/shared/VIBE_HOUSE_STANDARD.md` when changing generated-project law;
+5. the approved issue/specification and current ICM stage contract;
+6. `docs/governance/ENGINEERING-WORKFLOW.md` for software implementation;
+7. `ARCHITECTURE.md`, `DESIGN.md`, `RUNBOOK.md`, or `SECURITY.md` when the task touches those boundaries;
+8. Heart & Soul and other Layer 3 standards only when the current stage requires them.
 
-Do not load every method document into every task. For backend orientation, run `npm run icm:walk` rather than guessing from directory names.
+Do not load every method document into every task.
 
-## The public memory aid
+## Global project contract
 
-`Choose → See → Shape → Make → Prove → Challenge → Decide → Release → Learn`
+Before substantial work, persist:
 
-Technical route:
+- `MODE`
+- `OUTCOME`
+- `TARGET`
+- `CONSTRAINTS`
+- `PROOF`
+- `COMMERCIAL VALUE`
+- `OWNER / AUTHORITY`
+- `ROLLBACK`
 
-`00_intake → 01_vision → 02_blueprint → 03_build → 04_verify → 05_council → 06_judge → 07_ship → 08_improve`
-
-Every material decision carries:
-
-`Intent → Standard → Evidence`
+Separate verified facts from assumptions. Inspect before asking the owner to repeat information already present in repositories, docs, CI, deployment config, or connected systems.
 
 ## Mandatory engineering procedure
 
-`executiveusa/pauli-agent-skills-2026` is the canonical engineering procedure library for software produced by this factory.
+`executiveusa/pauli-agent-skills-2026` remains the canonical engineering procedure library for software produced by this factory.
 
-Vibe Engineering and ICM govern **what, why, whether, and authority**. Agent Skills govern **how approved engineering work is executed**.
+Vibe Engineering and ICM govern what, why, whether, context, and authority. Engineering skills govern how approved software work is executed.
 
-For software work, use:
+Engineering procedures compose inside—not beside—the House lifecycle. They cannot override ICM scope, Council, Judge, rights, ownership, rollback, or required human approval.
 
-`DEFINE → PLAN → BUILD → VERIFY → REVIEW → SHIP`
+## Heart & Soul / design law
 
-Apply only the skills relevant to the current slice. More skills do not equal more quality. No skill may override ICM scope, Council, Judge, rights, ownership, or required human approval.
+`factory/icm/template/shared/HEART_AND_SOUL_STANDARD.md` is the canonical design doctrine and inherits the House Standard.
 
-## Divergence rule
-
-Use `STANDARD` for factual work, approved implementation, verification, security conclusions, migrations, destructive actions, and release.
-
-Use `DIVERGE` for open-ended product, UX, positioning, creative direction, architecture alternatives, or debugging hypotheses when materially different options are useful.
-
-Use `FRONTIER` only for bounded reversible experiments where novelty is worth the risk.
-
-Verbalized Sampling may support DIVERGE/FRONTIER. Its probability labels are exploration signals, not truth or approval. Converge before Build.
+Design is not a parallel workflow. User-facing design moves through the same lifecycle and proof gates as engineering. Subtraction remains mandatory: remove until another removal would harm user success, comprehension, trust, accessibility, control, emotional resonance, or essential identity.
 
 ## No-slop rule
 
-Default model output is not a product decision. For consequential work ask:
+Default model output is not a product decision.
+
+For consequential work ask:
 
 **What part exists because we chose it, and what part exists because the model defaulted to it?**
 
 Use project context, a real reference where appropriate, deterministic detectors where useful, fresh review, and actual evidence. Anti-slop tools do not replace taste or judgment.
 
-A stage-level anti-slop claim is invalid unless its declared gates have actually passed. Presentation quality, agent confidence, a successful local build, or a clean-looking demo can never substitute for missing stage proof.
+## Truth rules
 
-## Commands
-
-```bash
-npm ci
-npm run check
-npm run icm:walk
-npm run vibe -- map
-npm run vibe -- walk
-npm audit --audit-level=high
-npm run truth:api
-npm run vibe -- method
-npm run mcp
-```
-
-Factory commands:
-
-```bash
-npm run factory:new -- --name "Project Name"
-npm run icmr:validate -- ./workspaces/project-name
-npm run factory:doctor -- ./workspaces/project-name
+```text
+BUILT ≠ VERIFIED
+CI PASS ≠ CUSTOMER VALUE
+DEPLOYED ≠ PRODUCTION PROOF
+FORMAT PASS ≠ BEHAVIORAL PROOF
 ```
 
 ## ICM rule
 
 - `ICMR.yaml` is Step 0: detected runtime representation and entry contract.
 - `AGENTS.md` is Layer 0 identity and law.
-- `icm/README.md` + `icm/backend/map.mjs` are the backend walk/router layer.
 - `CONTEXT.md` is Layer 1 routing.
 - Each `stages/NN_name/CONTEXT.md` is a Layer 2 stage contract.
 - `_config/`, `references/`, and `shared/` are Layer 3 stable context.
+- `factory/icm/template/shared/VIBE_HOUSE_STANDARD.md` is the global Layer 3 House doctrine.
 - `output/` folders are Layer 4 working artifacts/evidence.
-- `icm/backend/index.mjs` is the stable backend facade for CLI/HTTP/MCP adapters; canonical domain logic remains in the mapped domain modules.
 - Load only the current stage and references it explicitly names.
 - Working decisions end in durable artifacts, not chat memory.
-- Public-facing explanations use plain language first; technical terms remain available underneath.
 
-## Source and rights rule
+## Source, rights, ownership
 
-Record material third-party methods, code, text, design references, data, images, audio, and other inputs. Possessing a file is not by itself permission to distribute it. Required rights or attribution are release gates for the affected asset.
+Record material third-party methods, code, text, design references, data, images, audio, and other inputs. Possessing a file is not permission to distribute it. Required rights or attribution are release gates.
 
-## Ownership and retention rule
-
-The owner must be able to understand, export, move, replace providers/builders, recover, and continue operating. Retention is earned through measurable value, education, and improvement, not manufactured lock-in.
+The owner must be able to understand, export, move, replace providers/builders, recover, and continue operating. Retention is earned through measurable value and improvement, not manufactured lock-in.
 
 ## Prohibited changes
 
-- Do not begin substantial governed work without a valid `ICMR.yaml` Step 0 contract.
-- Do not advance an ICM stage when any declared gate is failed, missing, unverified, or lacks required authority/proof.
-- Do not let an adapter, plugin, agent, builder, reviewer, or UI mark a governed stage complete without writing the required durable receipt/evidence.
-- Do not rewrite unrelated product surfaces during infrastructure tickets.
-- Do not add another orchestrator when an adapter to the existing Vibe/ICM core is sufficient.
-- Do not commit secrets or `.sandcastle/.env`.
-- Do not overwrite a non-empty project destination with the factory scaffold.
-- Do not merge, deploy, publish, or close issues without required evidence and authority.
-- Do not claim live production verification from local, scaffold, build, review, merge, preview, or CI results.
-- Do not bypass mandatory engineering procedure because direct implementation appears faster.
-- Do not publish a third-party media asset with unverified distribution rights.
-- Do not add a backend domain or public backend interface without updating `icm/backend/map.mjs` and `npm run icm:walk`.
+- Do not begin substantial governed work without a valid Step 0 contract when ICMR applies.
+- Do not advance a stage when required evidence or authority is missing.
+- Do not let an adapter, plugin, agent, builder, reviewer, or UI mark a governed stage complete without durable proof.
+- Do not create a second House method in a skill, prompt, loop, or vendor adapter.
+- Do not rewrite unrelated surfaces during bounded work.
+- Do not commit secrets.
+- Do not merge, deploy, publish, or close consequential work without required evidence and authority.
+- Do not claim live production verification from local, scaffold, build, review, merge, preview, formatter, or CI results.
+- Do not publish third-party media with unverified rights.
 
 ## Review and release
 
-The builder may explain and repair findings but cannot be the only reviewer approving its own work. Fresh review produces evidence. Judge returns `SHIP` or `HOLD`. Production release remains separately authorized and requires live target-environment verification after release.
+The builder may explain and repair findings but cannot be the only reviewer approving its own work. Council provides independent challenge. Judge returns only `SHIP` or `HOLD`. Production release remains separately authorized and requires live target-environment verification after release.
+
+For material work, finish with `DECISION`, `CHANGES`, `PROOF`, `STATUS`, `COMMERCIAL IMPACT`, `RISKS`, `ROLLBACK`, `NEXT`, and `HUMAN APPROVAL` when required.
