@@ -20,6 +20,7 @@
     "truth:api": "npm run truth:compile && node scripts/truth-api.mjs",
     "truth:preview-verify": "node scripts/truth-preview-verify.mjs",
     "vibe": "node scripts/vibe.mjs",
+    "install:vibe": "node scripts/install-vibe.mjs",
     "mcp": "node scripts/vibe-mcp-stdio.mjs",
     "icm:walk": "node scripts/icm-walk-test.mjs",
     "skills:export": "node scripts/export-skills.mjs",

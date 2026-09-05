@@ -12,8 +12,9 @@ test('skill catalog exposes the Vibe workflow set', () => {
 
 test('aliases resolve to canonical skills', () => {
   assert.equal(getSkill('setup')?.id, 'setup-vibe');
-  assert.equal(getSkill('ocr')?.id, 'project-review');
-  assert.equal(getSkill('open-code-review')?.id, 'project-review');
+  assert.equal(getSkill('ocr')?.id, 'review');
+  assert.equal(getSkill('open-code-review')?.id, 'review');
+  assert.equal(getSkill('system-review')?.id, 'project-review');
   assert.equal(getSkill('tdd')?.id, 'test-first');
   assert.equal(getSkill('test')?.id, 'test-first');
   assert.equal(getSkill('architecture')?.id, 'architecture-check');
