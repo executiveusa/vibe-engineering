@@ -8,6 +8,11 @@
   },
   "scripts": {
     "factory:doctor": "node scripts/factory-doctor.mjs .",
-    "check": "npm run factory:doctor"
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run format:check && npm run factory:doctor"
+  },
+  "devDependencies": {
+    "prettier": "3.9.6"
   }
 }

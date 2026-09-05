@@ -1,0 +1,82 @@
+schema_version: 1
+name: Vibe Engineering Semantic Stage System
+source_of_truth: docs/architecture/VIBE-HOUSE-ARCHITECTURE.md
+
+principles:
+  formatter: prettier
+  context_architecture: ICM
+  orchestration_boundary: external orchestrator moves work through explicit stage contracts
+  proof_rule: color and status labels never substitute for evidence
+
+stages:
+  - id: intent
+    order: 0
+    icm_stage: 00_intake
+    label: INTENT
+    color: "#3B82F6"
+    meaning: Define the problem, owner, outcome, target, constraints, proof, and commercial value.
+    gate: Intent is explicit and reviewable.
+
+  - id: spec
+    order: 1
+    icm_stage: 01_vision
+    label: SPEC
+    color: "#8B5CF6"
+    meaning: Define what must exist and what acceptance means.
+    gate: Specification is approved before implementation.
+
+  - id: plan
+    order: 2
+    icm_stage: 02_blueprint
+    label: PLAN
+    color: "#F59E0B"
+    meaning: Define architecture, affected files, sequence, risk, rollback, and the next verifiable slice.
+    gate: Plan is implementable without hidden assumptions.
+
+  - id: build
+    order: 3
+    icm_stage: 03_build
+    label: BUILD
+    color: "#06B6D4"
+    meaning: Implement one bounded, reversible slice.
+    gate: Candidate implementation exists; builder does not approve it.
+
+  - id: proof
+    order: 4
+    icm_stage: 04_verify
+    label: PROOF
+    color: "#22C55E"
+    meaning: Produce deterministic tests, visual evidence, and live verification when required.
+    gate: Evidence supports the claimed outcome.
+
+  - id: council
+    order: 5
+    icm_stage: 05_council
+    label: COUNCIL
+    color: "#F97316"
+    meaning: Independent review for user value, architecture, failures, security, taste, and sovereignty.
+    gate: Required independent reviews are recorded.
+
+  - id: judge
+    order: 6
+    icm_stage: 06_judge
+    label: JUDGE
+    color: "#EF4444"
+    meaning: Decide SHIP or HOLD from evidence and consequence.
+    gate: Release authority is independent from the builder.
+
+  - id: ship
+    order: 7
+    icm_stage: 07_ship
+    label: SHIP
+    color: "#10B981"
+    meaning: Perform the authorized release with a tested rollback path.
+    gate: Release and rollback evidence are retained.
+
+  - id: operate
+    order: 8
+    icm_stage: 08_improve
+    label: OPERATE
+    color: "#64748B"
+    meaning: Observe production, handle incidents, maintain the system, and route validated improvements back to intent.
+    gate: Production state remains observable and owner-controlled.

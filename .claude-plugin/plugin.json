@@ -1,7 +1,7 @@
 {
   "name": "vibe-engineering",
-  "description": "Vibe Engineering for Claude Code: guided zero-to-product Journey plus optional long-running Loop Engineering, with ICM stage gates, anti-slop review, durable proof receipts, OpenCodeReview-backed code review, and human-controlled release.",
-  "version": "2.4.0",
+  "description": "Vibe Engineering House Skill for Claude Code: one canonical router for ICM context, INTENT → SPEC → PLAN → BUILD → PROOF → COUNCIL → JUDGE → SHIP → OPERATE, with stage gates, anti-slop review, durable proof, OpenCodeReview-backed review, and human-controlled release.",
+  "version": "3.0.0",
   "author": {
     "name": "The Pauli Effect"
   },
@@ -9,11 +9,12 @@
   "license": "MIT",
   "keywords": [
     "vibe-engineering",
+    "house-skill",
     "claude-code",
     "icm",
+    "artifact-lifecycle",
     "stage-gates",
     "loop-engineering",
-    "long-running-tasks",
     "anti-slop",
     "open-code-review",
     "verification",

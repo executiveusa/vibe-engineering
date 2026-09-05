@@ -4,6 +4,21 @@
 
 Vibe Engineering is a portable static React/Vite site plus a versioned governance, skills, review, and ICM software-factory package for agent-assisted delivery.
 
+## House architecture
+
+The canonical project architecture is defined in `docs/architecture/VIBE-HOUSE-ARCHITECTURE.md` and inherited by generated workspaces.
+
+```text
+Vibe Engineering  = governance and release law
+ICM               = interpretable context and filesystem architecture
+Artifact lifecycle = INTENT → SPEC → PLAN → BUILD → PROOF → COUNCIL → JUDGE → SHIP → OPERATE
+Orchestrator       = movement through approved stage contracts
+Workers            = replaceable implementation agents
+Git + CI + evidence = durable proof, rollback, and owner control
+```
+
+The semantic lifecycle and its visual tokens are versioned in `_config/stage-system.yaml`. Existing physical ICM stage names are preserved for compatibility and mapped to the canonical lifecycle rather than silently renamed.
+
 ## Current system
 
 ```text
@@ -71,23 +86,32 @@ project/
 ├── AGENTS.md
 ├── CONTEXT.md
 ├── .factory/state.json
+├── .prettierrc.json
+├── .prettierignore
 ├── _config/
+│   └── stage-system.yaml
 ├── references/
 ├── shared/
+├── docs/
+│   └── ARCHITECTURE-MAP.md
 ├── scripts/factory-doctor.mjs
 └── stages/
-    ├── 00_intake/
-    ├── 01_vision/
-    ├── 02_blueprint/
-    ├── 03_build/
-    ├── 04_verify/
-    ├── 05_council/
-    ├── 06_judge/
-    ├── 07_ship/
-    └── 08_improve/
+    ├── 00_intake/      # INTENT
+    ├── 01_vision/      # SPEC
+    ├── 02_blueprint/   # PLAN
+    ├── 03_build/       # BUILD
+    ├── 04_verify/      # PROOF
+    ├── 05_council/     # COUNCIL
+    ├── 06_judge/       # JUDGE
+    ├── 07_ship/        # SHIP
+    └── 08_improve/     # OPERATE
 ```
 
 Every stage contains a `CONTEXT.md` contract and a generated `output/` edit surface.
+
+## Formatting and visual semantics
+
+Prettier is the deterministic formatting layer for generated projects. It controls source formatting, not workflow meaning. Semantic stage colors and labels are defined by `_config/stage-system.yaml` and may be reused in Mermaid diagrams, dashboards, documentation, CLI surfaces, and orchestration interfaces. Text labels remain authoritative for accessibility and machine interpretation.
 
 ## Data
 
@@ -103,6 +127,7 @@ The static build is deployable to Vercel or another static host. A deployment re
 - Do not add another orchestration or session-management platform until sequential delivery is commercially proven.
 - Keep ICM model-agnostic and text-first.
 - Keep one stage focused on one job.
+- Preserve explicit semantic mapping when physical stage names change; do not silently reinterpret existing workspaces.
 - Do not allow builders or Sandcastle workers to approve their own work, merge, or deploy without the required authority.
 - Keep issue execution isolated and reversible.
 - A scaffold or doctor PASS must never be represented as a completed or production-verified product.

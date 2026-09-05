@@ -30,17 +30,26 @@ test('installs the canonical filesystem entry and agent adapters', async () => {
     const icmr = await readFile(path.join(root, 'ICMR.yaml'), 'utf8');
     const context = await readFile(path.join(root, 'CONTEXT.md'), 'utf8');
     const claude = await readFile(path.join(root, 'CLAUDE.md'), 'utf8');
+    const codex = await readFile(path.join(root, '.vibe/CODEX.md'), 'utf8');
+    const stageSystem = await readFile(path.join(root, '.vibe/stage-system.yaml'), 'utf8');
     const cursor = await readFile(path.join(root, '.cursor/rules/vibe.mdc'), 'utf8');
     const manifest = JSON.parse(await readFile(path.join(root, '.vibe/manifest.json'), 'utf8'));
 
     assert.match(agents, /Verify It Before Everything/);
     assert.match(agents, /No agent soup\. One walkable system/);
-    assert.match(icmr, /AGENTS\.md/);
-    assert.match(icmr, /PROOF\//);
-    assert.match(context, /Vibe is installed/);
-    assert.match(claude, /Read `AGENTS\.md`/);
+    assert.match(agents, /INTENT → SPEC → PLAN → BUILD → PROOF → COUNCIL → JUDGE → SHIP → OPERATE/);
+    assert.match(icmr, /INTENT/);
+    assert.match(icmr, /OPERATE/);
+    assert.match(icmr, /vibe-engineering\/SKILL\.md/);
+    assert.match(context, /Vibe House is installed/);
+    assert.match(claude, /vibe-engineering\/SKILL\.md/);
+    assert.match(codex, /vibe-engineering\/SKILL\.md/);
+    assert.match(stageSystem, /id: intent/);
+    assert.match(stageSystem, /id: judge/);
     assert.match(cursor, /alwaysApply: true/);
     assert.deepEqual(manifest.canonicalEntry, ['AGENTS.md', 'ICMR.yaml', 'CONTEXT.md']);
+    assert.equal(manifest.houseSkill, '.vibe/skills/vibe-engineering/SKILL.md');
+    assert.deepEqual(manifest.lifecycle, ['INTENT', 'SPEC', 'PLAN', 'BUILD', 'PROOF', 'COUNCIL', 'JUDGE', 'SHIP', 'OPERATE']);
     assert.ok(manifest.adapters.includes('codex'));
     assert.ok(manifest.adapters.includes('opencode'));
   });
@@ -58,11 +67,14 @@ test('preserves existing project law unless force is explicit', async () => {
   });
 });
 
-test('installs portable skills under the Vibe namespace', async () => {
+test('installs portable skills under the Vibe namespace with one house router', async () => {
   await withTempProject(async (root) => {
     const report = await installVibe({ target: root, skills: true }, repoRoot);
     assert.equal(report.skills, true);
+    const houseSkill = await readFile(path.join(root, '.vibe/skills/vibe-engineering/SKILL.md'), 'utf8');
     const proofSkill = await readFile(path.join(root, '.vibe/skills/proof/SKILL.md'), 'utf8');
+    assert.match(houseSkill, /canonical router/i);
+    assert.match(houseSkill, /INTENT → SPEC → PLAN → BUILD → PROOF → COUNCIL → JUDGE → SHIP → OPERATE/);
     assert.match(proofSkill, /proof/i);
   });
 });

@@ -1,23 +1,29 @@
 ---
 name: vibe-engineering
-description: Govern product and software work with V.I.B.E. — Verify It Before Everything. Use for project intake, product decisions, architecture, implementation, verification, design/copy quality, Council review, release, and post-release learning. Reads the smallest relevant ICM stage instead of loading the whole method.
+description: Govern product and software work with V.I.B.E. — Verify It Before Everything. Canonical house skill for project intake, ICM context, intent/spec/plan artifacts, implementation, verification, Council/Judge review, release, operations, formatting, and agent handoff. Reads the smallest relevant ICM stage instead of loading the whole method.
 license: MIT
 metadata:
-  version: "2.0.0"
-  tags: "Vibe Engineering, ICM, product, engineering, verification, systems thinking, critical thinking"
+  version: "3.0.0"
+  tags: "Vibe Engineering, ICM, house architecture, product, engineering, verification, systems thinking, critical thinking"
 ---
 
-# Vibe Engineering
+# Vibe Engineering — House Skill
 
 V.I.B.E. means **Verify It Before Everything**.
 
-Use the method to help a person or agent think clearly, build deliberately, prove claims, and keep ownership.
+This is the canonical router for the Vibe Engineering house system. Use this one skill when the user says `VIBE`, `HOUSE`, `LOCK`, asks to use Vibe Engineering, or asks to take a product from intent through production proof.
+
+Do not create a parallel methodology. Route through the project-local ICM workspace and call smaller procedures only when the current stage requires them.
 
 Public memory aid:
 
 `Choose → See → Shape → Make → Prove → Challenge → Decide → Release → Learn`
 
-Technical stage route:
+Canonical artifact lifecycle:
+
+`INTENT → SPEC → PLAN → BUILD → PROOF → COUNCIL → JUDGE → SHIP → OPERATE`
+
+Compatible physical ICM stage route:
 
 `00_intake → 01_vision → 02_blueprint → 03_build → 04_verify → 05_council → 06_judge → 07_ship → 08_improve`
 
@@ -28,6 +34,38 @@ If the project contains a Vibe ICM workspace, read its root `CONTEXT.md`, then r
 If the Vibe MCP server is available, call `vibe_method` for the canonical method or `vibe_context` for task-scoped context. Do not load every artifact by default.
 
 If neither is available, use this skill as the router and follow the project-local source of truth.
+
+## House architecture contract
+
+The layers have one job each:
+
+1. **Vibe Engineering** — governance: what should be done, by whom, under what proof and ownership constraints.
+2. **ICM** — interpretable context: where facts, contracts, artifacts, evidence, and state live.
+3. **Artifact lifecycle** — motion: `INTENT → SPEC → PLAN → BUILD → PROOF → COUNCIL → JUDGE → SHIP → OPERATE`.
+4. **Hermes / orchestrator** — execution routing: which worker acts next and whether the stage gate passed.
+5. **Workers** — Claude, Codex, GPT, Gemini, Orca, humans, or other tools. Workers are replaceable and cannot redefine the house architecture.
+
+The filesystem is the durable source of truth. Chat history, model memory, and vendor-specific prompts are adapters, not architecture.
+
+### Semantic stage meanings
+
+- `INTENT` — mode, outcome, target, constraints, proof, commercial value, ownership, and rollback requirement.
+- `SPEC` — exact behavior, design, interfaces, acceptance criteria, and named reference bars.
+- `PLAN` — bounded slices, file/change order, risks, dependencies, tests, and rollback.
+- `BUILD` — one independently verifiable slice at a time.
+- `PROOF` — deterministic checks plus relevant runtime/browser/security/accessibility evidence.
+- `COUNCIL` — independent review of value, architecture, failure, security/privacy, taste/accessibility, sovereignty, and proof.
+- `JUDGE` — release verdict only: `SHIP` or `HOLD`. Judge does not rewrite the work it judges.
+- `SHIP` — exact proven revision, authorized release, live-environment verification, and tested rollback.
+- `OPERATE` — monitor outcomes/incidents and create a new intent when change is needed.
+
+### Visual semantics
+
+When a project contains `_config/stage-system.yaml`, use those tokens as the canonical stage colors for diagrams, dashboards, status surfaces, and generated architecture maps. Color communicates stage meaning; it is not decorative branding.
+
+### Formatting law
+
+Use project-local formatter/linter rules. In the canonical Vibe factory, Prettier normalizes supported text/code formatting; it does not define semantic colors. Formatting gates must never be represented as behavioral or production proof.
 
 ## The decision contract
 
@@ -50,19 +88,15 @@ Use the plain phrase before the technical term when working with non-technical u
 
 ## Stage rules
 
-### Choose / Intake
+### Choose / Intake / Intent
 
 Inspect reality before changing it. Capture baseline, outcome, target, constraints, proof, commercial value, rollback, source rights, and greenfield/brownfield mode.
 
 When a market/product idea is materially unproven, separate the durable human instinct from the first product shape. Research what is already proven, what can be made better, and what remains genuinely new.
 
-### See / Vision
+### See + Shape / Vision + Blueprint / Spec
 
-Name the smallest valuable human outcome, primary user journey, success signal, ownership promise, and what is intentionally out of scope.
-
-### Shape / Blueprint
-
-Create one buildable product/architecture contract. Reuse existing systems before adding new ones. For taste-sensitive work, name a real reference bar.
+Name the smallest valuable human outcome, primary user journey, success signal, ownership promise, and what is intentionally out of scope. Create one buildable product/architecture contract. Reuse existing systems before adding new ones. For taste-sensitive work, name a real reference bar.
 
 Choose a divergence mode:
 
@@ -73,6 +107,10 @@ Choose a divergence mode:
 Verbalized Sampling may be used for `DIVERGE` or `FRONTIER`. Never treat a low verbalized probability as evidence of quality or truth.
 
 Converge to one approved slice before Build.
+
+### Plan
+
+Turn the approved spec into independently verifiable slices. Name the files/surfaces likely to change, dependencies, risks, checks, proof, rollback, and human gates. The plan should be sufficient for a fresh worker to act without reconstructing the originating conversation.
 
 ### Make / Build
 
@@ -104,9 +142,11 @@ Judge returns `SHIP` or `HOLD`; Judge does not rewrite the work it judges.
 
 Verify destination, branch, environment, domains, data/credential ownership, public-asset rights, monitoring, backup, rollback, and post-release checks. Production release requires authorized human approval. After release, verify the live target environment before claiming production success.
 
-### Learn / Improve
+### Operate / Learn / Improve
 
 Compare the promise with actual use. Measure customer/user outcome, cost, incidents, accessibility, revenue/savings/validated learning, ownership health, and why people stay or leave.
+
+Production signals may open a new `INTENT`, but consequential remediation still follows the same gates. Autonomous maintenance does not bypass Council, Judge, ownership, or rollback requirements.
 
 Retention is earned through:
 
@@ -141,6 +181,17 @@ Possessing a media file is not by itself permission to publish it.
 ## Ownership rule
 
 Before release, the owner should be able to find and control the code, data, repository, deployment, domain, billing, critical accounts, export path, documentation, and rollback. Another competent builder or agent should be able to continue without reconstructing the system from chat history.
+
+## Invocation contract
+
+Use one of these equivalent entry instructions:
+
+- `Use Vibe Engineering.`
+- `HOUSE this project.`
+- `LOCK this into the Vibe house architecture.`
+- `Read the Vibe Engineering skill and continue from current ICM state.`
+
+The skill decides the current stage from repository state. It does not restart completed work or ask the user to repeat context already present in the filesystem.
 
 ## Finish format
 
