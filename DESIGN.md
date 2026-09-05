@@ -14,6 +14,20 @@ motion:
   reducedMotion: true
 ---
 
+# House inheritance
+
+This design contract inherits:
+
+- `factory/icm/template/shared/VIBE_HOUSE_STANDARD.md` — global House law;
+- `factory/icm/template/shared/HEART_AND_SOUL_STANDARD.md` — canonical design/experience doctrine;
+- `_config/stage-system.yaml` — semantic lifecycle/visual status tokens.
+
+Design is not a separate workflow. Material design work moves through:
+
+`INTENT → SPEC → PLAN → BUILD → PROOF → COUNCIL → JUDGE → SHIP → OPERATE`
+
+The semantic stage colors describe workflow state. The brand palette below describes the product identity. Do not confuse the two.
+
 # Product truth
 
 Vibe Engineering makes software discipline understandable and usable for people building with AI who do not want to surrender judgment, taste, proof, or ownership.
@@ -103,11 +117,17 @@ Use transform and opacity. Motion must never delay access to content. Respect `p
 
 The existing owner-controlled soundtrack capability remains available but visually subordinate.
 
-# Subtraction rules
+# Heart & Soul / subtraction rules
 
 Every element must help the visitor understand, decide, act, verify, recover, or remember.
 
-Before keeping an element ask whether it can be removed, merged, inferred, deferred, or moved. Continue until another removal would damage clarity, trust, accessibility, emotional resonance, or essential identity.
+Before keeping an element ask whether it can be removed, merged, inferred, deferred, or moved. Continue until another removal would damage clarity, trust, accessibility, control, emotional resonance, user success, or essential identity.
+
+Minimalism is optional. Essentiality is mandatory.
+
+For every material design choice ask:
+
+**What exists because the product deliberately chose it, and what exists because the model defaulted to it?**
 
 # Anti-patterns
 
@@ -125,6 +145,14 @@ Before keeping an element ask whether it can be removed, merged, inferred, defer
 - No copying COLLINS, Impeccable, Awwwards sites, fashion brands, or editorial references literally.
 
 Use external references to extract principles, not surfaces.
+
+# Proof rule
+
+A polished mockup, screenshot, animation, or formatter pass is not design proof by itself.
+
+Relevant proof may include browser/device behavior, accessibility, responsive evidence, task completion, performance, reference comparison, interaction recordings, user feedback, trust/recovery behavior, and independent critique.
+
+Council challenges material user-facing work. Judge returns only `SHIP` or `HOLD`.
 
 # Quality bar
 

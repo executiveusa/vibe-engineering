@@ -1,5 +1,7 @@
 # Vibe Engineering v2 doctrine
 
+> **Status: historical doctrine / compatibility reference.** The current general method is governed by `skills/vibe-engineering/SKILL.md` and `factory/icm/template/shared/VIBE_HOUSE_STANDARD.md`. This document preserves the reasoning and public-language development that led to the House architecture. When terminology differs, use the current House lifecycle: `INTENT → SPEC → PLAN → BUILD → PROOF → COUNCIL → JUDGE → SHIP → OPERATE`.
+
 Built by The Pauli Effect · 2026 · Part of the Pauli Suite
 
 ## The public idea
@@ -17,6 +19,24 @@ The public language stays simple enough to remember:
 `Choose → See → Shape → Make → Prove → Challenge → Decide → Release → Learn`
 
 The technical contracts underneath those words may be rigorous. The person using the method should not need to learn the jargon before they can use the habit.
+
+## Current House mapping
+
+The v2 physical/public stages map to the current semantic House lifecycle:
+
+```text
+00 Intake / Choose      → INTENT
+01 Vision / See         → SPEC
+02 Blueprint / Shape    → PLAN
+03 Build / Make         → BUILD
+04 Verify / Prove       → PROOF
+05 Council / Challenge  → COUNCIL
+06 Judge / Decide       → JUDGE
+07 Ship / Release       → SHIP
+08 Improve / Learn      → OPERATE
+```
+
+These names are compatibility/history labels, not a second method.
 
 ## What V.I.B.E. trains
 
@@ -81,16 +101,7 @@ Exploration belongs before commitment. Verification may reopen a decision when e
 
 AI slop is any output that comes from a model default instead of deliberate intent, a reference, evidence, or human judgment.
 
-Slop can appear in:
-
-- ideas: copying the obvious product shape without researching the instinct;
-- strategy: generic audience, pricing, or growth advice without evidence;
-- copy: statistical phrases, empty hype, predictable rhythm, and fake authority;
-- UI: repeated model aesthetics, template layouts, decorative components, weak hierarchy, or inaccessible choices;
-- architecture: adding a fashionable stack or abstraction without a real boundary problem;
-- code: placeholders, swallowed errors, duplicate utilities, unnecessary dependencies, and cleverness without need;
-- business: building activity presented as customer value;
-- production: calling a build, preview, merge, or deployment submission “live proof.”
+Slop can appear in ideas, strategy, copy, UI, architecture, code, business, and production claims.
 
 The response is not a larger banned-pattern list. The response is intent + reference + detector + fresh review + reality.
 
@@ -98,13 +109,11 @@ The response is not a larger banned-pattern list. The response is intent + refer
 
 The builder may explain its work but may not be the only authority deciding that the work is ready.
 
-For taste-sensitive work, use a named/fetchable/comparable reference bar and compare the actual artifact against it. A critic should inspect the real output and name the largest remaining gap. For consequential work, Council and Judge retain separate authority.
+For taste-sensitive work, use a named/fetchable/comparable reference bar and compare the actual artifact against it. For consequential work, Council and Judge retain separate authority. Judge returns only `SHIP` or `HOLD`.
 
 ### 6. Small finished moves beat wide unfinished motion
 
 Build one independently verifiable slice at a time. A slice has an objective, constraints, proof, rollback, and a visible end.
-
-The system may automate the transition between low-risk slices after an approved plan, but verification remains mandatory and new consequence or scope stops the run.
 
 ### 7. Retention is earned
 
@@ -130,59 +139,24 @@ ICM layers remain:
 - **Layer 3** — stable method, quality, brand, source, and domain references;
 - **Layer 4** — current working artifacts and evidence.
 
+`factory/icm/template/shared/VIBE_HOUSE_STANDARD.md` is now the global Layer 3 House doctrine. Heart & Soul remains a subordinate design/experience standard within that House contract.
+
 One fact gets one home. Routing files stay small. Working sessions end in artifacts another human or agent can inspect.
 
-## Stage map
+## Truth rules now made explicit
 
-### 00 Intake / Choose
-
-Establish baseline, classification, mode, outcome, target, constraints, proof, commercial value, and rollback. Research reality before implementation. Run Proven-Better-New analysis when a market/product idea is materially unproven.
-
-### 01 Vision / See
-
-Name the human outcome, the real user journey, ownership promise, and reason the work deserves to exist. Separate needs from feature ideas.
-
-### 02 Blueprint / Shape
-
-Create the Intent → Standard → Evidence contract, architecture boundaries, named quality references, risky assumptions, acceptance criteria, rollback, and small work slices. Controlled divergence may happen here; one path must be selected before Build.
-
-### 03 Build / Make
-
-Implement one approved slice. Inspect before editing. Reuse before adding. Test behavior. Do not broaden scope.
-
-### 04 Verify / Prove
-
-Run native tests, browser/runtime checks, accessibility, security, performance where relevant, no-slop detectors, source checks, and independent code/design review. Record what is proven, failed, or still unverified.
-
-### 05 Council / Challenge
-
-Use independently attributable perspectives for user, taste, architecture, failure, security/privacy, sovereignty, commercial value, and proof proportional to consequence. Reviewers challenge; they do not restate.
-
-### 06 Judge / Decide
-
-Apply hard stops and the visible quality score. Return SHIP or HOLD. Missing evidence is a HOLD, not a guess.
-
-### 07 Ship / Release
-
-Release only with authority, rights, ownership, monitoring, backup, rollback, and target-environment proof. “Deployed” is not “verified.”
-
-### 08 Improve / Learn
-
-Compare the promise with reality. Measure adoption, support, accessibility, cost, revenue/savings, incidents, retention, customer control, and the smallest next improvement.
+```text
+BUILT ≠ VERIFIED
+CI PASS ≠ CUSTOMER VALUE
+DEPLOYED ≠ PRODUCTION PROOF
+FORMAT PASS ≠ BEHAVIORAL PROOF
+```
 
 ## Client Zero rule
 
 The Pauli Effect uses Vibe Engineering on Vibe Engineering before presenting it as a customer standard.
 
-Every major change to the method must leave evidence of:
-
-- its approved intent;
-- the standard used to judge it;
-- implementation and verification;
-- independent challenge;
-- source/provenance changes;
-- rollback;
-- the real outcome after release.
+Every major change to the method must leave evidence of approved intent, standard, implementation, verification, independent challenge, source/provenance changes, rollback, and real outcome after release.
 
 A method that cannot survive its own rules is not ready to teach.
 
@@ -191,9 +165,10 @@ A method that cannot survive its own rules is not ready to teach.
 There is one canonical method and many adapters.
 
 ```text
-VIBE ENGINEERING CORE
-  ├─ Truth / context contracts
-  ├─ ICM stage files
+VIBE ENGINEERING HOUSE
+  ├─ House Skill / router
+  ├─ VIBE_HOUSE_STANDARD.md
+  ├─ ICM context + stage contracts
   ├─ deterministic gates
   └─ source + evidence records
          │
@@ -206,21 +181,6 @@ VIBE ENGINEERING CORE
 ```
 
 Adapters may change. The method, authority hierarchy, proof rules, and ownership rules do not silently fork by provider.
-
-## Youth and creator language
-
-Teach the habit before the terminology.
-
-- systems thinking → **see what connects**;
-- critical thinking → **question the answer**;
-- first principles → **get back to what is true**;
-- specification → **decide what good looks like**;
-- verification → **prove it**;
-- rollback → **know how to get back**;
-- observability → **know what is happening after you ship**;
-- sovereignty → **keep control of what you built**.
-
-The professional term can follow the plain phrase. Complexity stays available without becoming an entrance fee.
 
 ## Source and provenance rule
 
