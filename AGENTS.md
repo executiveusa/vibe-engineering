@@ -111,6 +111,10 @@ Separate verified facts from assumptions. Inspect before asking the owner to rep
 
 Vibe Engineering and ICM govern what, why, whether, context, and authority. Engineering skills govern how approved software work is executed.
 
+The backend engineering lifecycle remains:
+
+`DEFINE → PLAN → BUILD → VERIFY → REVIEW → SHIP`
+
 Engineering procedures compose inside—not beside—the House lifecycle. They cannot override ICM scope, Council, Judge, rights, ownership, rollback, or required human approval.
 
 ## Heart & Soul / design law
