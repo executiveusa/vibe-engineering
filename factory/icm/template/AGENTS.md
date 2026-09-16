@@ -25,6 +25,8 @@ Compatible physical route:
 ## Non-negotiable laws
 
 - Verify It Before Everything.
+- Software must pass the Instinct Simplicity Review: one obvious front door, zero avoidable visible complexity, real visual/functional confirmation under the hood, and operator recovery.
+- Brand outcome: software that gets you out of your seat.
 - The filesystem is the source of truth. Agents are adapters, not architecture.
 - Any capable agent must be able to enter through `AGENTS.md → ICMR.yaml → CONTEXT.md`.
 - Durable rules and decisions belong in files, not chat memory or vendor-specific hidden prompts.

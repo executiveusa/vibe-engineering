@@ -13,6 +13,7 @@ One job: define the human change before feature ideas take over.
 - Layer 3: `../../shared/HEART_AND_SOUL_STANDARD.md` for user-facing product or experience work.
 - Layer 3: `../../shared/OWNERSHIP_RETENTION_STANDARD.md`.
 - Layer 3: `../../shared/PLAIN_LANGUAGE_STANDARD.md`.
+- Layer 3: `../../shared/INSTINCT_SIMPLICITY_REVIEW_STANDARD.md` for software products.
 
 ## Process
 
@@ -21,7 +22,8 @@ One job: define the human change before feature ideas take over.
 3. Separate real needs, constraints, and desired feelings from feature ideas and implementation choices.
 4. For user-facing work, define the intended emotional register, trust requirement, and the essential qualities that must survive later subtraction.
 5. Define the ownership promise: what the owner must understand, control, export, move, and continue operating.
-6. Name the success signal and the reason this deserves to exist now.
+6. For software, define one obvious front door, the user burden to remove, truthful working/approval/ready/blocked states, and how real completion will be visually and functionally confirmed under the hood.
+7. Name the success signal and the reason this deserves to exist now.
 
 ## Outputs
 

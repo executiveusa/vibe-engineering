@@ -13,6 +13,7 @@ One job: test the claims against the actual artifact and actual environment avai
 - Layer 3: `../../references/SOURCE_PROVENANCE.md`.
 - Layer 3: `../../shared/HEART_AND_SOUL_STANDARD.md` for user-facing product or experience work.
 - Layer 3: `../../shared/SUBTRACTION_GAUNTLET_STANDARD.md` for user-facing product or experience work.
+- Layer 3: `../../shared/INSTINCT_SIMPLICITY_REVIEW_STANDARD.md` for every software product.
 - Layer 3: `../../shared/NO_SLOP_STANDARD.md`.
 - Layer 3: `../../shared/REFERENCE_BAR_STANDARD.md` when comparative quality matters.
 - Native test, build, security, accessibility, browser, and deployment commands.
@@ -25,12 +26,13 @@ One job: test the claims against the actual artifact and actual environment avai
 4. Use browser/runtime evidence for browser products, security review for sensitive surfaces, and measurement before performance optimization.
 5. Run the no-slop check on every changed user-facing or architectural surface. A detector finding is evidence to inspect, not an automatic rewrite order.
 6. For user-facing work, run the Subtraction Gauntlet against the actual artifact. Classify material elements as KEEP, MERGE, INFER, DEFER, MOVE, or REMOVE. Require the critic to name the protected quality that stops further subtraction.
-7. When a reference bar exists, use a fresh reviewer to inspect the actual output next to the real reference and name the largest remaining gap. Do not let the builder perform the only comparison.
-8. Verify the seven Heart & Soul lenses where applicable: human outcome; hierarchy; journey; visual identity; motion/emotion; responsive/accessibility system; trust/proof/sovereignty.
-9. Verify source/provenance and media rights requirements that affect distribution. Missing required rights remain `UNVERIFIED` and block publication of that material.
-10. Record every finding as fixed, accepted with owner and reason, false positive with proof, or blocked.
-11. For persona-sensitive agents or features, run the paired personality-drift gauntlet in `factory/evaluations/personality-drift`: at least five blind personalized-vs-generic cases, grounded owner evidence, fresh judge, material uplift, and perfect non-fabrication/privacy scores. Store `personality-drift.json`; failure is HOLD.
-12. Separate native checks from live production proof. Passing CI or a production build is evidence for those checks only; it is not live-production proof.
+7. For every software product, run the Instinct Simplicity Review on the actual primary journey. Measure before/after user burden, require one obvious front door, move avoidable complexity under the hood, verify real completion visually and functionally, and write an exact-candidate receipt. A chat front door is preferred where natural, not forced where it harms the outcome.
+8. When a reference bar exists, use a fresh reviewer to inspect the actual output next to the real reference and name the largest remaining gap. Do not let the builder perform the only comparison.
+9. Verify the seven Heart & Soul lenses where applicable: human outcome; hierarchy; journey; visual identity; motion/emotion; responsive/accessibility system; trust/proof/sovereignty.
+10. Verify source/provenance and media rights requirements that affect distribution. Missing required rights remain `UNVERIFIED` and block publication of that material.
+11. Record every finding as fixed, accepted with owner and reason, false positive with proof, or blocked.
+12. For persona-sensitive agents or features, run the paired personality-drift gauntlet in `factory/evaluations/personality-drift`: at least five blind personalized-vs-generic cases, grounded owner evidence, fresh judge, material uplift, and perfect non-fabrication/privacy scores. Store `personality-drift.json`; failure is HOLD.
+13. Separate native checks from live production proof. Passing CI or a production build is evidence for those checks only; it is not live-production proof.
 
 ## Outputs
 
@@ -40,6 +42,7 @@ One job: test the claims against the actual artifact and actual environment avai
 - `open-code-review.json` -> `../../docs/evidence/`
 - `no-slop-review.md` -> `output/`
 - `subtraction-review.md` -> `output/` for user-facing or taste-sensitive work
+- `simplicity-review.json` -> `../../docs/evidence/` for every software product
 - `reference-comparison.md` -> `output/` when a reference bar exists
 - `rights-and-provenance-check.md` -> `output/` when third-party material affects distribution
 - `personality-drift.json` -> `../../docs/evidence/` when persona-sensitive behavior changes
@@ -48,7 +51,7 @@ One job: test the claims against the actual artifact and actual environment avai
 
 ## Human gate
 
-Critical findings and unresolved high findings block progression. The builder cannot approve its own implementation or be the sole taste critic. A Subtraction Gauntlet `HOLD` blocks progression; `REVISE` requires bounded correction or authorized disposition. Missing distribution rights block the affected public asset even when the rest of the release may proceed without it.
+Critical findings and unresolved high findings block progression. The builder cannot approve its own implementation or be the sole taste critic. A missing, stale, or non-PASS Simplicity Review blocks every software product. A Subtraction Gauntlet `HOLD` blocks progression; `REVISE` requires bounded correction or authorized disposition. Missing distribution rights block the affected public asset even when the rest of the release may proceed without it.
 
 ## Plain-language proof
 

@@ -82,6 +82,10 @@ test('ship gate blocks missing receipts and stale OCR candidate', async () => {
       path.join(evidence, 'open-code-review.json'),
       JSON.stringify({ status: 'PASS', candidate: '0'.repeat(40) }),
     );
+    await writeFile(
+      path.join(evidence, 'simplicity-review.json'),
+      JSON.stringify({ status: 'PASS', candidate: base, reviewerId: 'simplicity-reviewer-1', frontDoor: 'one chat', before: { inputs: 2 }, after: { inputs: 1 }, visualEvidence: ['screenshot.png'], functionalEvidence: ['journey test'], operatorRecoveryPath: 'runbook.md' }),
+    );
     await writeFile(path.join(evidence, 'icm-cold-walk.json'), JSON.stringify({ status: 'PASS', candidate: base }));
     await writeFile(
       path.join(evidence, 'independent-review.json'),
@@ -118,6 +122,41 @@ test('ship gate blocks missing receipts and stale OCR candidate', async () => {
       JSON.stringify({ status: 'PASS', candidate: base, scanStatus: 'ok', exitCode: 0, totals: { critical: 0, warning: 0 } }),
     );
     result = await shipGate(target, { candidate: base });
+    assert.equal(result.status, 'SHIP');
+  } finally {
+    await rm(tmp, { recursive: true, force: true });
+  }
+});
+
+
+test('ship gate requires exact-candidate Instinct simplicity evidence for software', async () => {
+  const tmp = await mkdtemp(path.join(os.tmpdir(), 'vibe-simplicity-gate-'));
+  try {
+    const target = path.join(tmp, 'repo');
+    await mkdir(target);
+    git(target, 'init');
+    git(target, 'config', 'user.email', 'factory@test.invalid');
+    git(target, 'config', 'user.name', 'Factory Test');
+    await mkdir(path.join(target, 'docs', 'evidence'), { recursive: true });
+    await writeFile(path.join(target, 'a'), 'a');
+    git(target, 'add', '.');
+    git(target, 'commit', '-m', 'candidate');
+    const candidate = git(target, 'rev-parse', 'HEAD');
+    const evidence = path.join(target, 'docs', 'evidence');
+    await writeFile(path.join(evidence, 'ultimate-bug-scan.json'), JSON.stringify({ status: 'PASS', candidate, scanStatus: 'ok', exitCode: 0, totals: { critical: 0, warning: 0 } }));
+    await writeFile(path.join(evidence, 'open-code-review.json'), JSON.stringify({ status: 'PASS', candidate }));
+    await writeFile(path.join(evidence, 'icm-cold-walk.json'), JSON.stringify({ status: 'PASS', candidate }));
+    await writeFile(path.join(evidence, 'independent-review.json'), JSON.stringify({ status: 'PASS', candidate, builderId: 'builder', reviewerId: 'reviewer' }));
+    await writeFile(path.join(evidence, 'judge-verdict.json'), JSON.stringify({ verdict: 'SHIP', candidate }));
+    let result = await shipGate(target, { candidate });
+    assert.equal(result.status, 'HOLD');
+    assert.match(result.failures.join('\n'), /simplicity-review|Simplicity Review/);
+    await writeFile(path.join(evidence, 'simplicity-review.json'), JSON.stringify({ status: 'PASS', candidate: '0'.repeat(40), reviewerId: 'simplicity-reviewer', frontDoor: 'one chat', before: {}, after: {}, visualEvidence: ['before.png'], functionalEvidence: ['journey'], operatorRecoveryPath: 'runbook' }));
+    result = await shipGate(target, { candidate });
+    assert.equal(result.status, 'HOLD');
+    assert.match(result.failures.join('\n'), /stale/);
+    await writeFile(path.join(evidence, 'simplicity-review.json'), JSON.stringify({ status: 'PASS', candidate, reviewerId: 'simplicity-reviewer', frontDoor: 'one chat', before: { surfaces: 3 }, after: { surfaces: 1 }, visualEvidence: ['before.png', 'after.png'], functionalEvidence: ['primary journey'], operatorRecoveryPath: 'runbook' }));
+    result = await shipGate(target, { candidate });
     assert.equal(result.status, 'SHIP');
   } finally {
     await rm(tmp, { recursive: true, force: true });

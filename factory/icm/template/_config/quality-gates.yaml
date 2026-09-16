@@ -9,6 +9,7 @@ required_evidence:
   - code_review
   - accessibility_review
   - plain_language_explanation
+  - exact_candidate_simplicity_review
   - rollback
   - ownership_receipt
   - target_environment_verification

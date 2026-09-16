@@ -118,6 +118,7 @@ export async function shipGate(root, { candidate } = {}) {
   const required = [
     'ultimate-bug-scan.json',
     'open-code-review.json',
+    'simplicity-review.json',
     'icm-cold-walk.json',
     'independent-review.json',
     'judge-verdict.json',
@@ -144,6 +145,22 @@ export async function shipGate(root, { candidate } = {}) {
     failures.push('Ultimate Bug Scanner scan was incomplete or failed');
   if (receipts['ultimate-bug-scan.json']?.totals?.critical !== 0 || receipts['ultimate-bug-scan.json']?.totals?.warning !== 0)
     failures.push('Ultimate Bug Scanner has unresolved findings');
+  if (receipts['simplicity-review.json']?.status !== 'PASS')
+    failures.push('Instinct Simplicity Review did not PASS');
+  if (receipts['simplicity-review.json']?.candidate !== resolvedCandidate)
+    failures.push('Instinct Simplicity Review receipt is stale for candidate');
+  if (!receipts['simplicity-review.json']?.reviewerId)
+    failures.push('Instinct Simplicity Review reviewer identity is missing');
+  if (!receipts['simplicity-review.json']?.frontDoor)
+    failures.push('Instinct Simplicity Review front door is missing');
+  if (!receipts['simplicity-review.json']?.before || !receipts['simplicity-review.json']?.after)
+    failures.push('Instinct Simplicity Review journey burden is missing');
+  if (!Array.isArray(receipts['simplicity-review.json']?.visualEvidence) || !receipts['simplicity-review.json'].visualEvidence.length)
+    failures.push('Instinct Simplicity Review visual evidence is missing');
+  if (!Array.isArray(receipts['simplicity-review.json']?.functionalEvidence) || !receipts['simplicity-review.json'].functionalEvidence.length)
+    failures.push('Instinct Simplicity Review functional evidence is missing');
+  if (!receipts['simplicity-review.json']?.operatorRecoveryPath)
+    failures.push('Instinct Simplicity Review operator recovery path is missing');
   if (receipts['open-code-review.json']?.status !== 'PASS')
     failures.push('Open Code Review did not PASS');
   if (receipts['open-code-review.json']?.candidate !== resolvedCandidate)
