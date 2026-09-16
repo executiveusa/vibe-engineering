@@ -1,1 +1,1 @@
-export const BUILD_SOURCE_COMMIT = 'local';
+export const BUILD_SOURCE_COMMIT = "local";

@@ -1,7 +1,7 @@
 {
   "name": "vibe-engineering",
   "private": true,
-  "version": "1.0.0",
+  "version": "3.1.0",
   "type": "module",
   "license": "MIT",
   "bin": {
@@ -30,7 +30,11 @@
     "factory:new": "node scripts/factory-new.mjs",
     "factory:one-click": "node scripts/factory-new.mjs",
     "factory:doctor": "node scripts/factory-governor.mjs",
-    "icmr:validate": "node scripts/icmr-validate.mjs"
+    "icmr:validate": "node scripts/icmr-validate.mjs",
+    "factory:control": "node scripts/factory-control.mjs",
+    "factory:walk": "node scripts/factory-control.mjs walk",
+    "factory:review": "node scripts/factory-control.mjs review",
+    "factory:ship-gate": "node scripts/factory-control.mjs ship-gate"
   },
   "dependencies": {
     "@vitejs/plugin-react": "6.0.3",

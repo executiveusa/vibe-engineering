@@ -1,0 +1,12 @@
+{
+  "name": "vibe-engineering",
+  "interface": { "displayName": "Vibe Engineering" },
+  "plugins": [
+    {
+      "name": "vibe-engineering-codex",
+      "source": { "source": "local", "path": "./plugins/vibe-engineering" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Developer Tools"
+    }
+  ]
+}

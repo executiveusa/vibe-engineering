@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "factory": {
+    "repository": "https://github.com/executiveusa/vibe-engineering",
+    "revisionPolicy": "exact-commit"
+  },
+  "sources": {
+    "specialistSkills": {
+      "repository": "https://github.com/executiveusa/pauli-agent-skills-2026",
+      "revision": "a42b27c082adc721b125b3b65c2c2e1d20b9f369"
+    },
+    "openCodeReview": {
+      "repository": "https://github.com/executiveusa/open-code-review",
+      "revision": "152cc6d585043d40c3674d9637a7a06bbd950610",
+      "requiredAfterEveryBuild": true
+    },
+    "icmArchitect": {
+      "source": "owner-supplied icm-architect-main package",
+      "absorbedPath": "factory/vendor/icm-architect",
+      "requiredForEveryProject": true
+    }
+  }
+}

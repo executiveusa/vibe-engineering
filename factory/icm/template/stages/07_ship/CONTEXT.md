@@ -13,12 +13,13 @@ One job: release the approved work reversibly, with ownership and live proof.
 
 ## Process
 
-1. Prepare a reversible release. Verify destination, branch, environment, domains, data ownership, credentials ownership, monitoring, backup, rollback command, and post-release checks.
-2. Confirm that every public third-party asset has the required rights/attribution record. Remove or replace any `UNVERIFIED` distribution asset before release rather than weakening the gate.
-3. Create `production-verification.md` with status `NOT VERIFIED` before release.
-4. After the authorized human approves and the release occurs, run live target-environment checks and record the evidence. Only then may production verification change to `VERIFIED`.
-5. Confirm the ownership receipt: another competent builder or agent can find the code, configuration, accounts, data/export path, monitoring, and rollback without reconstructing them from chat.
-6. Local, scaffold, build, review, merge, preview creation, and CI results are not production verification.
+1. Run `factory:ship-gate` on the exact candidate. It must confirm pinned Open Code Review PASS on that candidate, cold ICM walk PASS, independent review PASS, and Judge SHIP. Any missing or stale receipt is HOLD.
+2. Prepare a reversible release. Verify destination, branch, environment, domains, data ownership, credentials ownership, monitoring, backup, rollback command, and post-release checks.
+3. Confirm that every public third-party asset has the required rights/attribution record. Remove or replace any `UNVERIFIED` distribution asset before release rather than weakening the gate.
+4. Create `production-verification.md` with status `NOT VERIFIED` before release.
+5. After the authorized human approves and the release occurs, run live target-environment checks and record the evidence. Only then may production verification change to `VERIFIED`.
+6. Confirm the ownership receipt: another competent builder or agent can find the code, configuration, accounts, data/export path, monitoring, and rollback without reconstructing them from chat.
+7. Local, scaffold, build, review, merge, preview creation, and CI results are not production verification.
 
 ## Outputs
 
