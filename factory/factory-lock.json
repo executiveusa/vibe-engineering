@@ -58,6 +58,34 @@
       "license": "MIT with OpenAI/Anthropic Rider (non-standard; rights review required; not vendored)",
       "requiredAfterEveryCodeBuild": true,
       "mode": "external deterministic scan before Open Code Review"
+    },
+    "githubNoBloatExtraction": {
+      "bundleSha256": "0cc059f9b192c56560b933987ffc4af8444b142ee6a0b83fa753713f6358b8d6",
+      "mode": "contracts-only",
+      "sources": {
+        "acfs": {
+          "repository": "https://github.com/Dicklesworthstone/agentic_coding_flywheel_setup",
+          "revision": "a5338944f3fd6d635af48309333c2949c2a4731e",
+          "license": "MIT"
+        },
+        "setupChecker": {
+          "repository": "https://github.com/Dicklesworthstone/automated_flywheel_setup_checker",
+          "revision": "72acf71625584e525dc9793faf7e721fe9e00374",
+          "license": "NO LICENSE FILE - ideas only, no code"
+        },
+        "repoUpdater": {
+          "repository": "https://github.com/Dicklesworthstone/repo_updater",
+          "revision": "b5fe0131d3bb53fe311f6ebfc54d60fbc2404c73"
+        },
+        "doodlestein": {
+          "repository": "https://github.com/Dicklesworthstone/doodlestein_self_releaser",
+          "revision": "1e8b50251937ec299d875c48bb573840025d40a2"
+        },
+        "unslop": {
+          "repository": "https://github.com/mshumer/unslop",
+          "revision": "edcb62386d129c65e4395f0cfcc9168eb1ba2148"
+        }
+      }
     }
   }
 }
