@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { access, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import crypto from 'node:crypto';
 import path from 'node:path';
@@ -85,6 +85,7 @@ export async function review(root, { base, candidate, runner = spawnSync } = {})
   if (dirty) throw new Error('refusing exact-revision review with a dirty workspace');
   const resultFile = receiptPath(root, 'open-code-review-result.json');
   await mkdir(path.join(root, 'docs', 'evidence'), { recursive: true });
+  await rm(resultFile, { force: true });
   const args = ['review', '--from', resolvedBase, '--to', resolvedCandidate, '--format', 'json', '--output', resultFile];
   const result = runner(process.platform === 'win32' ? 'ocr.cmd' : 'ocr', args, {
     cwd: root,
@@ -97,7 +98,7 @@ export async function review(root, { base, candidate, runner = spawnSync } = {})
     base: resolvedBase,
     candidate: resolvedCandidate,
     command: `ocr ${args.join(' ')}`,
-    status: result.status === 0 ? 'PASS' : 'HOLD',
+    status: result.status === 0 && await exists(resultFile) ? 'PASS' : 'HOLD',
     exitCode: result.status,
     resultFile: 'docs/evidence/open-code-review-result.json',
     resultFileSha256: await exists(resultFile) ? hash(await readFile(resultFile)) : null,
@@ -148,7 +149,7 @@ export async function shipGate(root, { candidate } = {}) {
     failures.push('independent review receipt is stale for candidate');
   if (!receipts['independent-review.json']?.reviewerId || !receipts['independent-review.json']?.builderId)
     failures.push('independent review identities are missing');
-  if (receipts['independent-review.json']?.reviewerId === receipts['independent-review.json']?.builderId)
+  if (receipts['independent-review.json']?.reviewerId && receipts['independent-review.json']?.reviewerId === receipts['independent-review.json']?.builderId)
     failures.push('builder cannot be the independent reviewer');
   if (receipts['judge-verdict.json']?.verdict !== 'SHIP')
     failures.push('Judge did not return SHIP');

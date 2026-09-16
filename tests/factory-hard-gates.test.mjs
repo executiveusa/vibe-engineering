@@ -6,7 +6,7 @@ import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { createWorkspace } from '../scripts/factory-new.mjs';
-import { coldWalk, shipGate } from '../scripts/factory-control.mjs';
+import { coldWalk, review, shipGate } from '../scripts/factory-control.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 function git(cwd, ...args) {
@@ -30,6 +30,28 @@ test('cold ICM walk traverses every one-job stage and emits an actionable next s
     const judge = path.join(target, 'stages', '06_judge', 'CONTEXT.md');
     await writeFile(judge, (await readFile(judge, 'utf8')).replace('One job:', 'Job:'));
     assert.equal((await coldWalk(target)).status, 'HOLD');
+  } finally {
+    await rm(tmp, { recursive: true, force: true });
+  }
+});
+
+
+test('OCR receipt cannot pass on a zero exit without fresh structured output', async () => {
+  const tmp = await mkdtemp(path.join(os.tmpdir(), 'vibe-ocr-receipt-'));
+  try {
+    const target = path.join(tmp, 'repo');
+    await mkdir(target);
+    git(target, 'init');
+    git(target, 'config', 'user.email', 'factory@test.invalid');
+    git(target, 'config', 'user.name', 'Factory Test');
+    await writeFile(path.join(target, 'a'), 'a');
+    git(target, 'add', '.');
+    git(target, 'commit', '-m', 'base');
+    const base = git(target, 'rev-parse', 'HEAD');
+    const runner = () => ({ status: 0, stdout: '', stderr: '' });
+    const receipt = await review(target, { base, candidate: base, runner });
+    assert.equal(receipt.status, 'HOLD');
+    assert.equal(receipt.resultFileSha256, null);
   } finally {
     await rm(tmp, { recursive: true, force: true });
   }
