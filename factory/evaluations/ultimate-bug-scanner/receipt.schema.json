@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "vibe://schemas/ultimate-bug-scan-receipt",
+  "type": "object",
+  "required": ["candidate", "engineRevision", "engineVersion", "command", "exitCode", "scanStatus", "resultSha256", "languages", "files", "totals", "findingsResolved", "status"],
+  "properties": {
+    "candidate": { "type": "string", "minLength": 7 },
+    "engineRevision": { "const": "47edcd3a6f225b3316825175561943195ababe78" },
+    "engineVersion": { "const": "5.4.4" },
+    "command": { "type": "string", "pattern": "--format=json" },
+    "exitCode": { "const": 0 },
+    "scanStatus": { "const": "ok" },
+    "resultSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "languages": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "files": { "type": "integer", "minimum": 1 },
+    "totals": { "type": "object", "required": ["critical", "warning"], "properties": { "critical": { "const": 0 }, "warning": { "const": 0 } }, "additionalProperties": true },
+    "findingsResolved": { "const": true },
+    "status": { "const": "PASS" }
+  },
+  "additionalProperties": true
+}

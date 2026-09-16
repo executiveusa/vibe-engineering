@@ -9,6 +9,7 @@ One job: decide whether the verified work deserves to move to release preparatio
 - Layer 4: `../02_blueprint/output/design-contract.md` when present.
 - Layer 4: `../04_verify/output/`.
 - Layer 4: `../05_council/output/`.
+- `../../docs/evidence/ultimate-bug-scan.json` for the exact candidate and a complete scan.
 - `../../docs/evidence/open-code-review.json` for the exact candidate.
 - `../../docs/evidence/icm-cold-walk.json` produced from a zero-chat-memory root walk.
 - `../../docs/evidence/independent-review.json` proving the builder did not approve its own work.
@@ -24,7 +25,7 @@ One job: decide whether the verified work deserves to move to release preparatio
 1. Re-read the original Intent → Standard → Evidence contract before looking at the builder's confidence or effort.
 2. Score user value, architecture, reliability, security, accessibility/taste, ownership, rollback, evidence, and commercial alignment.
 3. For user-facing work, confirm that subtraction evidence exists, the largest remaining experience gap is dispositioned, and the protected quality that stops further subtraction is connected to the approved design contract.
-4. Confirm Open Code Review passed on the exact candidate, the ICM cold walk passed, and the independent reviewer is distinct from the builder. Missing, failing, or stale evidence is a hard HOLD.
+4. Confirm Ultimate Bug Scanner completed every applicable scanner with status `ok`, zero unresolved critical/warning findings, and a receipt for the exact candidate. Then confirm Open Code Review passed on the exact candidate, the ICM cold walk passed, and the independent reviewer is distinct from the builder. Missing, failing, or stale evidence is a hard HOLD.
 5. For persona-sensitive work, require personality-drift PASS on the exact candidate. It must show grounded specificity, preference/voice/continuity fidelity and material uplift over the generic control, with no fabricated owner traits or widened disclosure authority.
 6. Apply hard stops before averaging. Security, reliability, accessibility, ownership, missing required rights, missing rollback, unresolved Subtraction Gauntlet HOLD, and missing target evidence cannot be hidden by strong visual or implementation scores.
 7. Treat unresolved Council HOLDs and missing proof as blockers until new evidence or authorized disposition exists.

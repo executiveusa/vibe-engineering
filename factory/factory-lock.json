@@ -50,6 +50,14 @@
         }
       },
       "mode": "schemas-and-gates-only"
+    },
+    "ultimateBugScanner": {
+      "repository": "https://github.com/Dicklesworthstone/ultimate_bug_scanner",
+      "revision": "47edcd3a6f225b3316825175561943195ababe78",
+      "version": "5.4.4",
+      "license": "MIT with OpenAI/Anthropic Rider (non-standard; rights review required; not vendored)",
+      "requiredAfterEveryCodeBuild": true,
+      "mode": "external deterministic scan before Open Code Review"
     }
   }
 }
