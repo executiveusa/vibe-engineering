@@ -28,7 +28,8 @@ One job: test the claims against the actual artifact and actual environment avai
 7. Verify the seven Heart & Soul lenses where applicable: human outcome; hierarchy; journey; visual identity; motion/emotion; responsive/accessibility system; trust/proof/sovereignty.
 8. Verify source/provenance and media rights requirements that affect distribution. Missing required rights remain `UNVERIFIED` and block publication of that material.
 9. Record every finding as fixed, accepted with owner and reason, false positive with proof, or blocked.
-10. Separate native checks from live production proof. Passing CI or a production build is evidence for those checks only; it is not live-production proof.
+10. For persona-sensitive agents or features, run the paired personality-drift gauntlet in `factory/evaluations/personality-drift`: at least five blind personalized-vs-generic cases, grounded owner evidence, fresh judge, material uplift, and perfect non-fabrication/privacy scores. Store `personality-drift.json`; failure is HOLD.
+11. Separate native checks from live production proof. Passing CI or a production build is evidence for those checks only; it is not live-production proof.
 
 ## Outputs
 
@@ -39,6 +40,7 @@ One job: test the claims against the actual artifact and actual environment avai
 - `subtraction-review.md` -> `output/` for user-facing or taste-sensitive work
 - `reference-comparison.md` -> `output/` when a reference bar exists
 - `rights-and-provenance-check.md` -> `output/` when third-party material affects distribution
+- `personality-drift.json` -> `../../docs/evidence/` when persona-sensitive behavior changes
 - `evidence-index.md` -> `output/`
 - `plain-language-summary.md` -> `output/`
 

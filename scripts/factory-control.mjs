@@ -155,6 +155,18 @@ export async function shipGate(root, { candidate } = {}) {
     failures.push('Judge did not return SHIP');
   if (receipts['judge-verdict.json']?.candidate !== resolvedCandidate)
     failures.push('Judge receipt is stale for candidate');
+  const personalityRequired = receipts['judge-verdict.json']?.requiredGates?.includes('personality-drift');
+  if (personalityRequired) {
+    const personalityFile = receiptPath(root, 'personality-drift.json');
+    if (!(await exists(personalityFile))) failures.push('missing personality-drift.json');
+    else {
+      try {
+        const personality = await readJson(personalityFile);
+        if (personality.status !== 'PASS') failures.push('personality drift gauntlet did not PASS');
+        if (personality.candidate !== resolvedCandidate) failures.push('personality drift receipt is stale for candidate');
+      } catch { failures.push('invalid personality-drift.json'); }
+    }
+  }
   return { status: failures.length ? 'HOLD' : 'SHIP', candidate: resolvedCandidate, failures };
 }
 
