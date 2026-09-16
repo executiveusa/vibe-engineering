@@ -15,6 +15,13 @@ function git(cwd, ...args) {
   return r.stdout.trim();
 }
 
+
+async function writeHardenedReviewReceipts(evidence, candidate) {
+  await writeFile(path.join(evidence, 'no-slop-review.json'), JSON.stringify({ schemaVersion: 1, status: 'PASS', candidate, reviewerId: 'slop-reviewer', artifact: 'candidate', categories: { idea: 'PASS', strategy: 'NOT_APPLICABLE', copy: 'NOT_APPLICABLE', ui: 'NOT_APPLICABLE', architecture: 'PASS', code: 'PASS', business: 'NOT_APPLICABLE', production: 'PASS' }, findings: [], evidenceExamined: ['diff', 'tests'], generatedAt: new Date().toISOString() }));
+  await writeFile(path.join(evidence, 'subtraction-review.json'), JSON.stringify({ schemaVersion: 1, status: 'NOT_APPLICABLE', applicability: 'NON_USER_FACING', candidate, reviewerId: 'subtraction-reviewer', artifact: 'gate fixture', reason: 'no user-facing surface', generatedAt: new Date().toISOString() }));
+  await writeFile(path.join(evidence, 'voice-call-proof.json'), JSON.stringify({ schemaVersion: 1, status: 'NOT_APPLICABLE', applicability: 'NON_VOICE', candidate, reviewerId: 'voice-reviewer', reason: 'no voice or call surface', generatedAt: new Date().toISOString() }));
+}
+
 test('cold ICM walk traverses every one-job stage and emits an actionable next step', async () => {
   const tmp = await mkdtemp(path.join(os.tmpdir(), 'vibe-hard-gate-'));
   try {
@@ -74,6 +81,7 @@ test('ship gate blocks missing receipts and stale OCR candidate', async () => {
     assert.equal(result.status, 'HOLD');
     assert.ok(result.failures.length >= 4);
     const evidence = path.join(target, 'docs', 'evidence');
+    await writeHardenedReviewReceipts(evidence, base);
     await writeFile(
       path.join(evidence, 'ultimate-bug-scan.json'),
       JSON.stringify({ status: 'PASS', candidate: base, scanStatus: 'ok', exitCode: 0, totals: { critical: 0, warning: 0 } }),
@@ -147,6 +155,7 @@ test('ship gate requires exact-candidate Instinct simplicity evidence for softwa
     git(target, 'commit', '-m', 'candidate');
     const candidate = git(target, 'rev-parse', 'HEAD');
     const evidence = path.join(target, 'docs', 'evidence');
+    await writeHardenedReviewReceipts(evidence, candidate);
     await writeFile(path.join(evidence, 'ultimate-bug-scan.json'), JSON.stringify({ status: 'PASS', candidate, scanStatus: 'ok', exitCode: 0, totals: { critical: 0, warning: 0 } }));
     await writeFile(path.join(evidence, 'open-code-review.json'), JSON.stringify({ status: 'PASS', candidate }));
     await writeFile(path.join(evidence, 'icm-cold-walk.json'), JSON.stringify({ status: 'PASS', candidate }));
@@ -182,6 +191,7 @@ test('MISSION v2 is the final exact-candidate web release gate', async () => {
     git(target, 'add', '.'); git(target, 'commit', '-m', 'candidate');
     const candidate = git(target, 'rev-parse', 'HEAD');
     const evidence = path.join(target, 'docs', 'evidence');
+    await writeHardenedReviewReceipts(evidence, candidate);
     await writeFile(path.join(evidence, 'ultimate-bug-scan.json'), JSON.stringify({ status: 'PASS', candidate, scanStatus: 'ok', exitCode: 0, totals: { critical: 0, warning: 0 } }));
     await writeFile(path.join(evidence, 'open-code-review.json'), JSON.stringify({ status: 'PASS', candidate }));
     await writeFile(path.join(evidence, 'icm-cold-walk.json'), JSON.stringify({ status: 'PASS', candidate }));
@@ -202,6 +212,40 @@ test('MISSION v2 is the final exact-candidate web release gate', async () => {
     result = await shipGate(target, { candidate });
     assert.equal(result.status, 'HOLD');
     assert.match(result.failures.join('\n'), /contentPolicy|content policy/);
+  } finally { await rm(tmp, { recursive: true, force: true }); }
+});
+
+
+test('hardening receipts fail closed and voice proof enforces consent, latency, QA, and escalation', async () => {
+  const tmp = await mkdtemp(path.join(os.tmpdir(), 'vibe-hardening-receipts-'));
+  try {
+    const target = path.join(tmp, 'repo');
+    await mkdir(target); git(target, 'init'); git(target, 'config', 'user.email', 'factory@test.invalid'); git(target, 'config', 'user.name', 'Factory Test');
+    await mkdir(path.join(target, 'docs', 'evidence'), { recursive: true });
+    await writeFile(path.join(target, 'a'), 'a'); git(target, 'add', '.'); git(target, 'commit', '-m', 'candidate');
+    const candidate = git(target, 'rev-parse', 'HEAD'); const evidence = path.join(target, 'docs', 'evidence');
+    await writeFile(path.join(evidence, 'ultimate-bug-scan.json'), JSON.stringify({ status: 'PASS', candidate, scanStatus: 'ok', exitCode: 0, totals: { critical: 0, warning: 0 } }));
+    await writeFile(path.join(evidence, 'open-code-review.json'), JSON.stringify({ status: 'PASS', candidate }));
+    await writeFile(path.join(evidence, 'icm-cold-walk.json'), JSON.stringify({ status: 'PASS', candidate }));
+    await writeFile(path.join(evidence, 'independent-review.json'), JSON.stringify({ status: 'PASS', candidate, builderId: 'builder', reviewerId: 'reviewer' }));
+    await writeFile(path.join(evidence, 'simplicity-review.json'), JSON.stringify({ status: 'PASS', candidate, reviewerId: 'simplicity', frontDoor: 'voice call', before: {}, after: {}, visualEvidence: ['call-state.png'], functionalEvidence: ['call journey'], operatorRecoveryPath: 'runbook' }));
+    await writeFile(path.join(evidence, 'mission-v2-release.json'), JSON.stringify({ schemaVersion: 2, status: 'NOT_APPLICABLE', applicability: 'NON_WEB', candidate, decision: 'NOT APPLICABLE', reason: 'voice fixture is not web', workLog: {}, proofMatrix: {}, unverifiedItems: [], independentReview: {}, rollback: 'git revert', generatedAt: new Date().toISOString() }));
+    await writeFile(path.join(evidence, 'judge-verdict.json'), JSON.stringify({ verdict: 'SHIP', candidate }));
+    let result = await shipGate(target, { candidate });
+    assert.equal(result.status, 'HOLD');
+    assert.match(result.failures.join('\n'), /no-slop|Subtraction|Voice \/ Call/);
+    await writeHardenedReviewReceipts(evidence, candidate);
+    result = await shipGate(target, { candidate }); assert.equal(result.status, 'SHIP');
+    const noSlop = JSON.parse(await readFile(path.join(evidence, 'no-slop-review.json'))); noSlop.candidate = '0'.repeat(40); await writeFile(path.join(evidence, 'no-slop-review.json'), JSON.stringify(noSlop));
+    result = await shipGate(target, { candidate }); assert.equal(result.status, 'HOLD'); assert.match(result.failures.join('\n'), /no-slop.*stale/);
+    noSlop.candidate = candidate; await writeFile(path.join(evidence, 'no-slop-review.json'), JSON.stringify(noSlop));
+    const voice = { schemaVersion: 1, status: 'PASS', applicability: 'CALL_OR_VOICE', candidate, reviewerId: 'voice-reviewer', reason: 'candidate has a live call surface', consent: { identityDisclosure: 'PASS', recordingDisclosure: 'NOT_RECORDED', affirmativeConsent: 'PASS', revocationTest: 'PASS' }, recordingAndTranscripts: { policy: 'NOT_RECORDED', storage: 'NOT_RECORDED', access: 'NOT_RECORDED', retention: 'NOT_RECORDED', redaction: 'NOT_RECORDED', deletionOrExport: 'NOT_RECORDED' }, turnTaking: 'PASS', latency: { status: 'PASS', p50Ms: 700, p95Ms: 2600, budgetMs: 2000 }, interruptionHandling: 'PASS', voiceQa: { intelligibility: 'PASS', identityAndTone: 'PASS', noiseAndDeviceMatrix: 'PASS', failureDisclosure: 'PASS' }, callEscalation: { humanHandoff: 'PASS', emergencyBoundary: 'PASS', failedTransferRecovery: 'PASS', hangupControl: 'PASS' }, evidenceRefs: ['audio-fixture', 'latency-log'], generatedAt: new Date().toISOString() };
+    await writeFile(path.join(evidence, 'voice-call-proof.json'), JSON.stringify(voice));
+    result = await shipGate(target, { candidate }); assert.equal(result.status, 'HOLD'); assert.match(result.failures.join('\n'), /latency/);
+    voice.latency.p95Ms = 1800; voice.consent.affirmativeConsent = 'FAIL'; await writeFile(path.join(evidence, 'voice-call-proof.json'), JSON.stringify(voice));
+    result = await shipGate(target, { candidate }); assert.equal(result.status, 'HOLD'); assert.match(result.failures.join('\n'), /consent/);
+    voice.consent.affirmativeConsent = 'PASS'; await writeFile(path.join(evidence, 'voice-call-proof.json'), JSON.stringify(voice));
+    result = await shipGate(target, { candidate }); assert.equal(result.status, 'SHIP');
   } finally { await rm(tmp, { recursive: true, force: true }); }
 });
 

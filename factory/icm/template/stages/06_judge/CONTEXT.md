@@ -13,6 +13,8 @@ One job: decide whether the verified work deserves to move to release preparatio
 - `../../docs/evidence/open-code-review.json` for the exact candidate.
 - `../../docs/evidence/icm-cold-walk.json` produced from a zero-chat-memory root walk.
 - `../../docs/evidence/independent-review.json` proving the builder did not approve its own work.
+- `../../docs/evidence/no-slop-review.json` and `../../docs/evidence/subtraction-review.json` for every software candidate.
+- `../../docs/evidence/voice-call-proof.json` for every software candidate.
 - `../../docs/evidence/simplicity-review.json` for every software candidate.
 - `../../docs/evidence/personality-drift.json` when the candidate changes a named agent persona, voice, personalization, or "soul" claim.
 - Layer 3: `../../_config/quality-gates.yaml`.
@@ -20,6 +22,7 @@ One job: decide whether the verified work deserves to move to release preparatio
 - Layer 3: `../../shared/HEART_AND_SOUL_STANDARD.md` for user-facing product or experience work.
 - Layer 3: `../../shared/SUBTRACTION_GAUNTLET_STANDARD.md` for user-facing product or experience work.
 - Layer 3: `../../shared/INSTINCT_SIMPLICITY_REVIEW_STANDARD.md` for software products.
+- Layer 3: `../../shared/VOICE_CALL_PROOF_STANDARD.md` for every software product; exact-candidate N/A receipt required when no voice/call surface exists.
 - Approved consequence decisions and unresolved dispositions.
 
 ## Process

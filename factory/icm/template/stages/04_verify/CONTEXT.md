@@ -14,6 +14,7 @@ One job: test the claims against the actual artifact and actual environment avai
 - Layer 3: `../../shared/HEART_AND_SOUL_STANDARD.md` for user-facing product or experience work.
 - Layer 3: `../../shared/SUBTRACTION_GAUNTLET_STANDARD.md` for user-facing product or experience work.
 - Layer 3: `../../shared/INSTINCT_SIMPLICITY_REVIEW_STANDARD.md` for every software product.
+- Layer 3: `../../shared/VOICE_CALL_PROOF_STANDARD.md` for every software product; exact-candidate N/A receipt required when no voice/call surface exists.
 - Layer 3: `../../shared/NO_SLOP_STANDARD.md`.
 - Layer 3: `../../shared/REFERENCE_BAR_STANDARD.md` when comparative quality matters.
 - Native test, build, security, accessibility, browser, and deployment commands.
@@ -32,7 +33,8 @@ One job: test the claims against the actual artifact and actual environment avai
 10. Verify source/provenance and media rights requirements that affect distribution. Missing required rights remain `UNVERIFIED` and block publication of that material.
 11. Record every finding as fixed, accepted with owner and reason, false positive with proof, or blocked.
 12. For persona-sensitive agents or features, run the paired personality-drift gauntlet in `factory/evaluations/personality-drift`: at least five blind personalized-vs-generic cases, grounded owner evidence, fresh judge, material uplift, and perfect non-fabrication/privacy scores. Store `personality-drift.json`; failure is HOLD.
-13. Separate native checks from live production proof. Passing CI or a production build is evidence for those checks only; it is not live-production proof.
+13. For voice/call software, run the Voice / Call Proof Standard and prove consent, recording/transcript policy, turn-taking, measured latency, interruption, voice QA and escalation. Every non-voice candidate writes an exact-SHA N/A receipt.
+14. Separate native checks from live production proof. Passing CI or a production build is evidence for those checks only; it is not live-production proof.
 
 ## Outputs
 
@@ -40,8 +42,9 @@ One job: test the claims against the actual artifact and actual environment avai
 - `code-review-findings.md` -> `output/`
 - `ultimate-bug-scan.json` and full result -> `../../docs/evidence/`
 - `open-code-review.json` -> `../../docs/evidence/`
-- `no-slop-review.md` -> `output/`
-- `subtraction-review.md` -> `output/` for user-facing or taste-sensitive work
+- `no-slop-review.json` -> `../../docs/evidence/` for every software product
+- `subtraction-review.json` -> `../../docs/evidence/` for every software product; explicit N/A only for non-user-facing candidates
+- `voice-call-proof.json` -> `../../docs/evidence/` for every software product; full proof or explicit non-voice N/A
 - `simplicity-review.json` -> `../../docs/evidence/` for every software product
 - `reference-comparison.md` -> `output/` when a reference bar exists
 - `rights-and-provenance-check.md` -> `output/` when third-party material affects distribution

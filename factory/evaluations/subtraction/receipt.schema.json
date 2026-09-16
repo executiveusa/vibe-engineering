@@ -1,0 +1,11 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"vibe://schemas/subtraction-review-receipt",
+  "type":"object","additionalProperties":true,
+  "required":["schemaVersion","status","applicability","candidate","reviewerId","artifact","generatedAt"],
+  "properties":{
+    "schemaVersion":{"const":1},"status":{"enum":["PASS","NOT_APPLICABLE"]},"applicability":{"enum":["USER_FACING","NON_USER_FACING"]},"candidate":{"type":"string","pattern":"^[0-9a-f]{40}$"},"reviewerId":{"type":"string","minLength":1},"artifact":{"type":"string","minLength":1},
+    "reason":{"type":"string","minLength":1},"largestRemainingGap":{"type":"string","minLength":1},"protectedQuality":{"type":"string","minLength":1},
+    "dispositions":{"type":"object","required":["keep","merge","infer","defer","move","remove"],"properties":{"keep":{"type":"array"},"merge":{"type":"array"},"infer":{"type":"array"},"defer":{"type":"array"},"move":{"type":"array"},"remove":{"type":"array"}}},
+    "accessibilityRegression":{"type":"boolean"},"trustOrControlRegression":{"type":"boolean"},"evidenceExamined":{"type":"array","items":{"type":"string"}},"generatedAt":{"type":"string","minLength":1}
+  }
+}

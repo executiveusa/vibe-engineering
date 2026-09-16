@@ -117,6 +117,9 @@ export async function shipGate(root, { candidate } = {}) {
   const resolvedCandidate = await git(root, ['rev-parse', `${candidate ?? 'HEAD'}^{commit}`]);
   const required = [
     'ultimate-bug-scan.json',
+    'no-slop-review.json',
+    'subtraction-review.json',
+    'voice-call-proof.json',
     'open-code-review.json',
     'simplicity-review.json',
     'mission-v2-release.json',
@@ -138,6 +141,50 @@ export async function shipGate(root, { candidate } = {}) {
       failures.push(`invalid ${name}`);
     }
   }
+  const noSlop = receipts['no-slop-review.json'];
+  if (noSlop?.status !== 'PASS') failures.push('no-slop review did not PASS');
+  if (noSlop?.candidate !== resolvedCandidate) failures.push('no-slop review receipt is stale for candidate');
+  if (!noSlop?.reviewerId || !noSlop?.artifact) failures.push('no-slop review identity or artifact is missing');
+  const slopCategories = ['idea', 'strategy', 'copy', 'ui', 'architecture', 'code', 'business', 'production'];
+  for (const category of slopCategories) if (!['PASS', 'NOT_APPLICABLE'].includes(noSlop?.categories?.[category])) failures.push(`no-slop ${category} category is unresolved`);
+  if (!Array.isArray(noSlop?.findings) || noSlop.findings.some((finding) => !['FIXED', 'FALSE_POSITIVE_WITH_PROOF', 'AUTHORIZED_ACCEPTANCE'].includes(finding?.disposition))) failures.push('no-slop findings are unresolved');
+  if (!Array.isArray(noSlop?.evidenceExamined) || !noSlop.evidenceExamined.length) failures.push('no-slop evidence is missing');
+
+  const subtraction = receipts['subtraction-review.json'];
+  if (!['PASS', 'NOT_APPLICABLE'].includes(subtraction?.status)) failures.push('Subtraction Gauntlet did not PASS');
+  if (subtraction?.candidate !== resolvedCandidate) failures.push('Subtraction Gauntlet receipt is stale for candidate');
+  if (!subtraction?.reviewerId || !subtraction?.artifact) failures.push('Subtraction Gauntlet identity or artifact is missing');
+  if (subtraction?.applicability === 'NON_USER_FACING') {
+    if (subtraction?.status !== 'NOT_APPLICABLE' || !subtraction?.reason) failures.push('Subtraction Gauntlet non-user-facing exception is incomplete');
+  } else if (subtraction?.applicability === 'USER_FACING') {
+    const dispositions = ['keep', 'merge', 'infer', 'defer', 'move', 'remove'];
+    for (const disposition of dispositions) if (!Array.isArray(subtraction?.dispositions?.[disposition])) failures.push(`Subtraction Gauntlet ${disposition} disposition is missing`);
+    if (!subtraction?.largestRemainingGap || !subtraction?.protectedQuality) failures.push('Subtraction Gauntlet stopping evidence is missing');
+    if (subtraction?.accessibilityRegression !== false || subtraction?.trustOrControlRegression !== false) failures.push('Subtraction Gauntlet has a protected-quality regression');
+    if (!Array.isArray(subtraction?.evidenceExamined) || !subtraction.evidenceExamined.length) failures.push('Subtraction Gauntlet evidence is missing');
+  } else failures.push('Subtraction Gauntlet applicability is missing');
+
+  const voice = receipts['voice-call-proof.json'];
+  if (!['PASS', 'NOT_APPLICABLE'].includes(voice?.status)) failures.push('Voice / Call Proof did not PASS');
+  if (voice?.candidate !== resolvedCandidate) failures.push('Voice / Call Proof receipt is stale for candidate');
+  if (!voice?.reviewerId || !voice?.reason) failures.push('Voice / Call Proof reviewer or reason is missing');
+  if (voice?.applicability === 'NON_VOICE') {
+    if (voice?.status !== 'NOT_APPLICABLE') failures.push('Voice / Call Proof non-voice exception is incomplete');
+  } else if (voice?.applicability === 'CALL_OR_VOICE') {
+    if (voice?.status !== 'PASS') failures.push('Voice / Call Proof applicable candidate did not PASS');
+    if (voice?.consent?.identityDisclosure !== 'PASS' || !['PASS', 'NOT_RECORDED'].includes(voice?.consent?.recordingDisclosure) || voice?.consent?.affirmativeConsent !== 'PASS' || voice?.consent?.revocationTest !== 'PASS') failures.push('Voice / Call Proof consent failed');
+    const recordingFields = ['policy', 'storage', 'access', 'retention', 'redaction', 'deletionOrExport'];
+    for (const field of recordingFields) if (!['PASS', 'NOT_RECORDED'].includes(voice?.recordingAndTranscripts?.[field])) failures.push(`Voice / Call Proof recording/transcript ${field} failed`);
+    if (voice?.turnTaking !== 'PASS') failures.push('Voice / Call Proof turn-taking failed');
+    if (voice?.latency?.status !== 'PASS' || typeof voice?.latency?.p50Ms !== 'number' || typeof voice?.latency?.p95Ms !== 'number' || typeof voice?.latency?.budgetMs !== 'number' || voice.latency.p95Ms > voice.latency.budgetMs) failures.push('Voice / Call Proof latency failed');
+    if (voice?.interruptionHandling !== 'PASS') failures.push('Voice / Call Proof interruption handling failed');
+    const voiceQaFields = ['intelligibility', 'identityAndTone', 'noiseAndDeviceMatrix', 'failureDisclosure'];
+    for (const field of voiceQaFields) if (voice?.voiceQa?.[field] !== 'PASS') failures.push(`Voice / Call Proof voice QA ${field} failed`);
+    const escalationFields = ['humanHandoff', 'emergencyBoundary', 'failedTransferRecovery', 'hangupControl'];
+    for (const field of escalationFields) if (voice?.callEscalation?.[field] !== 'PASS') failures.push(`Voice / Call Proof escalation ${field} failed`);
+    if (!Array.isArray(voice?.evidenceRefs) || !voice.evidenceRefs.length) failures.push('Voice / Call Proof evidence is missing');
+  } else failures.push('Voice / Call Proof applicability is missing');
+
   if (receipts['ultimate-bug-scan.json']?.status !== 'PASS')
     failures.push('Ultimate Bug Scanner did not PASS');
   if (receipts['ultimate-bug-scan.json']?.candidate !== resolvedCandidate)
