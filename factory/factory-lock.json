@@ -24,6 +24,32 @@
       "revision": "65904594dfab2c28cbc922b89f49f0d795c8a9c3",
       "license": "Apache-2.0",
       "use": "retrieval-structure influence for Vibe personality-drift evaluation; no scorer attributed to CatchMe"
+    },
+    "hkudsEvaluationContracts": {
+      "bundleSha256": "fd22e373bf6504354e957db7a119f1acf35243b07d52f8b91acb03ee2e01e675",
+      "sources": {
+        "cliAnything": {
+          "repository": "https://github.com/HKUDS/CLI-Anything",
+          "revision": "810c18b0d1ab9b234bc996c9fd999318523a3ef0",
+          "license": "Apache-2.0"
+        },
+        "mgp": {
+          "repository": "https://github.com/HKUDS/MGP",
+          "revision": "54ce6c00e3d0aa731ecbe17e74407cbbb5a96f10",
+          "license": "MIT"
+        },
+        "helix": {
+          "repository": "https://github.com/HKUDS/HELIX",
+          "revision": "b5adffa6065931b4d8833f6576188ce93006217f",
+          "license": "MIT"
+        },
+        "openPhone": {
+          "repository": "https://github.com/HKUDS/OpenPhone",
+          "revision": "27af671465a99734c292d8bcddee18c4ff3ec6ce",
+          "license": "MIT"
+        }
+      },
+      "mode": "schemas-and-gates-only"
     }
   }
 }

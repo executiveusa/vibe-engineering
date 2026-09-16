@@ -1,0 +1,19 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"starnet://schemas/governed-memory-envelope",
+  "type":"object",
+  "required":["memory_id","subject","scope","type","content","source","sensitivity","created_at","retention","authority"],
+  "properties":{
+    "memory_id":{"type":"string","minLength":1},
+    "subject":{"type":"object","required":["kind","id"],"properties":{"kind":{"enum":["user","agent","organization"]},"id":{"type":"string"}},"additionalProperties":false},
+    "scope":{"enum":["session","project","user","organization"]},
+    "type":{"enum":["fact","preference","decision","procedure","relationship","credential-reference"]},
+    "content":{"type":"object"},
+    "source":{"type":"object","required":["kind","ref"],"properties":{"kind":{"enum":["human","tool","document","inference"]},"ref":{"type":"string"}},"additionalProperties":true},
+    "sensitivity":{"enum":["public","internal","private","secret-reference"]},
+    "created_at":{"type":"string","format":"date-time"},
+    "retention":{"type":"object","required":["mode"],"properties":{"mode":{"enum":["session","until","durable","revoked"]},"until":{"type":["string","null"],"format":"date-time"}},"additionalProperties":false},
+    "authority":{"type":"object","required":["may_recall","may_disclose","may_act"],"properties":{"may_recall":{"type":"boolean"},"may_disclose":{"type":"boolean"},"may_act":{"type":"boolean"}},"additionalProperties":false}
+  },
+  "additionalProperties":false
+}

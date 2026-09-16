@@ -1,0 +1,14 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"starnet://schemas/factory-cli-gate",
+  "type":"object",
+  "required":["candidate_sha","commands","tests","skill_contract","real_software_e2e"],
+  "properties":{
+    "candidate_sha":{"type":"string","minLength":7},
+    "commands":{"type":"array","minItems":1,"items":{"type":"object","required":["name","help","json_output"],"properties":{"name":{"type":"string"},"help":{"type":"boolean","const":true},"json_output":{"type":"boolean","const":true}},"additionalProperties":false}},
+    "tests":{"type":"object","required":["unit_pass","subprocess_pass"],"properties":{"unit_pass":{"type":"boolean","const":true},"subprocess_pass":{"type":"boolean","const":true}},"additionalProperties":true},
+    "skill_contract":{"type":"boolean","const":true},
+    "real_software_e2e":{"type":"boolean","const":true}
+  },
+  "additionalProperties":true
+}
