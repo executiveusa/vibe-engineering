@@ -36,7 +36,7 @@ export const ZERO_TO_PRODUCT_WORKFLOW = Object.freeze({
     phase('05-review', 'Review what was built', 'Use deterministic code review first, then judge product quality and system impact.', ['review', 'project-review'], ['stop-slop', 'taste', 'human-voice', 'agent-docs']),
     phase('06-prove', 'Prove the claims', 'Turn looks-done into evidence tied to the exact candidate revision.', ['proof']),
     phase('07-integrate', 'Integrate safely', 'Combine approved work without losing intent or introducing hidden breakage.', ['merge'], ['handoff']),
-    phase('08-release', 'Release with control', 'Ship only the exact proven revision with human authority and rollback.', ['ship'], ['human-step']),
+    phase('08-release', 'Release with control', 'Run MISSION v2 as the final web gate, then ship only the exact proven revision with human authority and rollback.', ['mobile-first-site-proof', 'ship'], ['human-step']),
     phase('09-learn', 'Learn and repeat', 'Preserve what worked so the next cycle starts smarter.', ['handoff'], ['teach', 'ask-vibe']),
   ]),
 });

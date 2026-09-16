@@ -119,6 +119,7 @@ export async function shipGate(root, { candidate } = {}) {
     'ultimate-bug-scan.json',
     'open-code-review.json',
     'simplicity-review.json',
+    'mission-v2-release.json',
     'icm-cold-walk.json',
     'independent-review.json',
     'judge-verdict.json',
@@ -145,6 +146,29 @@ export async function shipGate(root, { candidate } = {}) {
     failures.push('Ultimate Bug Scanner scan was incomplete or failed');
   if (receipts['ultimate-bug-scan.json']?.totals?.critical !== 0 || receipts['ultimate-bug-scan.json']?.totals?.warning !== 0)
     failures.push('Ultimate Bug Scanner has unresolved findings');
+  const mission = receipts['mission-v2-release.json'];
+  if (!['PASS', 'NOT_APPLICABLE'].includes(mission?.status))
+    failures.push('MISSION v2 final release gate did not PASS');
+  if (mission?.candidate !== resolvedCandidate)
+    failures.push('MISSION v2 release receipt is stale for candidate');
+  if (mission?.applicability === 'NON_WEB') {
+    if (mission?.status !== 'NOT_APPLICABLE' || mission?.decision !== 'NOT APPLICABLE' || !mission?.reason)
+      failures.push('MISSION v2 non-web exception is incomplete');
+  } else if (mission?.applicability === 'WEB') {
+    const workLogFields = ['mode', 'outcome', 'target', 'constraints', 'contentPolicy', 'proof', 'ownership', 'commercialValue'];
+    for (const field of workLogFields) if (!mission?.workLog?.[field]) failures.push(`MISSION v2 work log missing ${field}`);
+    if (!['LOCKED', 'REDUCE_WITH_APPROVAL', 'REWRITE_WITH_APPROVAL'].includes(mission?.workLog?.contentPolicy))
+      failures.push('MISSION v2 content policy is not declared');
+    const proofFields = ['staticAndRoutes', 'browserViewports', 'interactions', 'visualEvidence', 'accessibility', 'performance'];
+    for (const field of proofFields) if (mission?.proofMatrix?.[field] !== 'PASS') failures.push(`MISSION v2 proof matrix ${field} did not PASS`);
+    if (!['PASS', 'NOT_YET_RELEASED'].includes(mission?.proofMatrix?.deployment)) failures.push('MISSION v2 deployment proof state is invalid');
+    if (!Array.isArray(mission?.unverifiedItems)) failures.push('MISSION v2 UNVERIFIED register is missing');
+    else if (mission.unverifiedItems.some((item) => !['RESOLVED', 'REMOVED_FROM_SCOPE', 'PRESERVED_CURRENT_WORKING_DESTINATION'].includes(item?.handling)))
+      failures.push('MISSION v2 has an unresolved UNVERIFIED release item');
+    if (!mission?.independentReview?.reviewerId || mission?.independentReview?.score < 8.5 || mission?.independentReview?.p0Remaining !== 0 || mission?.independentReview?.p1Remaining !== 0)
+      failures.push('MISSION v2 independent review did not clear the release floor');
+    if (!mission?.rollback) failures.push('MISSION v2 rollback target is missing');
+  } else failures.push('MISSION v2 applicability is missing');
   if (receipts['simplicity-review.json']?.status !== 'PASS')
     failures.push('Instinct Simplicity Review did not PASS');
   if (receipts['simplicity-review.json']?.candidate !== resolvedCandidate)

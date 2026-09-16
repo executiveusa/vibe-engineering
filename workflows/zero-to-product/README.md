@@ -18,7 +18,7 @@ The workflow is intentionally simple on the surface. Not every skill runs every 
 | 05 Review | Is the implementation actually good? | `review`, `project-review` | `stop-slop`, `taste`, `human-voice`, `agent-docs` | material findings are resolved or explicitly accepted |
 | 06 Prove | What evidence says this is true? | `proof` | — | important claims have evidence tied to the exact candidate |
 | 07 Integrate | Can we combine the approved work safely? | `merge` | `handoff` | the combined state is coherent and rechecked |
-| 08 Release | Should this exact revision go live? | `ship` | `human-step` | an authorized human/Judge records SHIP, production is smoke-tested, rollback exists |
+| 08 Release | Should this exact revision go live? | `mobile-first-site-proof`, `ship` | `human-step` | an authorized human/Judge records SHIP, production is smoke-tested, rollback exists |
 | 09 Learn | What should the next cycle inherit? | `handoff` | `teach`, `ask-vibe` | context, scars, decisions, and next actions are durable |
 
 ## Review law
