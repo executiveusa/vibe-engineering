@@ -56,18 +56,29 @@ test('ship gate blocks missing receipts and stale OCR candidate', async () => {
       path.join(evidence, 'open-code-review.json'),
       JSON.stringify({ status: 'PASS', candidate: '0'.repeat(40) }),
     );
-    await writeFile(path.join(evidence, 'icm-cold-walk.json'), JSON.stringify({ status: 'PASS' }));
+    await writeFile(path.join(evidence, 'icm-cold-walk.json'), JSON.stringify({ status: 'PASS', candidate: base }));
     await writeFile(
       path.join(evidence, 'independent-review.json'),
-      JSON.stringify({ status: 'PASS' }),
+      JSON.stringify({ status: 'PASS', candidate: base, builderId: 'builder-1', reviewerId: 'reviewer-1' }),
     );
-    await writeFile(path.join(evidence, 'judge-verdict.json'), JSON.stringify({ verdict: 'SHIP' }));
+    await writeFile(path.join(evidence, 'judge-verdict.json'), JSON.stringify({ verdict: 'SHIP', candidate: base }));
     result = await shipGate(target, { candidate: base });
     assert.equal(result.status, 'HOLD');
     assert.match(result.failures.join('\n'), /stale/);
     await writeFile(
       path.join(evidence, 'open-code-review.json'),
       JSON.stringify({ status: 'PASS', candidate: base }),
+    );
+    await writeFile(
+      path.join(evidence, 'independent-review.json'),
+      JSON.stringify({ status: 'PASS', candidate: base, builderId: 'same', reviewerId: 'same' }),
+    );
+    result = await shipGate(target, { candidate: base });
+    assert.equal(result.status, 'HOLD');
+    assert.match(result.failures.join('\n'), /builder cannot be the independent reviewer/);
+    await writeFile(
+      path.join(evidence, 'independent-review.json'),
+      JSON.stringify({ status: 'PASS', candidate: base, builderId: 'builder-1', reviewerId: 'reviewer-1' }),
     );
     result = await shipGate(target, { candidate: base });
     assert.equal(result.status, 'SHIP');

@@ -140,10 +140,20 @@ export async function shipGate(root, { candidate } = {}) {
     failures.push('Open Code Review receipt is stale for candidate');
   if (receipts['icm-cold-walk.json']?.status !== 'PASS')
     failures.push('ICM cold walk did not PASS');
+  if (receipts['icm-cold-walk.json']?.candidate !== resolvedCandidate)
+    failures.push('ICM cold walk receipt is stale for candidate');
   if (receipts['independent-review.json']?.status !== 'PASS')
     failures.push('independent review did not PASS');
+  if (receipts['independent-review.json']?.candidate !== resolvedCandidate)
+    failures.push('independent review receipt is stale for candidate');
+  if (!receipts['independent-review.json']?.reviewerId || !receipts['independent-review.json']?.builderId)
+    failures.push('independent review identities are missing');
+  if (receipts['independent-review.json']?.reviewerId === receipts['independent-review.json']?.builderId)
+    failures.push('builder cannot be the independent reviewer');
   if (receipts['judge-verdict.json']?.verdict !== 'SHIP')
     failures.push('Judge did not return SHIP');
+  if (receipts['judge-verdict.json']?.candidate !== resolvedCandidate)
+    failures.push('Judge receipt is stale for candidate');
   return { status: failures.length ? 'HOLD' : 'SHIP', candidate: resolvedCandidate, failures };
 }
 
