@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "candidate": "095eb1583d1d51e274364c835d2959ea5977a009",
+  "reviewerId": "instinct-watcher (gate task agent, independent of patch author)",
+  "frontDoor": "factory-control CLI: status/walk/review/ship-gate <workspace> - one command surface for operators",
+  "before": "gate evidence was ad-hoc: manual pytest runs, no canonical receipts, no single ship verdict",
+  "after": "six canonical receipts in docs/evidence plus one ship-gate command that returns SHIP or HOLD with named failures",
+  "visualEvidence": [
+    "docs/evidence/ultimate-bug-scan.json",
+    "docs/evidence/icm-cold-walk.json",
+    "docs/evidence/open-code-review.json"
+  ],
+  "functionalEvidence": [
+    "native test suite 88/88 PASS at candidate 095eb158 (/tmp/v8-test.log)",
+    "UBS strict scan vs base: 0 new criticals",
+    "MISSION v2 gate contract tests 6/6 PASS (UNVERIFIED-holds-release, missing-content-policy-holds, NOT_APPLICABLE path)"
+  ],
+  "operatorRecoveryPath": "git revert 095eb1583d1d51e274364c835d2959ea5977a009 restores base 0217be79; receipts are additive-only under docs/evidence/",
+  "generatedAt": "2026-09-16T21:40:54.814957Z"
+}
