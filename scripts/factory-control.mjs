@@ -70,6 +70,7 @@ export async function coldWalk(root) {
 
 export async function recordWalk(root) {
   const result = await coldWalk(root);
+  try { result.candidate = await git(root, ['rev-parse', 'HEAD^{commit}']); } catch { result.candidate = null; }
   await mkdir(path.join(root, 'docs', 'evidence'), { recursive: true });
   await writeFile(receiptPath(root, 'icm-cold-walk.json'), `${JSON.stringify(result, null, 2)}\n`);
   return result;
@@ -82,7 +83,9 @@ export async function review(root, { base, candidate, runner = spawnSync } = {})
   const resolvedCandidate = await git(root, ['rev-parse', `${candidate}^{commit}`]);
   const dirty = await git(root, ['status', '--porcelain']);
   if (dirty) throw new Error('refusing exact-revision review with a dirty workspace');
-  const args = ['review', '--from', resolvedBase, '--to', resolvedCandidate];
+  const resultFile = receiptPath(root, 'open-code-review-result.json');
+  await mkdir(path.join(root, 'docs', 'evidence'), { recursive: true });
+  const args = ['review', '--from', resolvedBase, '--to', resolvedCandidate, '--format', 'json', '--output', resultFile];
   const result = runner(process.platform === 'win32' ? 'ocr.cmd' : 'ocr', args, {
     cwd: root,
     encoding: 'utf8',
@@ -96,6 +99,8 @@ export async function review(root, { base, candidate, runner = spawnSync } = {})
     command: `ocr ${args.join(' ')}`,
     status: result.status === 0 ? 'PASS' : 'HOLD',
     exitCode: result.status,
+    resultFile: 'docs/evidence/open-code-review-result.json',
+    resultFileSha256: await exists(resultFile) ? hash(await readFile(resultFile)) : null,
     outputSha256: hash(`${result.stdout ?? ''}\n${result.stderr ?? ''}`),
     generatedAt: new Date().toISOString(),
   };
