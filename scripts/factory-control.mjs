@@ -116,6 +116,7 @@ export async function review(root, { base, candidate, runner = spawnSync } = {})
 export async function shipGate(root, { candidate } = {}) {
   const resolvedCandidate = await git(root, ['rev-parse', `${candidate ?? 'HEAD'}^{commit}`]);
   const required = [
+    'ultimate-bug-scan.json',
     'open-code-review.json',
     'icm-cold-walk.json',
     'independent-review.json',
@@ -135,6 +136,14 @@ export async function shipGate(root, { candidate } = {}) {
       failures.push(`invalid ${name}`);
     }
   }
+  if (receipts['ultimate-bug-scan.json']?.status !== 'PASS')
+    failures.push('Ultimate Bug Scanner did not PASS');
+  if (receipts['ultimate-bug-scan.json']?.candidate !== resolvedCandidate)
+    failures.push('Ultimate Bug Scanner receipt is stale for candidate');
+  if (receipts['ultimate-bug-scan.json']?.scanStatus !== 'ok' || receipts['ultimate-bug-scan.json']?.exitCode !== 0)
+    failures.push('Ultimate Bug Scanner scan was incomplete or failed');
+  if (receipts['ultimate-bug-scan.json']?.totals?.critical !== 0 || receipts['ultimate-bug-scan.json']?.totals?.warning !== 0)
+    failures.push('Ultimate Bug Scanner has unresolved findings');
   if (receipts['open-code-review.json']?.status !== 'PASS')
     failures.push('Open Code Review did not PASS');
   if (receipts['open-code-review.json']?.candidate !== resolvedCandidate)

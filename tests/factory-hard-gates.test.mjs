@@ -75,6 +75,10 @@ test('ship gate blocks missing receipts and stale OCR candidate', async () => {
     assert.ok(result.failures.length >= 4);
     const evidence = path.join(target, 'docs', 'evidence');
     await writeFile(
+      path.join(evidence, 'ultimate-bug-scan.json'),
+      JSON.stringify({ status: 'PASS', candidate: base, scanStatus: 'ok', exitCode: 0, totals: { critical: 0, warning: 0 } }),
+    );
+    await writeFile(
       path.join(evidence, 'open-code-review.json'),
       JSON.stringify({ status: 'PASS', candidate: '0'.repeat(40) }),
     );
@@ -101,6 +105,17 @@ test('ship gate blocks missing receipts and stale OCR candidate', async () => {
     await writeFile(
       path.join(evidence, 'independent-review.json'),
       JSON.stringify({ status: 'PASS', candidate: base, builderId: 'builder-1', reviewerId: 'reviewer-1' }),
+    );
+    await writeFile(
+      path.join(evidence, 'ultimate-bug-scan.json'),
+      JSON.stringify({ status: 'HOLD', candidate: base, scanStatus: 'partial', exitCode: 2, totals: { critical: 0, warning: 0 } }),
+    );
+    result = await shipGate(target, { candidate: base });
+    assert.equal(result.status, 'HOLD');
+    assert.match(result.failures.join('\n'), /Ultimate Bug Scanner/);
+    await writeFile(
+      path.join(evidence, 'ultimate-bug-scan.json'),
+      JSON.stringify({ status: 'PASS', candidate: base, scanStatus: 'ok', exitCode: 0, totals: { critical: 0, warning: 0 } }),
     );
     result = await shipGate(target, { candidate: base });
     assert.equal(result.status, 'SHIP');
