@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "factory": {
+    "repository": "https://github.com/executiveusa/vibe-engineering",
+    "revisionPolicy": "exact-commit"
+  },
+  "sources": {
+    "specialistSkills": {
+      "repository": "https://github.com/executiveusa/pauli-agent-skills-2026",
+      "revision": "a42b27c082adc721b125b3b65c2c2e1d20b9f369"
+    },
+    "openCodeReview": {
+      "repository": "https://github.com/executiveusa/open-code-review",
+      "revision": "152cc6d585043d40c3674d9637a7a06bbd950610",
+      "requiredAfterEveryBuild": true
+    },
+    "icmArchitect": {
+      "source": "owner-supplied icm-architect-main package",
+      "absorbedPath": "factory/vendor/icm-architect",
+      "requiredForEveryProject": true
+    },
+    "catchMe": {
+      "repository": "https://github.com/HKUDS/CatchMe",
+      "revision": "65904594dfab2c28cbc922b89f49f0d795c8a9c3",
+      "license": "Apache-2.0",
+      "use": "retrieval-structure influence for Vibe personality-drift evaluation; no scorer attributed to CatchMe"
+    },
+    "hkudsEvaluationContracts": {
+      "bundleSha256": "fd22e373bf6504354e957db7a119f1acf35243b07d52f8b91acb03ee2e01e675",
+      "sources": {
+        "cliAnything": {
+          "repository": "https://github.com/HKUDS/CLI-Anything",
+          "revision": "810c18b0d1ab9b234bc996c9fd999318523a3ef0",
+          "license": "Apache-2.0"
+        },
+        "mgp": {
+          "repository": "https://github.com/HKUDS/MGP",
+          "revision": "54ce6c00e3d0aa731ecbe17e74407cbbb5a96f10",
+          "license": "MIT"
+        },
+        "helix": {
+          "repository": "https://github.com/HKUDS/HELIX",
+          "revision": "b5adffa6065931b4d8833f6576188ce93006217f",
+          "license": "MIT"
+        },
+        "openPhone": {
+          "repository": "https://github.com/HKUDS/OpenPhone",
+          "revision": "27af671465a99734c292d8bcddee18c4ff3ec6ce",
+          "license": "MIT"
+        }
+      },
+      "mode": "schemas-and-gates-only"
+    },
+    "ultimateBugScanner": {
+      "repository": "https://github.com/Dicklesworthstone/ultimate_bug_scanner",
+      "revision": "47edcd3a6f225b3316825175561943195ababe78",
+      "version": "5.4.4",
+      "license": "MIT with OpenAI/Anthropic Rider (non-standard; rights review required; not vendored)",
+      "requiredAfterEveryCodeBuild": true,
+      "mode": "external deterministic scan before Open Code Review"
+    },
+    "githubNoBloatExtraction": {
+      "bundleSha256": "0cc059f9b192c56560b933987ffc4af8444b142ee6a0b83fa753713f6358b8d6",
+      "mode": "contracts-only",
+      "sources": {
+        "acfs": {
+          "repository": "https://github.com/Dicklesworthstone/agentic_coding_flywheel_setup",
+          "revision": "a5338944f3fd6d635af48309333c2949c2a4731e",
+          "license": "MIT"
+        },
+        "setupChecker": {
+          "repository": "https://github.com/Dicklesworthstone/automated_flywheel_setup_checker",
+          "revision": "72acf71625584e525dc9793faf7e721fe9e00374",
+          "license": "NO LICENSE FILE - ideas only, no code"
+        },
+        "repoUpdater": {
+          "repository": "https://github.com/Dicklesworthstone/repo_updater",
+          "revision": "b5fe0131d3bb53fe311f6ebfc54d60fbc2404c73"
+        },
+        "doodlestein": {
+          "repository": "https://github.com/Dicklesworthstone/doodlestein_self_releaser",
+          "revision": "1e8b50251937ec299d875c48bb573840025d40a2"
+        },
+        "unslop": {
+          "repository": "https://github.com/mshumer/unslop",
+          "revision": "edcb62386d129c65e4395f0cfcc9168eb1ba2148"
+        }
+      }
+    }
+  }
+}

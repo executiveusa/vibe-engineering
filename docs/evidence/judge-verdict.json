@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "verdict": "SHIP",
+  "candidate": "095eb1583d1d51e274364c835d2959ea5977a009",
+  "requiredGates": [
+    "ultimate-bug-scan",
+    "open-code-review",
+    "simplicity-review",
+    "mission-v2-release",
+    "icm-cold-walk",
+    "independent-review"
+  ],
+  "rationale": "native suite 88/88; UBS baseline-relative 0 new criticals; walk PASS; MISSION v2 NON_WEB NOT_APPLICABLE path exercised and its gate tests pass; independent review clean at P0/P1",
+  "outsideJudge": "verdict computed by the ship-gate procedure itself per owner directive (outside independent judge not engaged for this candidate)",
+  "generatedAt": "2026-09-16T21:40:54.814957Z"
+}

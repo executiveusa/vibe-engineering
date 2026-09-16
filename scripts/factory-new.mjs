@@ -126,6 +126,10 @@ export async function createWorkspace(options, sourceRoot, hooks = {}) {
       path.join(sourceRoot, 'scripts', 'factory-doctor.mjs'),
       path.join(temporaryTarget, 'scripts', 'factory-doctor.mjs'),
     );
+    await copyFile(
+      path.join(sourceRoot, 'scripts', 'factory-control.mjs'),
+      path.join(temporaryTarget, 'scripts', 'factory-control.mjs'),
+    );
 
     const replacements = {
       PROJECT_NAME: options.name.trim(),

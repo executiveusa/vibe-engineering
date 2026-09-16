@@ -65,9 +65,9 @@ phases:
     support: [handoff]
     gates: [integration-coherent, affected-tests-pass]
   - id: 08-release
-    primary: [ship]
+    primary: [mobile-first-site-proof, ship]
     support: [human-step]
-    gates: [owner-ship-authority, rollback-ready, production-smoke-pass]
+    gates: [mission-v2-final-gate, owner-ship-authority, rollback-ready, production-smoke-pass]
   - id: 09-learn
     primary: [handoff]
     support: [teach, ask-vibe]

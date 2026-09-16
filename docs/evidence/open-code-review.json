@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "engine": "executiveusa/open-code-review",
+  "engineRevision": "152cc6d585043d40c3674d9637a7a06bbd950610",
+  "base": "0217be79bb76e41a0c3572003d457ad74320a613",
+  "candidate": "095eb1583d1d51e274364c835d2959ea5977a009",
+  "command": "ocr review --from 0217be79bb76e41a0c3572003d457ad74320a613 --to 095eb1583d1d51e274364c835d2959ea5977a009 --format json --output /tmp/vibe-engineering/docs/evidence/open-code-review-result.json",
+  "status": "PASS",
+  "exitCode": 0,
+  "resultFile": "docs/evidence/open-code-review-result.json",
+  "resultFileSha256": "b16646950f2f1f8bc2e694472c01c77c1c013235e65e9b73e6f4d9e1977cab3f",
+  "outputSha256": "259bd76bccfef417853ff81939dff82506cdf020df0012b2e86f831a83f15e89",
+  "generatedAt": "2026-09-16T21:51:54.125Z"
+}

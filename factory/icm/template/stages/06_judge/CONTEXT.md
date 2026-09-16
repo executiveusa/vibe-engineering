@@ -9,10 +9,17 @@ One job: decide whether the verified work deserves to move to release preparatio
 - Layer 4: `../02_blueprint/output/design-contract.md` when present.
 - Layer 4: `../04_verify/output/`.
 - Layer 4: `../05_council/output/`.
+- `../../docs/evidence/ultimate-bug-scan.json` for the exact candidate and a complete scan.
+- `../../docs/evidence/open-code-review.json` for the exact candidate.
+- `../../docs/evidence/icm-cold-walk.json` produced from a zero-chat-memory root walk.
+- `../../docs/evidence/independent-review.json` proving the builder did not approve its own work.
+- `../../docs/evidence/simplicity-review.json` for every software candidate.
+- `../../docs/evidence/personality-drift.json` when the candidate changes a named agent persona, voice, personalization, or "soul" claim.
 - Layer 3: `../../_config/quality-gates.yaml`.
 - Layer 3: `../../shared/VIBE_DECISION_STANDARD.md`.
 - Layer 3: `../../shared/HEART_AND_SOUL_STANDARD.md` for user-facing product or experience work.
 - Layer 3: `../../shared/SUBTRACTION_GAUNTLET_STANDARD.md` for user-facing product or experience work.
+- Layer 3: `../../shared/INSTINCT_SIMPLICITY_REVIEW_STANDARD.md` for software products.
 - Approved consequence decisions and unresolved dispositions.
 
 ## Process
@@ -20,9 +27,12 @@ One job: decide whether the verified work deserves to move to release preparatio
 1. Re-read the original Intent → Standard → Evidence contract before looking at the builder's confidence or effort.
 2. Score user value, architecture, reliability, security, accessibility/taste, ownership, rollback, evidence, and commercial alignment.
 3. For user-facing work, confirm that subtraction evidence exists, the largest remaining experience gap is dispositioned, and the protected quality that stops further subtraction is connected to the approved design contract.
-4. Apply hard stops before averaging. Security, reliability, accessibility, ownership, missing required rights, missing rollback, unresolved Subtraction Gauntlet HOLD, and missing target evidence cannot be hidden by strong visual or implementation scores.
-5. Treat unresolved Council HOLDs and missing proof as blockers until new evidence or authorized disposition exists.
-6. Return only SHIP or HOLD. Do not change the work being judged and do not invent missing evidence.
+4. For software, confirm the Simplicity Review PASS is exact-candidate evidence, was completed by a fresh reviewer, names one obvious front door, records before/after journey burden, verifies the result visually and functionally, preserves operator recovery, and supports “software that gets you out of your seat.”
+5. Confirm Ultimate Bug Scanner completed every applicable scanner with status `ok`, zero unresolved critical/warning findings, and a receipt for the exact candidate. Then confirm Open Code Review passed on the exact candidate, the ICM cold walk passed, and the independent reviewer is distinct from the builder. Missing, failing, or stale evidence is a hard HOLD.
+6. For persona-sensitive work, require personality-drift PASS on the exact candidate. It must show grounded specificity, preference/voice/continuity fidelity and material uplift over the generic control, with no fabricated owner traits or widened disclosure authority.
+7. Apply hard stops before averaging. Security, reliability, accessibility, ownership, missing required rights, missing rollback, unresolved Subtraction Gauntlet HOLD, and missing target evidence cannot be hidden by strong visual or implementation scores.
+8. Treat unresolved Council HOLDs and missing proof as blockers until new evidence or authorized disposition exists.
+9. Return only SHIP or HOLD. Do not change the work being judged and do not invent missing evidence.
 
 ## Outputs
 

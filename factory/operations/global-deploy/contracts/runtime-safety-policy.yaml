@@ -1,0 +1,15 @@
+version: 1
+disk:
+  reserved_bytes: 10737418240
+  warn_percent: 80
+  stop_new_builds_percent: 90
+  emergency_cleanup_percent: 95
+  never_delete: [secrets, databases, backups, release-receipts]
+processes:
+  classify_before_action: true
+  default_action: report
+  kill_requires: [owner, evidence, grace_period, receipt]
+commands:
+  destructive_default: deny
+  allow_once: true
+  peer_approval_for: [delete-data, force-push, rewrite-history, drop-database]

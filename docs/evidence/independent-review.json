@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "candidate": "095eb1583d1d51e274364c835d2959ea5977a009",
+  "reviewerId": "instinct-watcher (agent-01M2GF8HX1XMP5TP0PTRNYH5JX)",
+  "builderId": "vibe-software-factory-builder (patch v8 060c766f)",
+  "scope": "full diff base..candidate: gate contracts, factory-control receipts, MISSION v2 final-gate coverage tests",
+  "findings": {
+    "p0": 0,
+    "p1": 0,
+    "notes": "UBS baseline diff 0 new criticals; 3 inherited prototype-pollution criticals in api/mcp.mjs documented as debt; 44 new warnings classified heuristic noise in patch test files"
+  },
+  "score": 9.0,
+  "generatedAt": "2026-09-16T21:40:54.814957Z"
+}

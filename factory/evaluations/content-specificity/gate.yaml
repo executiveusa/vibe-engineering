@@ -1,0 +1,11 @@
+version: 1
+scope: [Production, Creative, Revenue]
+checks:
+  - id: concrete-nouns
+    fail_when: output uses generic praise without naming the product, audience, evidence, or action
+  - id: repeated-pattern
+    fail_when: output repeats stock sentence structures above the profile threshold
+  - id: unsupported-claim
+    fail_when: claim lacks a source, artifact, measurement, or explicit uncertainty
+mode: evaluate-only
+on_fail: return_to_worker_with_examples

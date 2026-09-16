@@ -12,6 +12,7 @@ One job: turn the approved human outcome into one buildable decision contract.
 - Layer 3: `../../shared/HEART_AND_SOUL_STANDARD.md` for user-facing product or experience work.
 - Layer 3: `../../shared/REFERENCE_BAR_STANDARD.md`.
 - Layer 3: `../../shared/NO_SLOP_STANDARD.md`.
+- Layer 3: `../../shared/INSTINCT_SIMPLICITY_REVIEW_STANDARD.md` for software products.
 - Existing architecture, product truth, incumbent `DESIGN.md`, and conventions when brownfield.
 
 ## Process
@@ -23,7 +24,8 @@ One job: turn the approved human outcome into one buildable decision contract.
 5. For user-facing work, inspect one experience through the seven Heart & Soul lenses: Human Outcome; Information & Hierarchy; Interaction & Journey; Visual & Identity; Motion, Rhythm & Emotion; System, Responsive & Accessibility; Trust, Proof & Sovereignty. These are lenses over one design job, not seven parallel agents.
 6. For taste-sensitive or comparative work, name the fetchable/comparable reference bar and any measurable half. Extract mechanisms rather than copying another product's identity.
 7. Converge the seven lenses and any divergent candidates into one coherent approved path before Build. Record one safe fallback or bounded experiment only when useful; Build does not keep exploring the whole option set.
-8. Define what must survive later subtraction so the critic can distinguish essential quality from decorative complexity.
+8. For software, map the primary journey burden and design one obvious front door. Move setup, orchestration, monitoring, retries, and proof under the hood unless the user must decide or recover. Keep operator controls separate from the default path.
+9. Define what must survive later subtraction so the critic can distinguish essential quality from decorative complexity.
 
 ## Outputs
 

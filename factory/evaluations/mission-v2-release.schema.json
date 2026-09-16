@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vibe-engineering.local/schemas/mission-v2-release.schema.json",
+  "title": "MISSION v2 final release gate receipt",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schemaVersion", "status", "applicability", "candidate", "decision", "workLog", "proofMatrix", "unverifiedItems", "independentReview", "rollback", "generatedAt"],
+  "properties": {
+    "schemaVersion": { "const": 2 },
+    "status": { "enum": ["PASS", "HOLD", "NOT_APPLICABLE"] },
+    "applicability": { "enum": ["WEB", "NON_WEB"] },
+    "candidate": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "decision": { "enum": ["NOT READY", "READY FOR PREVIEW", "PREVIEW VERIFIED", "PRODUCTION VERIFIED", "NOT APPLICABLE"] },
+    "workLog": {
+      "type": "object",
+      "required": ["mode", "outcome", "target", "constraints", "contentPolicy", "proof", "ownership", "commercialValue"],
+      "properties": {
+        "contentPolicy": { "enum": ["LOCKED", "REDUCE_WITH_APPROVAL", "REWRITE_WITH_APPROVAL"] }
+      }
+    },
+    "proofMatrix": {
+      "type": "object",
+      "required": ["staticAndRoutes", "browserViewports", "interactions", "visualEvidence", "accessibility", "performance", "deployment"],
+      "properties": {
+        "staticAndRoutes": { "const": "PASS" },
+        "browserViewports": { "const": "PASS" },
+        "interactions": { "const": "PASS" },
+        "visualEvidence": { "const": "PASS" },
+        "accessibility": { "const": "PASS" },
+        "performance": { "const": "PASS" },
+        "deployment": { "enum": ["PASS", "NOT_YET_RELEASED"] }
+      }
+    },
+    "unverifiedItems": { "type": "array", "items": { "type": "object", "required": ["item", "handling"], "properties": { "handling": { "enum": ["RESOLVED", "REMOVED_FROM_SCOPE", "PRESERVED_CURRENT_WORKING_DESTINATION", "BLOCKS_RELEASE"] } } } },
+    "independentReview": { "type": "object", "required": ["reviewerId", "score", "p0Remaining", "p1Remaining"], "properties": { "score": { "type": "number", "minimum": 0, "maximum": 10 }, "p0Remaining": { "const": 0 }, "p1Remaining": { "const": 0 } }, "rollback": { "type": "string", "minLength": 1 },
+    "generatedAt": { "type": "string", "minLength": 1 }
+  }
+}

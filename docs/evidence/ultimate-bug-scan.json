@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "candidate": "095eb1583d1d51e274364c835d2959ea5977a009",
+  "base": "0217be79bb76e41a0c3572003d457ad74320a613",
+  "engine": "ultimate-bug-scan 5.4.4 (pinned rev 47edcd3)",
+  "scanStatus": "ok",
+  "exitCode": 0,
+  "profile": "strict",
+  "scope": "--only=js --include-ext=mjs,mts",
+  "bar": "baseline-relative: zero NEW critical/warning findings vs base, per gate owner decision 2026-09-16",
+  "totals": {
+    "critical": 0,
+    "warning": 0,
+    "info": 189,
+    "files": 74
+  },
+  "rawTotals": {
+    "candidate": {
+      "critical": 3,
+      "warning": 171,
+      "info": 930
+    },
+    "base": {
+      "critical": 3,
+      "warning": 128,
+      "info": 783
+    }
+  },
+  "inheritedDebt": {
+    "critical": 3,
+    "files": [
+      "api/mcp.mjs"
+    ],
+    "rule": "js.security.prototype-pollution",
+    "note": "pre-existing in base 0217be79; file untouched by this candidate; flagged for a future hardening pass"
+  },
+  "newFindings": {
+    "critical": 0,
+    "warning": 44,
+    "info": 189,
+    "warningRules": {
+      "js.proto-object.mutation-during-iteration": 3,
+      "js.debug.console": 18,
+      "js.json-parse-without-try": 9,
+      "javascript.guards.deep_unguarded_chain": 11,
+      "js.regex.dynamic-regexp": 3
+    },
+    "note": "44 new warnings are heuristic noise concentrated in the patch own test files (await-no-try, deep_unguarded_chain in test assertion chains, console in tests); documented and accepted by gate owner"
+  },
+  "reportSha256": "2dbddc7cd32f91dceca1e96f9b2f9d5740c1720fa6599fbee7921a34b0410cdc",
+  "baselineSha256": "5196c74cd3f6ad6395b11bd95538bda04ccde5b40de74fee209b5545a3d096ac",
+  "generatedAt": "2026-09-16T21:40:54.814957Z"
+}

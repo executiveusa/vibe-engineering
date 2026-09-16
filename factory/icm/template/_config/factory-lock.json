@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "factory": "executiveusa/vibe-engineering",
+  "specialistSkillsRevision": "a42b27c082adc721b125b3b65c2c2e1d20b9f369",
+  "openCodeReviewRevision": "152cc6d585043d40c3674d9637a7a06bbd950610",
+  "openCodeReviewRequiredAfterEveryBuild": true,
+  "icmColdWalkRequiredBeforeShip": true
+}

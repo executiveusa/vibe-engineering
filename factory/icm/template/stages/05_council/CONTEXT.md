@@ -9,6 +9,7 @@ One job: give fresh, separately accountable perspectives permission to find what
 - Product interface, evidence, affected system map, and reference comparison when present.
 - Layer 3: `../../shared/HEART_AND_SOUL_STANDARD.md` for user-facing product or experience work.
 - Layer 3: `../../shared/SUBTRACTION_GAUNTLET_STANDARD.md` for user-facing product or experience work.
+- Layer 3: `../../shared/INSTINCT_SIMPLICITY_REVIEW_STANDARD.md` for software products.
 - Layer 3: `../../shared/NO_SLOP_STANDARD.md`.
 - Layer 3: `../../shared/REFERENCE_BAR_STANDARD.md` when comparative quality matters.
 - Layer 3: `../../shared/OWNERSHIP_RETENTION_STANDARD.md`.
@@ -17,7 +18,7 @@ One job: give fresh, separately accountable perspectives permission to find what
 
 Run six independently attributable reviews. Each review names the reviewer or governed review role, evidence examined, findings, and disposition.
 
-1. **User value + commercial reality** — does the work improve the promised outcome for the actual target, and is the value measurable?
+1. **User value + commercial reality** — does the work improve the promised outcome for the actual target, is the value measurable, and does it get the user out of their seat rather than create setup, monitoring, translation, or cleanup?
 2. **Architecture** — will the decision remain understandable, maintainable, and appropriately simple as the system changes?
 3. **Failure modes** — what breaks first, how is failure detected, and how does recovery work?
 4. **Security + privacy** — are permissions, data, secrets, external input, and exposure proportional to the risk?
@@ -25,6 +26,8 @@ Run six independently attributable reviews. Each review names the reviewer or go
 6. **Sovereignty + ownership** — can the owner understand, export, move, replace providers/builders, recover, and continue operating?
 
 Every review also answers: **What claim here has the weakest proof?**
+
+For software, Council also challenges the exact-candidate Simplicity Review: one obvious front door, decision-changing questions only, hidden but recoverable operational complexity, truthful state, real visual/functional confirmation, and before/after journey burden.
 
 The accessibility + taste review additionally names the single largest remaining experience gap and whether another subtraction would improve or damage the approved outcome.
 
