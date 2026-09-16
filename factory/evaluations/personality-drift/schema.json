@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Vibe personality drift gauntlet result",
+  "type": "object",
+  "required": ["schemaVersion", "candidate", "builderId", "judgeId", "cases"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "candidate": { "type": "string", "minLength": 7 },
+    "builderId": { "type": "string", "minLength": 1 },
+    "judgeId": { "type": "string", "minLength": 1 },
+    "cases": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "type": "object",
+        "required": ["id", "evidenceRefs", "personalized", "generic"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "evidenceRefs": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+          "personalized": { "$ref": "#/$defs/scores" },
+          "generic": { "$ref": "#/$defs/scores" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "$defs": {
+    "scores": {
+      "type": "object",
+      "required": ["grounded_specificity", "preference_fidelity", "voice_fidelity", "continuity", "non_fabrication", "privacy_authority"],
+      "properties": {
+        "grounded_specificity": { "type": "number", "minimum": 0, "maximum": 4 },
+        "preference_fidelity": { "type": "number", "minimum": 0, "maximum": 4 },
+        "voice_fidelity": { "type": "number", "minimum": 0, "maximum": 4 },
+        "continuity": { "type": "number", "minimum": 0, "maximum": 4 },
+        "non_fabrication": { "type": "number", "minimum": 0, "maximum": 4 },
+        "privacy_authority": { "type": "number", "minimum": 0, "maximum": 4 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

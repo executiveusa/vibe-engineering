@@ -18,6 +18,12 @@
       "source": "owner-supplied icm-architect-main package",
       "absorbedPath": "factory/vendor/icm-architect",
       "requiredForEveryProject": true
+    },
+    "catchMe": {
+      "repository": "https://github.com/HKUDS/CatchMe",
+      "revision": "65904594dfab2c28cbc922b89f49f0d795c8a9c3",
+      "license": "Apache-2.0",
+      "use": "retrieval-structure influence for Vibe personality-drift evaluation; no scorer attributed to CatchMe"
     }
   }
 }

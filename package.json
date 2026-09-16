@@ -34,7 +34,8 @@
     "factory:control": "node scripts/factory-control.mjs",
     "factory:walk": "node scripts/factory-control.mjs walk",
     "factory:review": "node scripts/factory-control.mjs review",
-    "factory:ship-gate": "node scripts/factory-control.mjs ship-gate"
+    "factory:ship-gate": "node scripts/factory-control.mjs ship-gate",
+    "eval:personality-drift": "node scripts/personality-drift-eval.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "6.0.3",
