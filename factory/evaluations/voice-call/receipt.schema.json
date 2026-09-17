@@ -1,0 +1,14 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"vibe://schemas/voice-call-proof-receipt",
+  "type":"object","additionalProperties":true,
+  "required":["schemaVersion","status","applicability","candidate","reviewerId","reason","generatedAt"],
+  "properties":{
+    "schemaVersion":{"const":1},"status":{"enum":["PASS","NOT_APPLICABLE"]},"applicability":{"enum":["CALL_OR_VOICE","NON_VOICE"]},"candidate":{"type":"string","pattern":"^[0-9a-f]{40}$"},"reviewerId":{"type":"string","minLength":1},"reason":{"type":"string","minLength":1},
+    "consent":{"type":"object","required":["identityDisclosure","recordingDisclosure","affirmativeConsent","revocationTest"],"properties":{"identityDisclosure":{"const":"PASS"},"recordingDisclosure":{"enum":["PASS","NOT_RECORDED"]},"affirmativeConsent":{"const":"PASS"},"revocationTest":{"const":"PASS"}}},
+    "recordingAndTranscripts":{"type":"object","required":["policy","storage","access","retention","redaction","deletionOrExport"],"properties":{"policy":{"enum":["PASS","NOT_RECORDED"]},"storage":{"enum":["PASS","NOT_RECORDED"]},"access":{"enum":["PASS","NOT_RECORDED"]},"retention":{"enum":["PASS","NOT_RECORDED"]},"redaction":{"enum":["PASS","NOT_RECORDED"]},"deletionOrExport":{"enum":["PASS","NOT_RECORDED"]}}},
+    "turnTaking":{"const":"PASS"},"latency":{"type":"object","required":["status","p50Ms","p95Ms","budgetMs"],"properties":{"status":{"const":"PASS"},"p50Ms":{"type":"number","minimum":0},"p95Ms":{"type":"number","minimum":0},"budgetMs":{"type":"number","exclusiveMinimum":0}}},
+    "interruptionHandling":{"const":"PASS"},"voiceQa":{"type":"object","required":["intelligibility","identityAndTone","noiseAndDeviceMatrix","failureDisclosure"],"properties":{"intelligibility":{"const":"PASS"},"identityAndTone":{"const":"PASS"},"noiseAndDeviceMatrix":{"const":"PASS"},"failureDisclosure":{"const":"PASS"}}},
+    "callEscalation":{"type":"object","required":["humanHandoff","emergencyBoundary","failedTransferRecovery","hangupControl"],"properties":{"humanHandoff":{"const":"PASS"},"emergencyBoundary":{"const":"PASS"},"failedTransferRecovery":{"const":"PASS"},"hangupControl":{"const":"PASS"}}},
+    "evidenceRefs":{"type":"array","minItems":1,"items":{"type":"string","minLength":1}},"generatedAt":{"type":"string","minLength":1}
+  }
+}

@@ -57,3 +57,7 @@ Check: target-environment evidence, health checks, ownership receipt, backup, ro
 For any material output ask: **What part of this exists because we chose it, and what part exists because the model defaulted to it?**
 
 Anything important in the second category goes back through intent, reference, and proof.
+
+## Required machine receipt
+
+Every software candidate writes `docs/evidence/no-slop-review.json` for the exact candidate SHA. It must identify a fresh reviewer, the actual artifact, PASS or explicit NOT_APPLICABLE disposition for idea, strategy, copy, UI, architecture, code, business and production, every finding and its fixed/proven/authorized disposition, and evidence examined. Missing, invalid, stale, or non-PASS evidence is HOLD. The final ship gate parses this receipt; prose alone cannot pass.

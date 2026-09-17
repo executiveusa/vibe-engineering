@@ -1,0 +1,13 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"vibe://schemas/no-slop-review-receipt",
+  "type":"object","additionalProperties":true,
+  "required":["schemaVersion","status","candidate","reviewerId","artifact","categories","findings","evidenceExamined","generatedAt"],
+  "properties":{
+    "schemaVersion":{"const":1},"status":{"const":"PASS"},"candidate":{"type":"string","pattern":"^[0-9a-f]{40}$"},
+    "reviewerId":{"type":"string","minLength":1},"artifact":{"type":"string","minLength":1},
+    "categories":{"type":"object","required":["idea","strategy","copy","ui","architecture","code","business","production"],"additionalProperties":false,"properties":{"idea":{"enum":["PASS","NOT_APPLICABLE"]},"strategy":{"enum":["PASS","NOT_APPLICABLE"]},"copy":{"enum":["PASS","NOT_APPLICABLE"]},"ui":{"enum":["PASS","NOT_APPLICABLE"]},"architecture":{"enum":["PASS","NOT_APPLICABLE"]},"code":{"enum":["PASS","NOT_APPLICABLE"]},"business":{"enum":["PASS","NOT_APPLICABLE"]},"production":{"enum":["PASS","NOT_APPLICABLE"]}}},
+    "findings":{"type":"array","items":{"type":"object","required":["finding","disposition"],"properties":{"disposition":{"enum":["FIXED","FALSE_POSITIVE_WITH_PROOF","AUTHORIZED_ACCEPTANCE"]}}}},
+    "evidenceExamined":{"type":"array","minItems":1,"items":{"type":"string","minLength":1}},"generatedAt":{"type":"string","minLength":1}
+  }
+}

@@ -69,6 +69,10 @@ The gauntlet passes only when:
 - model-default design patterns have been deliberately accepted, replaced, or removed;
 - the largest remaining design gap is either fixed or explicitly accepted by authorized review.
 
+## Required machine receipt
+
+Write `docs/evidence/subtraction-review.json` for the exact candidate SHA. User-facing software must return PASS with fresh reviewer identity, artifact, all six disposition arrays, largest remaining gap, protected quality, no accessibility/trust/control regression, and evidence examined. Non-user-facing software may return `NOT_APPLICABLE` only with a specific reason and reviewer identity. Missing, invalid, stale, REVISE, or HOLD evidence blocks SHIP.
+
 ## Required critic output
 
 ```yaml

@@ -32,6 +32,7 @@ const REQUIRED_FILES = [
   '_config/factory-lock.json',
   '_config/factory-questionnaire.md',
   'shared/PLAIN_LANGUAGE_STANDARD.md',
+  'shared/VOICE_CALL_PROOF_STANDARD.md',
   'references/MISSION-V2-MOBILE-FIRST-SITE-PROOF.md',
   'shared/NO_SLOP_STANDARD.md',
   'shared/REFERENCE_BAR_STANDARD.md',

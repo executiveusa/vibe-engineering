@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "candidate": "d03b81d06515e6a94fc40c3f8c39232ba4bdaeb9",
+  "reviewerId": "instinct-watcher (agent-01M2GF8HX1XMP5TP0PTRNYH5JX, independent of patch author)",
+  "artifact": "full diff 095eb15..d03b81d (12 files, +194/-11)",
+  "categories": {
+    "idea": "PASS",
+    "strategy": "PASS",
+    "copy": "PASS",
+    "ui": "NOT_APPLICABLE",
+    "architecture": "PASS",
+    "code": "PASS",
+    "business": "NOT_APPLICABLE",
+    "production": "PASS"
+  },
+  "findings": [],
+  "evidenceExamined": [
+    "git show d03b81d full diff read line-by-line",
+    "factory/icm/template/shared/VOICE_CALL_PROOF_STANDARD.md",
+    "factory/icm/template/stages/04_verify/CONTEXT.md",
+    "stages/06_judge/CONTEXT.md",
+    "stages/07_ship/CONTEXT.md",
+    "scripts/factory-control.mjs shipGate additions",
+    "tests/factory-hard-gates.test.mjs new gate tests"
+  ],
+  "generatedAt": "2026-09-17T03:52:59.467672+00:00"
+}
