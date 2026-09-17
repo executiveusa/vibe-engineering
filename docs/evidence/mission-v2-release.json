@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
   "status": "NOT_APPLICABLE",
-  "candidate": "d03b81d06515e6a94fc40c3f8c39232ba4bdaeb9",
+  "candidate": "095eb1583d1d51e274364c835d2959ea5977a009",
   "applicability": "NON_WEB",
   "decision": "NOT APPLICABLE",
-  "reason": "candidate is factory tooling (gate contracts, receipt schemas, control-plane checks, tests); no user-facing web surface, route, or visual journey ships in this diff",
+  "reason": "candidate is factory tooling (control-plane .mjs scripts, gate contracts, and their test suites); no user-facing web surface, route, or visual journey ships in this diff",
   "workLog": {},
   "proofMatrix": {},
   "unverifiedItems": [],
   "independentReview": {},
-  "rollback": "git revert d03b81d06515e6a94fc40c3f8c39232ba4bdaeb9",
-  "generatedAt": "2026-09-17T03:52:59.467672+00:00"
+  "rollback": "git revert 095eb1583d1d51e274364c835d2959ea5977a009",
+  "generatedAt": "2026-09-16T21:40:54.814957Z"
 }

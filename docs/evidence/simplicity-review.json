@@ -1,21 +1,21 @@
 {
   "schemaVersion": 1,
   "status": "PASS",
-  "candidate": "d03b81d06515e6a94fc40c3f8c39232ba4bdaeb9",
-  "reviewerId": "instinct-watcher (agent-01M2GF8HX1XMP5TP0PTRNYH5JX, independent of patch author)",
-  "frontDoor": "factory-control CLI: status/walk/review/ship-gate - one command surface; ship-gate now also enforces no-slop, subtraction, and voice-call receipts",
-  "before": "slop, subtraction, and voice proof were documented standards with no machine enforcement at ship time",
-  "after": "three exact-SHA machine receipts are mandatory; ship-gate auto-HOLDs on missing, invalid, stale, or non-PASS receipts, with gate tests proving both paths",
+  "candidate": "095eb1583d1d51e274364c835d2959ea5977a009",
+  "reviewerId": "instinct-watcher (gate task agent, independent of patch author)",
+  "frontDoor": "factory-control CLI: status/walk/review/ship-gate <workspace> - one command surface for operators",
+  "before": "gate evidence was ad-hoc: manual pytest runs, no canonical receipts, no single ship verdict",
+  "after": "six canonical receipts in docs/evidence plus one ship-gate command that returns SHIP or HOLD with named failures",
   "visualEvidence": [
     "docs/evidence/ultimate-bug-scan.json",
     "docs/evidence/icm-cold-walk.json",
     "docs/evidence/open-code-review.json"
   ],
   "functionalEvidence": [
-    "native test suite 89/89 PASS at candidate d03b81d",
-    "UBS strict scan vs base 095eb15: 0 new criticals, 12 new heuristic-noise warnings accepted per recorded gate-owner confirmation",
-    "new gate tests prove HOLD on missing/invalid/stale/non-PASS receipts and SHIP on valid set"
+    "native test suite 88/88 PASS at candidate 095eb158 (/tmp/v8-test.log)",
+    "UBS strict scan vs base: 0 new criticals",
+    "MISSION v2 gate contract tests 6/6 PASS (UNVERIFIED-holds-release, missing-content-policy-holds, NOT_APPLICABLE path)"
   ],
-  "operatorRecoveryPath": "git revert d03b81d06515e6a94fc40c3f8c39232ba4bdaeb9 restores 095eb15; receipts are additive-only under docs/evidence/",
-  "generatedAt": "2026-09-17T03:52:59.467672+00:00"
+  "operatorRecoveryPath": "git revert 095eb1583d1d51e274364c835d2959ea5977a009 restores base 0217be79; receipts are additive-only under docs/evidence/",
+  "generatedAt": "2026-09-16T21:40:54.814957Z"
 }
