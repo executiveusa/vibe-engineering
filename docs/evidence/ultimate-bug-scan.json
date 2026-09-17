@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "candidate": "d03b81d06515e6a94fc40c3f8c39232ba4bdaeb9",
+  "base": "095eb1583d1d51e274364c835d2959ea5977a009",
+  "engine": "ultimate-bug-scan 5.4.4 (pinned rev 47edcd3)",
+  "scanStatus": "ok",
+  "exitCode": 0,
+  "profile": "strict",
+  "scope": "--only=js --include-ext=mjs,mts",
+  "bar": "baseline-relative: zero NEW critical findings vs base 095eb15; new-warning disposition per v8 gate bar",
+  "gateOwnerConfirmation": "Confirmed as gate owner 2026-09-16 21:50 CST (verbatim via parent relay): the v8 noise-acceptance precedent applies to v9 - all 12 warnings are the same two documented heuristic false-positive classes (proto-object.mutation-during-iteration on a separate failures array, json-parse-without-try in intentional fail-closed gate code), 0 new criticals, baseline-controlled.",
+  "totals": {
+    "critical": 0,
+    "warning": 0,
+    "info": 205,
+    "files": 86
+  },
+  "rawTotals": {
+    "candidate": {
+      "critical": 58,
+      "warning": 340,
+      "info": 1135
+    },
+    "base": {
+      "critical": 58,
+      "warning": 402,
+      "info": 1073
+    }
+  },
+  "newFindings": {
+    "critical": 0,
+    "warning": 12,
+    "warningRules": {
+      "js.proto-object.mutation-during-iteration": 8,
+      "js.json-parse-without-try": 4
+    },
+    "files": [
+      "scripts/factory-control.mjs",
+      "scripts/factory-doctor.mjs",
+      "tests/factory-hard-gates.test.mjs"
+    ],
+    "note": "12 new warnings, all in the patch own files; both rule classes are documented heuristic false positives (failures.push to a separate array inside for..of; intentional fail-closed JSON.parse). Disposition: AUTHORIZED_ACCEPTANCE per gateOwnerConfirmation above."
+  },
+  "inheritedDebt": {
+    "critical": 58,
+    "note": "pre-existing in base 095eb15 at identical counts; not introduced by this candidate"
+  },
+  "reportSha256": "b7548bc0c9f731d4797d39ceade0a7e07bfac55431657aeee6e02fba7e2eba1a",
+  "baselineSha256": "02dc704f6f50d79d9b5d5309cfb7b347318be7462fe8cdd71f9a3547d3684943",
+  "generatedAt": "2026-09-17T03:52:59.467672+00:00"
+}

@@ -1,0 +1,420 @@
+{
+  "status": "complete",
+  "llm": {
+    "model": "claude-sonnet-4-5"
+  },
+  "message": "Review complete: 29 finding(s) across 6 selected item(s).",
+  "summary": {
+    "files_reviewed": 6,
+    "comments": 29,
+    "total_tokens": 1824822,
+    "input_tokens": 1791271,
+    "output_tokens": 33551,
+    "cache_read_tokens": 1648753,
+    "cache_write_tokens": 141568,
+    "elapsed": "6m31s"
+  },
+  "tool_calls": {
+    "total": 89,
+    "by_tool": {
+      "code_comment": 10,
+      "code_search": 28,
+      "file_find": 6,
+      "file_read": 41,
+      "file_read_diff": 4
+    },
+    "failure": 0,
+    "failure_by_tool": {},
+    "failure_details": []
+  },
+  "comments": [
+    {
+      "path": "factory/evaluations/subtraction/receipt.schema.json",
+      "content": "The 'evidenceExamined' field is validated as required by factory-control.mjs (line 164) for USER_FACING applicability, but it's not included in the schema's required array. This creates an inconsistency where the runtime validation expects the field but the schema doesn't enforce it. Consider adding 'evidenceExamined' to the required array or making its requirement conditional based on applicability.",
+      "existing_code": "  \"required\":[\"schemaVersion\",\"status\",\"applicability\",\"candidate\",\"reviewerId\",\"artifact\",\"generatedAt\"],",
+      "start_line": 4,
+      "end_line": 4,
+      "category": "bug",
+      "severity": "high"
+    },
+    {
+      "path": "factory/evaluations/voice-call/receipt.schema.json",
+      "content": "Inconsistent naming: this schema uses 'evidenceRefs' while the other two schemas (no-slop and subtraction) use 'evidenceExamined' for the same concept. This creates maintainability issues and potential confusion. Consider standardizing on a single field name across all schemas, preferably 'evidenceExamined' to match the majority pattern.",
+      "existing_code": "    \"evidenceRefs\":{\"type\":\"array\",\"minItems\":1,\"items\":{\"type\":\"string\",\"minLength\":1}},\"generatedAt\":{\"type\":\"string\",\"minLength\":1}",
+      "start_line": 12,
+      "end_line": 12,
+      "category": "maintainability",
+      "severity": "medium"
+    },
+    {
+      "path": "factory/evaluations/subtraction/receipt.schema.json",
+      "content": "These fields ('reason', 'largestRemainingGap', 'protectedQuality') are conditionally required based on 'applicability' value according to factory-control.mjs validation logic, but the schema doesn't express this conditional requirement. The schema should use conditional validation (e.g., 'if'/'then' keywords) to enforce that 'largestRemainingGap' and 'protectedQuality' are required when applicability is 'USER_FACING', and 'reason' is required when applicability is 'NON_USER_FACING'.",
+      "existing_code": "    \"reason\":{\"type\":\"string\",\"minLength\":1},\"largestRemainingGap\":{\"type\":\"string\",\"minLength\":1},\"protectedQuality\":{\"type\":\"string\",\"minLength\":1},",
+      "start_line": 7,
+      "end_line": 7,
+      "category": "bug",
+      "severity": "medium"
+    },
+    {
+      "path": "factory/evaluations/subtraction/receipt.schema.json",
+      "content": "The 'dispositions' field is validated as required by factory-control.mjs (line 161) for USER_FACING applicability, but it's not in the schema's required array. Additionally, the schema doesn't enforce that 'accessibilityRegression' and 'trustOrControlRegression' must be false for USER_FACING cases (line 163 of factory-control.mjs). Consider adding conditional validation to match runtime requirements.",
+      "existing_code": "    \"dispositions\":{\"type\":\"object\",\"required\":[\"keep\",\"merge\",\"infer\",\"defer\",\"move\",\"remove\"],\"properties\":{\"keep\":{\"type\":\"array\"},\"merge\":{\"type\":\"array\"},\"infer\":{\"type\":\"array\"},\"defer\":{\"type\":\"array\"},\"move\":{\"type\":\"array\"},\"remove\":{\"type\":\"array\"}}},",
+      "start_line": 8,
+      "end_line": 8,
+      "category": "bug",
+      "severity": "high"
+    },
+    {
+      "path": "factory/evaluations/voice-call/receipt.schema.json",
+      "content": "The 'consent' field and several other nested objects (recordingAndTranscripts, latency, voiceQa, callEscalation) are conditionally required when applicability is 'CALL_OR_VOICE' according to factory-control.mjs, but the schema doesn't express this. The schema should use conditional validation (e.g., 'if'/'then' keywords) to enforce that these fields are required only when applicability is 'CALL_OR_VOICE'.",
+      "existing_code": "    \"consent\":{\"type\":\"object\",\"required\":[\"identityDisclosure\",\"recordingDisclosure\",\"affirmativeConsent\",\"revocationTest\"],\"properties\":{\"identityDisclosure\":{\"const\":\"PASS\"},\"recordingDisclosure\":{\"enum\":[\"PASS\",\"NOT_RECORDED\"]},\"affirmativeConsent\":{\"const\":\"PASS\"},\"revocationTest\":{\"const\":\"PASS\"}}},",
+      "start_line": 7,
+      "end_line": 7,
+      "category": "bug",
+      "severity": "high"
+    },
+    {
+      "path": "factory/evaluations/voice-call/receipt.schema.json",
+      "content": "The latency validation allows p95Ms to be less than p50Ms, which is statistically impossible. P95 latency (95th percentile) must always be greater than or equal to p50 (50th percentile). Consider adding a conditional schema validation or documenting that runtime validation (as seen in factory-control.mjs line 179) handles this constraint.",
+      "existing_code": "    \"latency\":{\"type\":\"object\",\"required\":[\"status\",\"p50Ms\",\"p95Ms\",\"budgetMs\"],\"properties\":{\"status\":{\"const\":\"PASS\"},\"p50Ms\":{\"type\":\"number\",\"minimum\":0},\"p95Ms\":{\"type\":\"number\",\"minimum\":0},\"budgetMs\":{\"type\":\"number\",\"exclusiveMinimum\":0}}},",
+      "start_line": 0,
+      "end_line": 0,
+      "category": "bug",
+      "severity": "medium"
+    },
+    {
+      "path": "factory/evaluations/no-slop/receipt.schema.json",
+      "content": "The schema requires 'finding' field in the findings array items but doesn't validate its structure. According to the requirement that 'finding' is in the required array, the schema should specify what type 'finding' should be (likely a string with minLength:1) to prevent empty or invalid finding entries.",
+      "existing_code": "    \"findings\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"required\":[\"finding\",\"disposition\"],\"properties\":{\"disposition\":{\"enum\":[\"FIXED\",\"FALSE_POSITIVE_WITH_PROOF\",\"AUTHORIZED_ACCEPTANCE\"]}}}},",
+      "start_line": 10,
+      "end_line": 10,
+      "category": "maintainability",
+      "severity": "medium"
+    },
+    {
+      "path": "factory/evaluations/no-slop/receipt.schema.json",
+      "content": "The 'finding' property is marked as required in the items but has no type or validation constraints defined. This allows empty objects, numbers, or other invalid values to pass schema validation. Add type definition: \"finding\": {\"type\": \"string\", \"minLength\": 1} to ensure findings contain meaningful content.",
+      "suggestion_code": "    \"findings\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"required\":[\"finding\",\"disposition\"],\"properties\":{\"finding\":{\"type\":\"string\",\"minLength\":1},\"disposition\":{\"enum\":[\"FIXED\",\"FALSE_POSITIVE_WITH_PROOF\",\"AUTHORIZED_ACCEPTANCE\"]}}}},",
+      "existing_code": "    \"findings\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"required\":[\"finding\",\"disposition\"],\"properties\":{\"disposition\":{\"enum\":[\"FIXED\",\"FALSE_POSITIVE_WITH_PROOF\",\"AUTHORIZED_ACCEPTANCE\"]}}}},",
+      "start_line": 10,
+      "end_line": 10,
+      "category": "bug",
+      "severity": "high"
+    },
+    {
+      "path": "factory/evaluations/subtraction/receipt.schema.json",
+      "content": "The disposition arrays (keep, merge, infer, defer, move, remove) have no item type constraints. This allows any values (numbers, booleans, objects, etc.) to be added to these arrays. According to the SUBTRACTION_GAUNTLET_STANDARD.md, these should contain interface elements, content blocks, interactions, etc. Consider adding item type validation, likely: \"items\": {\"type\": \"string\"} or \"items\": {\"type\": \"object\"} depending on the expected structure.",
+      "existing_code": "    \"dispositions\":{\"type\":\"object\",\"required\":[\"keep\",\"merge\",\"infer\",\"defer\",\"move\",\"remove\"],\"properties\":{\"keep\":{\"type\":\"array\"},\"merge\":{\"type\":\"array\"},\"infer\":{\"type\":\"array\"},\"defer\":{\"type\":\"array\"},\"move\":{\"type\":\"array\"},\"remove\":{\"type\":\"array\"}}},",
+      "start_line": 8,
+      "end_line": 8,
+      "category": "maintainability",
+      "severity": "low"
+    },
+    {
+      "path": "factory/evaluations/subtraction/receipt.schema.json",
+      "content": "The 'evidenceExamined' array has no minItems constraint, allowing empty arrays to pass schema validation. According to factory-control.mjs line 164, USER_FACING applicability requires at least one evidence item. While the conditional requirement issue is already identified, the schema should also add minItems:1 to enforce non-empty arrays when the field is present, consistent with the no-slop schema pattern.",
+      "suggestion_code": "    \"accessibilityRegression\":{\"type\":\"boolean\"},\"trustOrControlRegression\":{\"type\":\"boolean\"},\"evidenceExamined\":{\"type\":\"array\",\"minItems\":1,\"items\":{\"type\":\"string\",\"minLength\":1}},\"generatedAt\":{\"type\":\"string\",\"minLength\":1}",
+      "existing_code": "    \"accessibilityRegression\":{\"type\":\"boolean\"},\"trustOrControlRegression\":{\"type\":\"boolean\"},\"evidenceExamined\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"generatedAt\":{\"type\":\"string\",\"minLength\":1}",
+      "start_line": 9,
+      "end_line": 9,
+      "category": "bug",
+      "severity": "medium"
+    },
+    {
+      "path": "factory/evaluations/subtraction/receipt.schema.json",
+      "content": "The 'dispositions' object allows additional properties beyond the six required disposition types (keep, merge, infer, defer, move, remove). This could allow typos or invalid disposition names to pass validation (e.g., 'remov' or 'merges'). Consider adding \"additionalProperties\":false to the dispositions object to enforce the exact set of six dispositions, consistent with how the no-slop 'categories' object is validated.",
+      "suggestion_code": "    \"dispositions\":{\"type\":\"object\",\"required\":[\"keep\",\"merge\",\"infer\",\"defer\",\"move\",\"remove\"],\"additionalProperties\":false,\"properties\":{\"keep\":{\"type\":\"array\"},\"merge\":{\"type\":\"array\"},\"infer\":{\"type\":\"array\"},\"defer\":{\"type\":\"array\"},\"move\":{\"type\":\"array\"},\"remove\":{\"type\":\"array\"}}},",
+      "existing_code": "    \"dispositions\":{\"type\":\"object\",\"required\":[\"keep\",\"merge\",\"infer\",\"defer\",\"move\",\"remove\"],\"properties\":{\"keep\":{\"type\":\"array\"},\"merge\":{\"type\":\"array\"},\"infer\":{\"type\":\"array\"},\"defer\":{\"type\":\"array\"},\"move\":{\"type\":\"array\"},\"remove\":{\"type\":\"array\"}}},",
+      "start_line": 8,
+      "end_line": 8,
+      "category": "maintainability",
+      "severity": "low"
+    },
+    {
+      "path": "factory/evaluations/voice-call/receipt.schema.json",
+      "content": "The nested validation objects (consent, recordingAndTranscripts, latency, voiceQa, callEscalation) don't specify additionalProperties behavior. Without \"additionalProperties\":false, typos in field names (e.g., 'identityDisclosuer' instead of 'identityDisclosure') would be silently accepted. Consider adding \"additionalProperties\":false to each nested object to catch typos and enforce the exact field set.",
+      "suggestion_code": "    \"consent\":{\"type\":\"object\",\"required\":[\"identityDisclosure\",\"recordingDisclosure\",\"affirmativeConsent\",\"revocationTest\"],\"additionalProperties\":false,\"properties\":{\"identityDisclosure\":{\"const\":\"PASS\"},\"recordingDisclosure\":{\"enum\":[\"PASS\",\"NOT_RECORDED\"]},\"affirmativeConsent\":{\"const\":\"PASS\"},\"revocationTest\":{\"const\":\"PASS\"}}},",
+      "existing_code": "    \"consent\":{\"type\":\"object\",\"required\":[\"identityDisclosure\",\"recordingDisclosure\",\"affirmativeConsent\",\"revocationTest\"],\"properties\":{\"identityDisclosure\":{\"const\":\"PASS\"},\"recordingDisclosure\":{\"enum\":[\"PASS\",\"NOT_RECORDED\"]},\"affirmativeConsent\":{\"const\":\"PASS\"},\"revocationTest\":{\"const\":\"PASS\"}}},",
+      "start_line": 7,
+      "end_line": 7,
+      "category": "maintainability",
+      "severity": "low"
+    },
+    {
+      "path": "factory/evaluations/voice-call/receipt.schema.json",
+      "content": "The recordingAndTranscripts object doesn't specify additionalProperties behavior. Consider adding \"additionalProperties\":false after the \"required\" array to prevent typos in field names from being silently accepted.",
+      "suggestion_code": "    \"recordingAndTranscripts\":{\"type\":\"object\",\"required\":[\"policy\",\"storage\",\"access\",\"retention\",\"redaction\",\"deletionOrExport\"],\"additionalProperties\":false,\"properties\":{\"policy\":{\"enum\":[\"PASS\",\"NOT_RECORDED\"]},\"storage\":{\"enum\":[\"PASS\",\"NOT_RECORDED\"]},\"access\":{\"enum\":[\"PASS\",\"NOT_RECORDED\"]},\"retention\":{\"enum\":[\"PASS\",\"NOT_RECORDED\"]},\"redaction\":{\"enum\":[\"PASS\",\"NOT_RECORDED\"]},\"deletionOrExport\":{\"enum\":[\"PASS\",\"NOT_RECORDED\"]}}}",
+      "existing_code": "    \"recordingAndTranscripts\":{\"type\":\"object\",\"required\":[\"policy\",\"storage\",\"access\",\"retention\",\"redaction\",\"deletionOrExport\"],\"properties\":{\"policy\":{\"enum\":[\"PASS\",\"NOT_RECORDED\"]},\"storage\":{\"enum\":[\"PASS\",\"NOT_RECORDED\"]},\"access\":{\"enum\":[\"PASS\",\"NOT_RECORDED\"]},\"retention\":{\"enum\":[\"PASS\",\"NOT_RECORDED\"]},\"redaction\":{\"enum\":[\"PASS\",\"NOT_RECORDED\"]},\"deletionOrExport\":{\"enum\":[\"PASS\",\"NOT_RECORDED\"]}}},",
+      "start_line": 8,
+      "end_line": 8,
+      "category": "maintainability",
+      "severity": "low"
+    },
+    {
+      "path": "factory/evaluations/voice-call/receipt.schema.json",
+      "content": "The latency object doesn't specify additionalProperties behavior. Consider adding \"additionalProperties\":false to prevent typos or extra fields.",
+      "suggestion_code": "    \"turnTaking\":{\"const\":\"PASS\"},\"latency\":{\"type\":\"object\",\"required\":[\"status\",\"p50Ms\",\"p95Ms\",\"budgetMs\"],\"additionalProperties\":false,\"properties\":{\"status\":{\"const\":\"PASS\"},\"p50Ms\":{\"type\":\"number\",\"minimum\":0},\"p95Ms\":{\"type\":\"number\",\"minimum\":0},\"budgetMs\":{\"type\":\"number\",\"exclusiveMinimum\":0}}},",
+      "existing_code": "    \"turnTaking\":{\"const\":\"PASS\"},\"latency\":{\"type\":\"object\",\"required\":[\"status\",\"p50Ms\",\"p95Ms\",\"budgetMs\"],\"properties\":{\"status\":{\"const\":\"PASS\"},\"p50Ms\":{\"type\":\"number\",\"minimum\":0},\"p95Ms\":{\"type\":\"number\",\"minimum\":0},\"budgetMs\":{\"type\":\"number\",\"exclusiveMinimum\":0}}},",
+      "start_line": 9,
+      "end_line": 9,
+      "category": "maintainability",
+      "severity": "low"
+    },
+    {
+      "path": "factory/evaluations/voice-call/receipt.schema.json",
+      "content": "The voiceQa object doesn't specify additionalProperties behavior. Consider adding \"additionalProperties\":false to prevent typos or extra fields.",
+      "suggestion_code": "    \"interruptionHandling\":{\"const\":\"PASS\"},\"voiceQa\":{\"type\":\"object\",\"required\":[\"intelligibility\",\"identityAndTone\",\"noiseAndDeviceMatrix\",\"failureDisclosure\"],\"additionalProperties\":false,\"properties\":{\"intelligibility\":{\"const\":\"PASS\"},\"identityAndTone\":{\"const\":\"PASS\"},\"noiseAndDeviceMatrix\":{\"const\":\"PASS\"},\"failureDisclosure\":{\"const\":\"PASS\"}}},",
+      "existing_code": "    \"interruptionHandling\":{\"const\":\"PASS\"},\"voiceQa\":{\"type\":\"object\",\"required\":[\"intelligibility\",\"identityAndTone\",\"noiseAndDeviceMatrix\",\"failureDisclosure\"],\"properties\":{\"intelligibility\":{\"const\":\"PASS\"},\"identityAndTone\":{\"const\":\"PASS\"},\"noiseAndDeviceMatrix\":{\"const\":\"PASS\"},\"failureDisclosure\":{\"const\":\"PASS\"}}},",
+      "start_line": 10,
+      "end_line": 10,
+      "category": "maintainability",
+      "severity": "low"
+    },
+    {
+      "path": "factory/evaluations/voice-call/receipt.schema.json",
+      "content": "The callEscalation object doesn't specify additionalProperties behavior. Consider adding \"additionalProperties\":false to prevent typos or extra fields.",
+      "suggestion_code": "    \"callEscalation\":{\"type\":\"object\",\"required\":[\"humanHandoff\",\"emergencyBoundary\",\"failedTransferRecovery\",\"hangupControl\"],\"additionalProperties\":false,\"properties\":{\"humanHandoff\":{\"const\":\"PASS\"},\"emergencyBoundary\":{\"const\":\"PASS\"},\"failedTransferRecovery\":{\"const\":\"PASS\"},\"hangupControl\":{\"const\":\"PASS\"}}}",
+      "existing_code": "    \"callEscalation\":{\"type\":\"object\",\"required\":[\"humanHandoff\",\"emergencyBoundary\",\"failedTransferRecovery\",\"hangupControl\"],\"properties\":{\"humanHandoff\":{\"const\":\"PASS\"},\"emergencyBoundary\":{\"const\":\"PASS\"},\"failedTransferRecovery\":{\"const\":\"PASS\"},\"hangupControl\":{\"const\":\"PASS\"}}},",
+      "start_line": 11,
+      "end_line": 11,
+      "category": "maintainability",
+      "severity": "low"
+    },
+    {
+      "path": "scripts/factory-control.mjs",
+      "content": "Inconsistent use of optional chaining: `noSlop?.findings` uses optional chaining but `noSlop.findings.some(...)` uses direct access. While this is safe due to short-circuit evaluation (if the first condition is true, the second won't execute), it makes the code harder to reason about and maintain. Consider using `noSlop?.findings?.some(...)` for consistency, or restructure to: `if (!Array.isArray(noSlop?.findings)) failures.push(...); else if (noSlop.findings.some(...)) failures.push(...);`",
+      "suggestion_code": "  if (!Array.isArray(noSlop?.findings)) failures.push('no-slop findings are missing or invalid');\n  else if (noSlop.findings.some((finding) =\u003e !['FIXED', 'FALSE_POSITIVE_WITH_PROOF', 'AUTHORIZED_ACCEPTANCE'].includes(finding?.disposition))) failures.push('no-slop findings are unresolved');",
+      "existing_code": "  if (!Array.isArray(noSlop?.findings) || noSlop.findings.some((finding) =\u003e !['FIXED', 'FALSE_POSITIVE_WITH_PROOF', 'AUTHORIZED_ACCEPTANCE'].includes(finding?.disposition))) failures.push('no-slop findings are unresolved');",
+      "start_line": 150,
+      "end_line": 150,
+      "category": "maintainability",
+      "severity": "low"
+    },
+    {
+      "path": "scripts/factory-control.mjs",
+      "content": "Inconsistent optional chaining: `noSlop?.evidenceExamined` uses optional chaining but `noSlop.evidenceExamined.length` uses direct access. While safe due to short-circuit evaluation, this pattern is fragile and harder to maintain.",
+      "suggestion_code": "  if (!Array.isArray(noSlop?.evidenceExamined) || !noSlop?.evidenceExamined?.length) failures.push('no-slop evidence is missing');",
+      "existing_code": "  if (!Array.isArray(noSlop?.evidenceExamined) || !noSlop.evidenceExamined.length) failures.push('no-slop evidence is missing');",
+      "start_line": 151,
+      "end_line": 151,
+      "category": "maintainability",
+      "severity": "low"
+    },
+    {
+      "path": "scripts/factory-control.mjs",
+      "content": "Inconsistent optional chaining: same pattern as above. Consider using `subtraction?.evidenceExamined?.length` for consistency.",
+      "suggestion_code": "  if (!Array.isArray(subtraction?.evidenceExamined) || !subtraction?.evidenceExamined?.length) failures.push('Subtraction Gauntlet evidence is missing');",
+      "existing_code": "  if (!Array.isArray(subtraction?.evidenceExamined) || !subtraction.evidenceExamined.length) failures.push('Subtraction Gauntlet evidence is missing');",
+      "start_line": 164,
+      "end_line": 164,
+      "category": "maintainability",
+      "severity": "low"
+    },
+    {
+      "path": "scripts/factory-control.mjs",
+      "content": "Inconsistent optional chaining in complex condition: The first four checks use optional chaining (`voice?.latency?.status`, etc.) but the final comparison uses direct access (`voice.latency.p95Ms`). While technically safe because the type checks confirm existence, this is fragile and makes the code harder to maintain. Consider using optional chaining throughout or restructuring for clarity.",
+      "suggestion_code": "    if (voice?.latency?.status !== 'PASS' || typeof voice?.latency?.p50Ms !== 'number' || typeof voice?.latency?.p95Ms !== 'number' || typeof voice?.latency?.budgetMs !== 'number') failures.push('Voice / Call Proof latency incomplete');\n    else if (voice.latency.p95Ms \u003e voice.latency.budgetMs) failures.push('Voice / Call Proof latency exceeds budget');",
+      "existing_code": "    if (voice?.latency?.status !== 'PASS' || typeof voice?.latency?.p50Ms !== 'number' || typeof voice?.latency?.p95Ms !== 'number' || typeof voice?.latency?.budgetMs !== 'number' || voice.latency.p95Ms \u003e voice.latency.budgetMs) failures.push('Voice / Call Proof latency failed');",
+      "start_line": 179,
+      "end_line": 179,
+      "category": "maintainability",
+      "severity": "medium"
+    },
+    {
+      "path": "scripts/factory-control.mjs",
+      "content": "Inconsistent optional chaining: same pattern as above. Consider using `voice?.evidenceRefs?.length` for consistency.",
+      "suggestion_code": "  if (!Array.isArray(voice?.evidenceRefs) || !voice?.evidenceRefs?.length) failures.push('Voice / Call Proof evidence is missing');",
+      "existing_code": "  if (!Array.isArray(voice?.evidenceRefs) || !voice.evidenceRefs.length) failures.push('Voice / Call Proof evidence is missing');",
+      "start_line": 185,
+      "end_line": 185,
+      "category": "maintainability",
+      "severity": "low"
+    },
+    {
+      "path": "tests/factory-hard-gates.test.mjs",
+      "content": "Missing test coverage for critical validation paths: This test only covers the NON_USER_FACING path for Subtraction Gauntlet and the NOT_RECORDED path for Voice/Call recordings. The validation code has complex logic for USER_FACING subtraction (checking dispositions, regressions, gaps) and recorded voice calls (checking recording policies, storage, etc.) that is not tested. Consider adding test cases for these paths to ensure the validation logic works correctly.",
+      "existing_code": "test('hardening receipts fail closed and voice proof enforces consent, latency, QA, and escalation', async () =\u003e {\n  const tmp = await mkdtemp(path.join(os.tmpdir(), 'vibe-hardening-receipts-'));\n  try {\n    const target = path.join(tmp, 'repo');\n    await mkdir(target); git(target, 'init'); git(target, 'config', 'user.email', 'factory@test.invalid'); git(target, 'config', 'user.name', 'Factory Test');\n    await mkdir(path.join(target, 'docs', 'evidence'), { recursive: true });\n    await writeFile(path.join(target, 'a'), 'a'); git(target, 'add', '.'); git(target, 'commit', '-m', 'candidate');\n    const candidate = git(target, 'rev-parse', 'HEAD'); const evidence = path.join(target, 'docs', 'evidence');\n    await writeFile(path.join(evidence, 'ultimate-bug-scan.json'), JSON.stringify({ status: 'PASS', candidate, scanStatus: 'ok', exitCode: 0, totals: { critical: 0, warning: 0 } }));\n    await writeFile(path.join(evidence, 'open-code-review.json'), JSON.stringify({ status: 'PASS', candidate }));\n    await writeFile(path.join(evidence, 'icm-cold-walk.json'), JSON.stringify({ status: 'PASS', candidate }));\n    await writeFile(path.join(evidence, 'independent-review.json'), JSON.stringify({ status: 'PASS', candidate, builderId: 'builder', reviewerId: 'reviewer' }));\n    await writeFile(path.join(evidence, 'simplicity-review.json'), JSON.stringify({ status: 'PASS', candidate, reviewerId: 'simplicity', frontDoor: 'voice call', before: {}, after: {}, visualEvidence: ['call-state.png'], functionalEvidence: ['call journey'], operatorRecoveryPath: 'runbook' }));\n    await writeFile(path.join(evidence, 'mission-v2-release.json'), JSON.stringify({ schemaVersion: 2, status: 'NOT_APPLICABLE', applicability: 'NON_WEB', candidate, decision: 'NOT APPLICABLE', reason: 'voice fixture is not web', workLog: {}, proofMatrix: {}, unverifiedItems: [], independentReview: {}, rollback: 'git revert', generatedAt: new Date().toISOString() }));\n    await writeFile(path.join(evidence, 'judge-verdict.json'), JSON.stringify({ verdict: 'SHIP', candidate }));\n    let result = await shipGate(target, { candidate });\n    assert.equal(result.status, 'HOLD');\n    assert.match(result.failures.join('\\n'), /no-slop|Subtraction|Voice \\/ Call/);\n    await writeHardenedReviewReceipts(evidence, candidate);\n    result = await shipGate(target, { candidate }); assert.equal(result.status, 'SHIP');\n    const noSlop = JSON.parse(await readFile(path.join(evidence, 'no-slop-review.json'))); noSlop.candidate = '0'.repeat(40); await writeFile(path.join(evidence, 'no-slop-review.json'), JSON.stringify(noSlop));\n    result = await shipGate(target, { candidate }); assert.equal(result.status, 'HOLD'); assert.match(result.failures.join('\\n'), /no-slop.*stale/);\n    noSlop.candidate = candidate; await writeFile(path.join(evidence, 'no-slop-review.json'), JSON.stringify(noSlop));\n    const voice = { schemaVersion: 1, status: 'PASS', applicability: 'CALL_OR_VOICE', candidate, reviewerId: 'voice-reviewer', reason: 'candidate has a live call surface', consent: { identityDisclosure: 'PASS', recordingDisclosure: 'NOT_RECORDED', affirmativeConsent: 'PASS', revocationTest: 'PASS' }, recordingAndTranscripts: { policy: 'NOT_RECORDED', storage: 'NOT_RECORDED', access: 'NOT_RECORDED', retention: 'NOT_RECORDED', redaction: 'NOT_RECORDED', deletionOrExport: 'NOT_RECORDED' }, turnTaking: 'PASS', latency: { status: 'PASS', p50Ms: 700, p95Ms: 2600, budgetMs: 2000 }, interruptionHandling: 'PASS', voiceQa: { intelligibility: 'PASS', identityAndTone: 'PASS', noiseAndDeviceMatrix: 'PASS', failureDisclosure: 'PASS' }, callEscalation: { humanHandoff: 'PASS', emergencyBoundary: 'PASS', failedTransferRecovery: 'PASS', hangupControl: 'PASS' }, evidenceRefs: ['audio-fixture', 'latency-log'], generatedAt: new Date().toISOString() };\n    await writeFile(path.join(evidence, 'voice-call-proof.json'), JSON.stringify(voice));\n    result = await shipGate(target, { candidate }); assert.equal(result.status, 'HOLD'); assert.match(result.failures.join('\\n'), /latency/);\n    voice.latency.p95Ms = 1800; voice.consent.affirmativeConsent = 'FAIL'; await writeFile(path.join(evidence, 'voice-call-proof.json'), JSON.stringify(voice));\n    result = await shipGate(target, { candidate }); assert.equal(result.status, 'HOLD'); assert.match(result.failures.join('\\n'), /consent/);\n    voice.consent.affirmativeConsent = 'PASS'; await writeFile(path.join(evidence, 'voice-call-proof.json'), JSON.stringify(voice));\n    result = await shipGate(target, { candidate }); assert.equal(result.status, 'SHIP');\n  } finally { await rm(tmp, { recursive: true, force: true }); }\n});",
+      "start_line": 219,
+      "end_line": 250,
+      "category": "test",
+      "severity": "medium"
+    },
+    {
+      "path": "scripts/factory-control.mjs",
+      "content": "Missing schema version validation: The code doesn't validate `schemaVersion` for no-slop-review.json. According to the schema (receipt.schema.json), schemaVersion must be exactly 1. If a future version changes the schema structure, this gate will silently accept incompatible receipts. Add: `if (noSlop?.schemaVersion !== 1) failures.push('no-slop review has unsupported schema version');`",
+      "existing_code": "  const noSlop = receipts['no-slop-review.json'];\n  if (noSlop?.status !== 'PASS') failures.push('no-slop review did not PASS');",
+      "start_line": 144,
+      "end_line": 145,
+      "category": "bug",
+      "severity": "high"
+    },
+    {
+      "path": "scripts/factory-control.mjs",
+      "content": "Missing schema version validation: Similar to no-slop, subtraction-review.json lacks schemaVersion validation. Add: `if (subtraction?.schemaVersion !== 1) failures.push('Subtraction Gauntlet has unsupported schema version');`",
+      "existing_code": "  const subtraction = receipts['subtraction-review.json'];\n  if (!['PASS', 'NOT_APPLICABLE'].includes(subtraction?.status)) failures.push('Subtraction Gauntlet did not PASS');",
+      "start_line": 153,
+      "end_line": 154,
+      "category": "bug",
+      "severity": "high"
+    },
+    {
+      "path": "scripts/factory-control.mjs",
+      "content": "Critical logic error: This condition will ALWAYS fail when these fields are undefined/missing (which is valid according to the schema - they're not in the required fields). The check `undefined !== false` is true, so even valid receipts without regressions will be rejected. The correct logic should be: `if (subtraction?.accessibilityRegression === true || subtraction?.trustOrControlRegression === true)` to only fail on explicit true values.",
+      "existing_code": "    if (subtraction?.accessibilityRegression !== false || subtraction?.trustOrControlRegression !== false) failures.push('Subtraction Gauntlet has a protected-quality regression');",
+      "start_line": 163,
+      "end_line": 163,
+      "category": "bug",
+      "severity": "critical"
+    },
+    {
+      "path": "scripts/factory-control.mjs",
+      "content": "Missing schema version validation: voice-call-proof.json also lacks schemaVersion validation. Add: `if (voice?.schemaVersion !== 1) failures.push('Voice / Call Proof has unsupported schema version');`",
+      "existing_code": "  const voice = receipts['voice-call-proof.json'];\n  if (!['PASS', 'NOT_APPLICABLE'].includes(voice?.status)) failures.push('Voice / Call Proof did not PASS');",
+      "start_line": 167,
+      "end_line": 168,
+      "category": "bug",
+      "severity": "high"
+    },
+    {
+      "path": "tests/factory-hard-gates.test.mjs",
+      "content": "Missing test for schema version validation: The test creates a valid voice receipt but doesn't verify that invalid schema versions are rejected. Add a test case that sets `voice.schemaVersion = 999` and verifies it's rejected with an appropriate error message.",
+      "existing_code": "    const voice = { schemaVersion: 1, status: 'PASS', applicability: 'CALL_OR_VOICE', candidate, reviewerId: 'voice-reviewer', reason: 'candidate has a live call surface', consent: { identityDisclosure: 'PASS', recordingDisclosure: 'NOT_RECORDED', affirmativeConsent: 'PASS', revocationTest: 'PASS' }, recordingAndTranscripts: { policy: 'NOT_RECORDED', storage: 'NOT_RECORDED', access: 'NOT_RECORDED', retention: 'NOT_RECORDED', redaction: 'NOT_RECORDED', deletionOrExport: 'NOT_RECORDED' }, turnTaking: 'PASS', latency: { status: 'PASS', p50Ms: 700, p95Ms: 2600, budgetMs: 2000 }, interruptionHandling: 'PASS', voiceQa: { intelligibility: 'PASS', identityAndTone: 'PASS', noiseAndDeviceMatrix: 'PASS', failureDisclosure: 'PASS' }, callEscalation: { humanHandoff: 'PASS', emergencyBoundary: 'PASS', failedTransferRecovery: 'PASS', hangupControl: 'PASS' }, evidenceRefs: ['audio-fixture', 'latency-log'], generatedAt: new Date().toISOString() };",
+      "start_line": 242,
+      "end_line": 242,
+      "category": "test",
+      "severity": "medium"
+    },
+    {
+      "path": "tests/factory-hard-gates.test.mjs",
+      "content": "Test gap: This helper always creates receipts with NOT_APPLICABLE status for subtraction and voice. The critical USER_FACING path for subtraction (lines 159-164 in factory-control.mjs) is never tested, particularly the regression checks (`accessibilityRegression !== false`). This path contains a critical logic bug that would block all valid USER_FACING releases. Add test coverage for USER_FACING subtraction receipts with and without the optional regression fields.",
+      "existing_code": "async function writeHardenedReviewReceipts(evidence, candidate) {\n  await writeFile(path.join(evidence, 'no-slop-review.json'), JSON.stringify({ schemaVersion: 1, status: 'PASS', candidate, reviewerId: 'slop-reviewer', artifact: 'candidate', categories: { idea: 'PASS', strategy: 'NOT_APPLICABLE', copy: 'NOT_APPLICABLE', ui: 'NOT_APPLICABLE', architecture: 'PASS', code: 'PASS', business: 'NOT_APPLICABLE', production: 'PASS' }, findings: [], evidenceExamined: ['diff', 'tests'], generatedAt: new Date().toISOString() }));\n  await writeFile(path.join(evidence, 'subtraction-review.json'), JSON.stringify({ schemaVersion: 1, status: 'NOT_APPLICABLE', applicability: 'NON_USER_FACING', candidate, reviewerId: 'subtraction-reviewer', artifact: 'gate fixture', reason: 'no user-facing surface', generatedAt: new Date().toISOString() }));\n  await writeFile(path.join(evidence, 'voice-call-proof.json'), JSON.stringify({ schemaVersion: 1, status: 'NOT_APPLICABLE', applicability: 'NON_VOICE', candidate, reviewerId: 'voice-reviewer', reason: 'no voice or call surface', generatedAt: new Date().toISOString() }));\n}",
+      "start_line": 19,
+      "end_line": 23,
+      "category": "test",
+      "severity": "high"
+    },
+    {
+      "path": "scripts/factory-control.mjs",
+      "content": "Logic gap: When `applicability === 'USER_FACING'`, the code doesn't enforce that `status === 'PASS'`. A USER_FACING receipt with `status: 'NOT_APPLICABLE'` would pass line 154's check and enter the USER_FACING validation block at line 159, which doesn't make semantic sense. For USER_FACING changes, the status should be PASS. Add: `if (subtraction?.status !== 'PASS') failures.push('Subtraction Gauntlet user-facing change must have PASS status');` at the beginning of the USER_FACING block.",
+      "existing_code": "  } else if (subtraction?.applicability === 'USER_FACING') {\n    const dispositions = ['keep', 'merge', 'infer', 'defer', 'move', 'remove'];",
+      "start_line": 159,
+      "end_line": 160,
+      "category": "bug",
+      "severity": "medium"
+    }
+  ],
+  "groups": [
+    {
+      "label": "Receipt schema definitions for factory evaluations",
+      "files": [
+        "factory/evaluations/no-slop/receipt.schema.json",
+        "factory/evaluations/subtraction/receipt.schema.json",
+        "factory/evaluations/voice-call/receipt.schema.json"
+      ]
+    },
+    {
+      "label": "Factory control and automation scripts",
+      "files": [
+        "scripts/factory-control.mjs",
+        "scripts/factory-doctor.mjs",
+        "tests/factory-hard-gates.test.mjs"
+      ]
+    }
+  ],
+  "session_id": "c7a492a5-1570-4506-8852-49747ced39b5",
+  "manifest": {
+    "schema_version": "ocr.run-manifest/v1",
+    "run_id": "c7a492a5-1570-4506-8852-49747ced39b5",
+    "operation": "review",
+    "terminal_state": "complete",
+    "repository": {
+      "identity_sha256": "704d329c8ccd8be285a644395cc0560ce0bb5448c31601412111af010e2be0d7"
+    },
+    "input": {
+      "mode": "range",
+      "requested_from": "095eb1583d1d51e274364c835d2959ea5977a009",
+      "requested_head": "d03b81d06515e6a94fc40c3f8c39232ba4bdaeb9",
+      "resolved_base": "095eb1583d1d51e274364c835d2959ea5977a009",
+      "resolved_head": "d03b81d06515e6a94fc40c3f8c39232ba4bdaeb9",
+      "exact_range": "095eb1583d1d51e274364c835d2959ea5977a009..d03b81d06515e6a94fc40c3f8c39232ba4bdaeb9",
+      "source_artifact_sha256": "d3f2158c8275c67aab1f0211a01c84e68176b010659f146e54d35718757eb2e0"
+    },
+    "execution": {
+      "ocr_version": "v1.12.4",
+      "model": "claude-sonnet-4-5",
+      "configured_concurrency": 8,
+      "rule_config_sha256": "3be7920cfdb726301c8abca8f2fa34fdb142ff39089395f48e1a9267d59e1130",
+      "runtime_config_sha256": "1289e9907a79816aa9967284b64612aea3808a9f0c27142c7850b5c80c0f049d"
+    },
+    "coverage": {
+      "selected": [
+        {
+          "item_id": "43c73b77b78fde7fb26f31730e29d643140bdf6306239f487b73559865e667d5",
+          "path": "tests/factory-hard-gates.test.mjs",
+          "fingerprint": "c82e9d35459f80eac5a34f3110ed12839073b11d191368c7ca227c35610ad31a"
+        },
+        {
+          "item_id": "57f2dae6b1d811a9fe736fcf0f4fa3dd3d435611af4f1f5eceacf662c1396edb",
+          "path": "factory/evaluations/subtraction/receipt.schema.json",
+          "fingerprint": "422533d0f84457d94b0c77ef9449c2425b02ae50d75514bacd2a431c3545ef47"
+        },
+        {
+          "item_id": "844b64d4de5e928bc6fb91a438e3dc440d4b2d3b8508800b6b1a2cc61fcfb785",
+          "path": "scripts/factory-control.mjs",
+          "fingerprint": "5ca782a9c30bad571484a1f8159c0bbc5c581d1c384777a4bf60466d74bf976c"
+        },
+        {
+          "item_id": "d69fcaad04e09654c986fedc1b5d0aaeac9f3de0a1daefac06cbbc1f1a4b646d",
+          "path": "scripts/factory-doctor.mjs",
+          "fingerprint": "fe30281a55aa1824ddb268949853a61880ef4fef3944de01ea1cb0db24f00453"
+        },
+        {
+          "item_id": "ef9220b3636ce242320e95173841c484da21cbc2dc3e3c2d662a9ce051eb7fe8",
+          "path": "factory/evaluations/no-slop/receipt.schema.json",
+          "fingerprint": "a8fd3fd40e55df4c15eb8ba25df0b84aa2770d8b51a101123c5e44cc83f4602e"
+        },
+        {
+          "item_id": "f262217bf4f425172dff9a21daeb306fdc834123c305d96c0356abae3041d4d0",
+          "path": "factory/evaluations/voice-call/receipt.schema.json",
+          "fingerprint": "4dd4da0140a17abed261a2f743e9b56a198ccc2566a1229ff73cedb41d965d19"
+        }
+      ],
+      "completed": [
+        {
+          "item_id": "43c73b77b78fde7fb26f31730e29d643140bdf6306239f487b73559865e667d5",
+          "path": "tests/factory-hard-gates.test.mjs",
+          "fingerprint": "c82e9d35459f80eac5a34f3110ed12839073b11d191368c7ca227c35610ad31a"
+        },
+        {
+          "item_id": "57f2dae6b1d811a9fe736fcf0f4fa3dd3d435611af4f1f5eceacf662c1396edb",
+          "path": "factory/evaluations/subtraction/receipt.schema.json",
+          "fingerprint": "422533d0f84457d94b0c77ef9449c2425b02ae50d75514bacd2a431c3545ef47"
+        },
+        {
+          "item_id": "844b64d4de5e928bc6fb91a438e3dc440d4b2d3b8508800b6b1a2cc61fcfb785",
+          "path": "scripts/factory-control.mjs",
+          "fingerprint": "5ca782a9c30bad571484a1f8159c0bbc5c581d1c384777a4bf60466d74bf976c"
+        },
+        {
+          "item_id": "d69fcaad04e09654c986fedc1b5d0aaeac9f3de0a1daefac06cbbc1f1a4b646d",
+          "path": "scripts/factory-doctor.mjs",
+          "fingerprint": "fe30281a55aa1824ddb268949853a61880ef4fef3944de01ea1cb0db24f00453"
+        },
+        {
+          "item_id": "ef9220b3636ce242320e95173841c484da21cbc2dc3e3c2d662a9ce051eb7fe8",
+          "path": "factory/evaluations/no-slop/receipt.schema.json",
+          "fingerprint": "a8fd3fd40e55df4c15eb8ba25df0b84aa2770d8b51a101123c5e44cc83f4602e"
+        },
+        {
+          "item_id": "f262217bf4f425172dff9a21daeb306fdc834123c305d96c0356abae3041d4d0",
+          "path": "factory/evaluations/voice-call/receipt.schema.json",
+          "fingerprint": "4dd4da0140a17abed261a2f743e9b56a198ccc2566a1229ff73cedb41d965d19"
+        }
+      ],
+      "reused": [],
+      "failed": [],
+      "waived": []
+    },
+    "elapsed_ms": 391503
+  }
+}

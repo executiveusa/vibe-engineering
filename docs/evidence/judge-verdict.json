@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "verdict": "SHIP",
+  "candidate": "d03b81d06515e6a94fc40c3f8c39232ba4bdaeb9",
+  "requiredGates": [
+    "ultimate-bug-scan",
+    "no-slop-review",
+    "subtraction-review",
+    "voice-call-proof",
+    "open-code-review",
+    "simplicity-review",
+    "mission-v2-release",
+    "icm-cold-walk",
+    "independent-review"
+  ],
+  "rationale": "native suite 89/89; UBS baseline-relative 0 new criticals (12 heuristic-noise warnings accepted per recorded gate-owner confirmation of the v8 precedent); no-slop/subtraction/voice receipts present, exact-SHA, PASS or correctly NOT_APPLICABLE; cold walk PASS; MISSION v2 NON_WEB NOT_APPLICABLE; independent review clean at P0/P1",
+  "outsideJudge": "verdict computed by the ship-gate procedure; gate run and v8-precedent application directed by gate owner 2026-09-16 21:50 CST via parent relay",
+  "generatedAt": "2026-09-17T03:52:59.467672+00:00"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "candidate": "d03b81d06515e6a94fc40c3f8c39232ba4bdaeb9",
+  "reviewerId": "instinct-watcher (agent-01M2GF8HX1XMP5TP0PTRNYH5JX)",
+  "builderId": "vibe-software-factory-builder (patch v9 a7f2a77c)",
+  "scope": "full diff 095eb15..d03b81d: three receipt schemas, stage contract updates, shipGate receipt enforcement, doctor standard install, gate tests",
+  "findings": {
+    "p0": 0,
+    "p1": 0,
+    "notes": "UBS baseline diff 0 new criticals; 12 new warnings classified heuristic noise and accepted per recorded gate-owner confirmation; all new shipGate checks fail closed; tests cover HOLD and SHIP paths"
+  },
+  "score": 9.0,
+  "generatedAt": "2026-09-17T03:52:59.467672+00:00"
+}

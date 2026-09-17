@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "status": "NOT_APPLICABLE",
+  "applicability": "NON_USER_FACING",
+  "candidate": "d03b81d06515e6a94fc40c3f8c39232ba4bdaeb9",
+  "reviewerId": "instinct-watcher (agent-01M2GF8HX1XMP5TP0PTRNYH5JX, independent of patch author)",
+  "artifact": "full diff 095eb15..d03b81d",
+  "reason": "candidate is factory gate tooling (receipt schemas, stage CONTEXT contracts, control-plane .mjs checks, and gate tests); no user-facing surface ships in this diff",
+  "generatedAt": "2026-09-17T03:52:59.467672+00:00"
+}
