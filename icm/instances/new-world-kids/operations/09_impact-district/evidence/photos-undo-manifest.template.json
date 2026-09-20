@@ -1,0 +1,19 @@
+{
+  "manifest": "nwkids-photos-undo",
+  "batch_id": "YYYY-MM-batchNN",
+  "created_by": "agent-id",
+  "created_at": "ISO-8601",
+  "scope": "Google Photos organization, owner-authorized 2026-09-19; albums only, no deletes, no moves of originals",
+  "entries": [
+    {
+      "item_id": "photos-item-id-or-content-hash",
+      "item_hint": "filename or date+description if known",
+      "action": "added_to_album",
+      "album": "NWK-YYYY-MM",
+      "classification": "nwkids|unattributed|other-lane",
+      "classified_by": "date-metadata|vision-model|owner",
+      "ts": "ISO-8601"
+    }
+  ],
+  "rollback": "Replay entries in reverse: remove item_id from album. Albums themselves are deleted only on owner order."
+}
