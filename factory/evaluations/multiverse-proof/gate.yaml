@@ -1,0 +1,25 @@
+version: 1
+scope: [Production, Revenue]
+applies_to: stateful projects (full version); website-class projects (light version: Playwright fault matrix + seeded rounds)
+pattern: Antithesis-style deterministic simulation testing, free-tier build (property-based tests + fault matrix + recorded seeds)
+spec: skills/multiverse-proof/SKILL.md
+stage: proof
+mode: evaluate-only
+on_fail: hold_release
+mandatory_surface: proof
+checks:
+  - id: property-catalog-exists
+    fail_when: the project declares no "should ALWAYS" invariant list for its shape
+  - id: seeds-recorded
+    fail_when: a run lacks a logged seed per round
+  - id: fault-matrix-run
+    fail_when: properties ran only in the happy-path environment (no dead APIs, timeouts, garbage responses, slow network, or injected tool faults)
+  - id: invariants-hold-under-faults
+    fail_when: any invariant breaks under any seeded fault round
+  - id: repro-artifact
+    fail_when: a reported failure has no reproducing seed plus artifact (no seed, no claim)
+  - id: injection-laced-inputs
+    fail_when: agent-class surfaces were never fed hostile or instruction-laced tool outputs
+  - id: no-flaky-pass
+    fail_when: a pass cannot be reproduced by rerunning the recorded seed
+notes: Automations OFF - runs on demand as a review surface; receipts are artifacts. Real Antithesis (enterprise) adds total environmental determinism and the multiverse exploration engine if ever purchased.

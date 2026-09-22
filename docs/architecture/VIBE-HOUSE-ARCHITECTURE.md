@@ -34,7 +34,7 @@ The physical ICM stage names remain versioned implementation details. Their cano
 | Spec | `01_vision` | approved user/product intent and acceptance boundary |
 | Plan | `02_blueprint` | architecture, files, sequence, risks, rollback, verifiable slice |
 | Build | `03_build` | isolated implementation output |
-| Proof | `04_verify` | deterministic tests, visual evidence, live checks where required |
+| Proof | `04_verify` | deterministic tests, visual evidence, live checks where required; multiverse-proof (`factory/evaluations/multiverse-proof/gate.yaml`) is a MANDATORY surface for stateful projects: seeded property tests under a fault matrix, every failure reproducible by seed |
 | Council | `05_council` | independent value, architecture, failure, security, taste, sovereignty review; for website-class projects the motion/taste audit (`factory/evaluations/motion-design-audit/gate.yaml`, spec `skills/icm-awwwards-taste-gauntlet-audit/SKILL.md`) is a MANDATORY surface - no website ships without its audit receipt |
 | Judge | `06_judge` | SHIP/HOLD verdict from evidence |
 | Ship | `07_ship` | authorized release plus tested rollback |
