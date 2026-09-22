@@ -1,6 +1,6 @@
 version: 1
 scope: [Production, Revenue]
-applies_to: stateful projects (full version); website-class projects (light version: Playwright fault matrix + seeded rounds)
+applies_to: "stateful projects (full version); website-class projects (light version - Playwright fault matrix + seeded rounds)"
 pattern: Antithesis-style deterministic simulation testing, free-tier build (property-based tests + fault matrix + recorded seeds)
 spec: skills/multiverse-proof/SKILL.md
 stage: proof
