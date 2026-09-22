@@ -19,4 +19,10 @@ jobs:
       review_concurrency: "3"
       route_severity_below: low
       route_categories: style,documentation
+      # NOTE: prompt-injection findings are reviewed under the `security` category
+      # (the engine has no separate injection category) and are never routed away
+      # from inline comments. TODO: the referenced reusable workflow
+      # executiveusa/open-code-review/.github/workflows/vibe-review-standard.yml@main
+      # does not exist in that repo - this gate currently errors until a reusable
+      # workflow is published there. Tracked; do not silently retarget.
       upload_artifacts: true

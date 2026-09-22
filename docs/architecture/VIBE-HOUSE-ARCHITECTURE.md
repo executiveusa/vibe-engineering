@@ -35,10 +35,14 @@ The physical ICM stage names remain versioned implementation details. Their cano
 | Plan | `02_blueprint` | architecture, files, sequence, risks, rollback, verifiable slice |
 | Build | `03_build` | isolated implementation output |
 | Proof | `04_verify` | deterministic tests, visual evidence, live checks where required |
-| Council | `05_council` | independent value, architecture, failure, security, taste, sovereignty review |
+| Council | `05_council` | independent value, architecture, failure, security, taste, sovereignty review; for website-class projects the motion/taste audit (`factory/evaluations/motion-design-audit/gate.yaml`, spec `skills/icm-awwwards-taste-gauntlet-audit/SKILL.md`) is a MANDATORY surface - no website ships without its audit receipt |
 | Judge | `06_judge` | SHIP/HOLD verdict from evidence |
 | Ship | `07_ship` | authorized release plus tested rollback |
 | Operate | `08_improve` | production observation, incidents, maintenance, validated improvement loop |
+
+## Final review law
+
+The final vibe-project-review pass is always the LAST step before Judge and Ship. Nothing evidence-gathering happens after it; the Judge only reads evidence, and Ship only executes an authorized release. That final review must explicitly cover three surfaces: security, bugs, and prompt-injection protection (tool- and agent-facing content handling, untrusted-content quarantine, instructions hidden inside data). A review that skips any of the three is incomplete and produces HOLD.
 
 ## Mandatory intake contract
 

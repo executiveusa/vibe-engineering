@@ -1,0 +1,42 @@
+version: 1
+scope: [Production, Creative, Revenue]
+applies_to: website-class projects (any project shipping a web UI)
+spec: skills/icm-awwwards-taste-gauntlet-audit/SKILL.md (icm-awwwards-taste-gauntlet-audit v1.0.0 - governing version)
+mode: evaluate-only
+on_fail: hold_release
+mandatory_surface: council
+checks:
+  - id: inspect-before-change
+    fail_when: redesign or motion changes begin before repo, framework, routes, component system, styling approach, motion libraries, and content sources are inspected (LAW 01)
+  - id: runtime-truth
+    fail_when: audit claims rest on source-code assumptions contradicted by built or live runtime behavior (LAW 02)
+  - id: no-invented-proof
+    fail_when: audit cites evidence, references, or measurements that were not actually produced or fetched (LAW 03)
+  - id: job-before-execution
+    fail_when: the site is judged against a template ideal instead of its actual organization, user, action, and business objective
+  - id: motion-explains
+    fail_when: animation exists that does not clarify hierarchy, show spatial relationships, provide feedback, or reinforce navigation (LAW 05)
+  - id: native-scroll
+    fail_when: scroll position is hijacked where native scrolling plus interpolation would serve (LAW 06)
+  - id: gpu-safe-motion
+    fail_when: layout properties are animated continuously where transform/opacity suffice; filter animated without justification
+  - id: reduced-motion
+    fail_when: prefers-reduced-motion is not honored as a real designed experience (LAW 07)
+  - id: mobile-composition
+    fail_when: mobile is a shrunk desktop instead of a composed experience (LAW 08)
+  - id: no-self-approval
+    fail_when: the builder approves its own audit or remediation (LAW 09)
+  - id: hostile-reference-comparison
+    fail_when: the audit skips blind comparison against a real, fetchable, award-level reference appropriate to the site type
+  - id: accessibility-hard-gate
+    fail_when: the accessibility hard gate (spec section 35) fails
+  - id: performance-hard-gate
+    fail_when: the performance hard gate (spec section 36) fails
+  - id: truth-gate
+    fail_when: the site promises what the product does not do (spec section 37)
+  - id: stop-and-ask
+    fail_when: remediation begins without the audit's required STOP and explicit human approval
+artifacts_required_for_ship:
+  - motion/taste audit receipt (spec section 45 Evidence Receipt)
+  - independent critic pass (spec section 39)
+notes: Audit-only by default. The gate is a mandatory review surface, not auto-remediation.
