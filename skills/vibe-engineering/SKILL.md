@@ -160,6 +160,28 @@ Compare the promise with actual use. Measure user/customer outcomes, cost, incid
 
 Production signals may open a new `INTENT`, but consequential remediation follows the same gates. Autonomous maintenance does not bypass Council, Judge, ownership, or rollback.
 
+## Design inheritance law
+
+For design and product work, preserve global quality standards but never treat prior project aesthetics as defaults.
+
+Before visual BUILD, define the project's Visual World, Emotional Target, Cultural Sources, Typography, Color Behavior, Density, Composition, Image Language, Motion Language, and Anti-References.
+
+Compare new visual directions against the existing GitHub/Netlify/Vercel portfolio. If a project resembles another project with only different copy, logo, color, or imagery, reject the direction.
+
+ADHD-friendly means low cognitive friction, not mandatory minimalism or whitespace.
+
+COLLINS, Apple, Awwwards, Impeccable, Steve Krug, and similar references are quality benchmarks, never visual templates.
+
+Reuse engineering patterns freely. Do not reuse unrelated brand appearance.
+
+Canonical enforcement skill:
+
+`skills/preserve-standards-forget-style/SKILL.md`
+
+Permanent law:
+
+> **Preserve standards. Forget style. Every brand earns its own world.**
+
 ## No-slop rule
 
 AI slop is any important output that exists because the model defaulted to it instead of because the project chose it.
