@@ -1,0 +1,6 @@
+{
+  "_status": "DISABLED - requires paid Refero plan and owner approval",
+  "mcpServers": {
+    "refero": { "type": "http", "url": "https://api.refero.design/mcp", "disabled": true }
+  }
+}
