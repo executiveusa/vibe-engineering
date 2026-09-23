@@ -141,3 +141,45 @@ That protected quality must connect to the approved Intent → Standard → Evid
 ## Client Zero
 
 Vibe Engineering applies this standard to itself before teaching or distributing it as a client standard.
+
+
+## Cross-project style firewall
+
+Global standards may persist across projects. Unrelated brand appearance may not.
+
+Preserve globally: usability, ADHD-friendly clarity, accessibility, craftsmanship, reduction, responsive behavior, Steve Krug principles, Collins-level rigor, Apple-level polish, anti-slop editing, performance, verification, strong hierarchy, recovery, and human control.
+
+Do **not** globally inherit recurring visual treatments such as white/cream backgrounds, editorial minimalism, oversized whitespace, giant headlines, serif/sans pairings, Inter, Geist, Space Grotesk, split heroes, muted palettes, thin rules, rounded cards, magazine grids, or any other prior-project aesthetic unless the current brand independently earns that choice.
+
+Before visual BUILD, define the project's:
+
+- Visual World
+- Emotional Target
+- Cultural Sources
+- Typography
+- Color Behavior
+- Density
+- Composition
+- Image Language
+- Motion Language
+- Anti-References
+
+Derive those choices from the project's own audience, culture, geography, industry, history, personality, product behavior, imagery, competitive context, and emotional goal.
+
+Consistency belongs inside a brand, not across unrelated brands.
+
+ADHD-friendly means low cognitive friction, not mandatory minimalism or whitespace.
+
+COLLINS, Apple, Awwwards, Impeccable, Steve Krug, and similar references are quality benchmarks, never visual templates.
+
+Reuse engineering patterns freely. Do not reuse unrelated brand appearance.
+
+Before approval, compare the new design against the existing GitHub/Netlify/Vercel portfolio. If it resembles another project with only different copy, logo, color, or imagery, reject the direction and return to the visual-world definition.
+
+Canonical enforcement skill:
+
+`skills/preserve-standards-forget-style/SKILL.md`
+
+Permanent law:
+
+> **Preserve standards. Forget style. Every brand earns its own world.**
