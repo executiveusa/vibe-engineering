@@ -485,3 +485,29 @@ wayfinder
 Skills provide procedures. Vibe Engineering provides governance.
 
 A skill completing its procedure does not automatically authorize release. Only verified evidence, passing hard gates, owner control, required human approval, and the Vibe Judge can produce `SHIP`.
+
+
+## Visual identity and anti-convergence
+
+### Visual Independence Governor
+
+Source:
+
+- `skills/visual-independence-governor/SKILL.md`
+
+Use when:
+
+- creating or redesigning any website, app, brand, interface, campaign, or design system;
+- unrelated projects are beginning to share the same aesthetic;
+- an AI agent may be defaulting to familiar typography, palettes, heroes, cards, whitespace, or editorial/SaaS compositions;
+- a benchmark such as Apple, Collins, Awwwards, shadcn, or another admired product is being used.
+
+Required behavior:
+
+- preserve global quality standards while deriving project-specific aesthetics from evidence;
+- create a Visual World Brief before visual implementation;
+- compare against closest portfolio neighbors when available;
+- reject recolored or reworded versions of existing project aesthetics;
+- keep cognitive clarity, accessibility, and responsive quality while allowing radically different visual worlds.
+
+Recommended stage mapping: `INTENT/SPEC -> BUILD -> COUNCIL`.
