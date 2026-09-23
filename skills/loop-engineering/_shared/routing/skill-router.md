@@ -26,4 +26,6 @@ Do not preload every skill. Match the current stage and artifact.
 | Any substantial completion claim | Unlazy gate discipline | acceptance ledger + rerun evidence | never skip because work 'looks done' |
 | Final quality comparison | Gauntlet Loop pattern | fresh critic, real bar, blind comparator | no valid bar yet |
 
+| Visual / UI design research before build | `third-party/refero-design` (bundled craft refs; Refero MCP only if licensed) | research-first reference lock, decision ledger, anti-averaging | backend-only work; never overrides Heart & Soul, UDEC or gauntlet verdicts |
+
 Rule: references teach patterns. Do not install or combine frameworks unless the architecture decision in `02_architecture` justifies their cost and ownership impact.
