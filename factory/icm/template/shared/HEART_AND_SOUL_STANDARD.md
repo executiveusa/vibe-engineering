@@ -141,3 +141,26 @@ That protected quality must connect to the approved Intent → Standard → Evid
 ## Client Zero
 
 Vibe Engineering applies this standard to itself before teaching or distributing it as a client standard.
+
+
+## Visual independence governor
+
+For material visual or brand work, use the repo-agnostic skill:
+
+`skills/visual-independence-governor/SKILL.md`
+
+It prevents quality standards from becoming a repeated house aesthetic.
+
+Its governing rules are:
+
+- consistency belongs inside a brand, not across unrelated brands;
+- preserve standards, forget style;
+- every brand earns its own world;
+- derive a Visual World Brief before visual BUILD;
+- compare against portfolio neighbors or common AI defaults before approval;
+- require meaningful differentiation in at least three major visual dimensions when unrelated brands are compared;
+- ADHD-friendly clarity does not imply minimalism;
+- benchmark brands are mechanism references, never appearance templates;
+- reuse engineering systems, not unrelated brand appearance.
+
+When this skill detects convergence, return the work to design before BUILD or release review.
