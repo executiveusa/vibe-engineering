@@ -4,6 +4,15 @@ on:
   schedule:
     - cron: "30 7 * * *"
   workflow_dispatch:
+    inputs:
+      target_repository:
+        description: "Optional: owner/repo to run the factory against (skips Vercel batch selection)"
+        required: false
+        type: string
+      target_branch:
+        description: "Optional: branch of target_repository (used with target_repository)"
+        required: false
+        type: string
 
 concurrency:
   group: nightly-production-readiness
@@ -26,7 +35,16 @@ jobs:
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
-        run: node scripts/select-nightly-vercel-batch.mjs
+          TARGET_REPOSITORY_IN: ${{ inputs.target_repository }}
+          TARGET_BRANCH_IN: ${{ inputs.target_branch }}
+        run: |
+          if [ -n "$TARGET_REPOSITORY_IN" ]; then
+            branch="${TARGET_BRANCH_IN:-main}"
+            project="${TARGET_REPOSITORY_IN##*/}"
+            echo "matrix={"include":[{"project":"$project","repository":"$TARGET_REPOSITORY_IN","branch":"$branch","state":"MANUAL","priority":0}]}" >> "$GITHUB_OUTPUT"
+          else
+            node scripts/select-nightly-vercel-batch.mjs
+          fi
 
   audit-prd-build-review:
     needs: select
