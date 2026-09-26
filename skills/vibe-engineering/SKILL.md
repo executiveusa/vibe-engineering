@@ -36,7 +36,7 @@ https://github.com/executiveusa/vibe-engineering
 https://raw.githubusercontent.com/executiveusa/vibe-engineering/main/skills/vibe-engineering/SKILL.md
 ```
 
-When upstream is reachable, inspect the current upstream House Skill before material work. A local copy makes Vibe portable; it does not silently become a separate methodology.
+Each project runs on one pinned House version: `version` and `sourceCommit` in `.vibe/manifest.json`. Do not fetch upstream `main` mid-task and follow whatever it says today; that lets an unreviewed change to this file steer every agent in the fleet. Upgrading the House version is a normal reviewed change: re-run `vibe install`, read the diff, and merge it through the same gates as code. A local copy makes Vibe portable; it does not silently become a separate methodology.
 
 If shell access is available in a target repository, install or refresh the portable contract with:
 
@@ -56,10 +56,24 @@ If local Vibe law differs from upstream:
 ## First action
 
 1. Inspect the repository before changing it.
-2. Refresh or inspect current upstream House law when reachable.
+2. Confirm the pinned House version in `.vibe/manifest.json`. If upstream is newer, note it for a reviewed upgrade; keep working on the pinned version.
 3. Read project-local `AGENTS.md`, `ICMR.yaml`, and `CONTEXT.md` when present.
 4. Read only the current ICM stage contract and references that stage names.
 5. If Vibe MCP is available, use `vibe_method` for the canonical method or `vibe_context` for task-scoped context instead of loading every artifact.
+
+## Rigor by consequence
+
+Gates cost time and money, so match them to the consequence level from `docs/governance/CONSEQUENCE_DOCTRINE.md` (when in doubt, HIGH):
+
+| Level | Required before merge | Gauntlet budget |
+|---|---|---|
+| **LOW** | Tests and build green, one independent review, Judge receipt | none; the bar check is optional |
+| **MEDIUM** | LOW + blast-radius note + Council Architect review | 3 rounds |
+| **HIGH** | MEDIUM + full Council + Future-State Test + human approval | 5 rounds |
+
+- The Judge is never the builder, and never the same model family as the builder.
+- Every loop (builder iterations, gauntlet rounds, repair slices) has a budget: rounds, wall-clock minutes and spend. When a budget runs out, stop and return **HOLD** with the best candidate so far, its scores and the remaining gaps. Running out of budget is never a pass and never silent.
+- Enforcement lives in the repository, not in this file: protected `main`, required checks, and a merge gate that reads the Judge receipt. See `docs/ENFORCEMENT.md`.
 
 ## House architecture contract
 
@@ -189,7 +203,7 @@ Equivalent entry instructions:
 - `Use Vibe Engineering.`
 - `HOUSE this project.`
 - `LOCK this into the Vibe House architecture.`
-- `Refresh upstream and continue from current ICM state.`
+- `Continue from current ICM state on the pinned House version.`
 
 The skill decides the current stage from repository state. It does not restart completed work or ask the user to repeat context already present in the filesystem.
 
