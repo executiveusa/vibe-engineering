@@ -1,0 +1,65 @@
+name: Vibe merge gate
+
+# Reusable. A repository calls this on its pull requests and makes the resulting check required on
+# protected main (scripts/protect-main.sh). The check passes only when the Judge receipt is SHIP,
+# current for the code being merged, and HIGH-consequence work has an independent approval.
+# See docs/ENFORCEMENT.md for the caller workflow.
+on:
+  workflow_call:
+    inputs:
+      vibe-ref:
+        description: Commit SHA of vibe-engineering to run; use the same SHA as the `uses:` line.
+        required: true
+        type: string
+      receipt-path:
+        type: string
+        default: docs/evidence/production-readiness-judge.json
+      runs-on:
+        description: JSON runner labels, e.g. '["self-hosted","pauli-self-hosted"]'.
+        type: string
+        default: '["ubuntu-latest"]'
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  gate:
+    name: vibe-merge-gate
+    if: ${{ github.event.pull_request }}
+    runs-on: ${{ fromJson(inputs.runs-on) }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          path: target
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: executiveusa/vibe-engineering
+          ref: ${{ inputs.vibe-ref }}
+          path: vibe
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - id: reviews
+        name: Count independent approvals
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          # Latest decisive review per reviewer, excluding the PR author; count the approvals.
+          count=$(gh api --paginate "repos/$REPO/pulls/$PR/reviews" \
+            --jq '.[] | select(.user.login != env.AUTHOR) | select(.state == "APPROVED" or .state == "CHANGES_REQUESTED" or .state == "DISMISSED") | "\(.user.login)\t\(.state)"' \
+            | awk -F'\t' '{ last[$1] = $2 } END { n = 0; for (u in last) if (last[u] == "APPROVED") n++; print n }')
+          echo "approvals=$count" >> "$GITHUB_OUTPUT"
+      - name: Judge receipt, freshness and tier
+        working-directory: target
+        env:
+          RECEIPT: ${{ inputs.receipt-path }}
+          APPROVALS: ${{ steps.reviews.outputs.approvals }}
+        run: node ../vibe/scripts/merge-gate.mjs --receipt "$RECEIPT" --approvals "$APPROVALS"

@@ -60,4 +60,8 @@ If ours loses or a hard floor fails:
 4. re-verify from fresh evidence;
 5. compare again.
 
-Stop when ours wins/clears the defined bar, the owner stops, a safety/authority gate blocks, or evidence shows the target itself must change.
+Stop when ours wins/clears the defined bar, the owner stops, a safety/authority gate blocks, evidence shows the target itself must change, or the budget runs out.
+
+## Budget
+
+Every gauntlet has a budget before round 1: a round cap (MEDIUM 3, HIGH 5 unless the bar sets a stricter one), and optionally wall-clock minutes and spend. When the budget runs out the result is **HOLD**, with the best candidate so far, its scores, and the open decisive gaps. The owner decides whether to raise the budget, lower the bar, or stop. An exhausted budget is never a pass.

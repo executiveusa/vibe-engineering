@@ -9,6 +9,11 @@ if (!taskNumber || !/^\d+$/.test(taskNumber)) {
   );
 }
 
+const anthropicKey = process.env.ANTHROPIC_API_KEY;
+if (!anthropicKey) {
+  throw new Error("Set ANTHROPIC_API_KEY: the independent reviewer runs on Claude Code.");
+}
+
 const baseline = process.env.VIBE_BASELINE_BRANCH ?? "main";
 const branch = `sandcastle/issue-${taskNumber}-${Date.now()}`;
 
@@ -36,7 +41,6 @@ try {
     maxIterations: 1,
     agent: sandcastle.codex("gpt-5.4", {
       effort: "high",
-      approvalsReviewer: "auto_review",
     }),
     promptFile: ".sandcastle/implement-prompt.md",
     promptArgs: {
@@ -51,12 +55,13 @@ try {
     );
   }
 
+  // The reviewer is a different model family from the implementer, so it does not share its blind spots.
   await sandbox.run({
     name: `review-issue-${taskNumber}`,
     maxIterations: 1,
-    agent: sandcastle.codex("gpt-5.4", {
+    agent: sandcastle.claudeCode(process.env.VIBE_JUDGE_MODEL || "opus", {
       effort: "high",
-      approvalsReviewer: "auto_review",
+      env: { ANTHROPIC_API_KEY: anthropicKey },
     }),
     promptFile: ".sandcastle/review-prompt.md",
     promptArgs: {

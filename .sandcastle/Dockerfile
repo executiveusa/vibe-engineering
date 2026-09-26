@@ -7,7 +7,8 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends git ca-certificates curl gh \
   && rm -rf /var/lib/apt/lists/*
 
-RUN npm install -g @openai/codex
+# Builder (Codex) and independent Judge (Claude Code) CLIs, pinned; bump deliberately.
+RUN npm install -g @openai/codex@0.157.1 @anthropic-ai/claude-code@2.1.283
 
 RUN groupmod -g ${AGENT_GID} node \
   && usermod -u ${AGENT_UID} -g ${AGENT_GID} node
