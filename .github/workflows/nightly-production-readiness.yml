@@ -41,7 +41,8 @@ jobs:
           if [ -n "$TARGET_REPOSITORY_IN" ]; then
             branch="${TARGET_BRANCH_IN:-main}"
             project="${TARGET_REPOSITORY_IN##*/}"
-            echo "matrix={"include":[{"project":"$project","repository":"$TARGET_REPOSITORY_IN","branch":"$branch","state":"MANUAL","priority":0}]}" >> "$GITHUB_OUTPUT"
+            matrix=$(jq -cn --arg p "$project" --arg r "$TARGET_REPOSITORY_IN" --arg b "$branch" '{include:[{project:$p,repository:$r,branch:$b,state:"MANUAL",priority:0}]}')
+            echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
           else
             node scripts/select-nightly-vercel-batch.mjs
           fi
