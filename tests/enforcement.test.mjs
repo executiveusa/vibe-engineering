@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { assertIndependentJudge, evaluateReceipt } from '../factory/judge-receipt.mjs';
+import { assertIndependentJudge, evaluateReceipt, modelFamily } from '../factory/judge-receipt.mjs';
 import { gate } from '../scripts/merge-gate.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -53,6 +53,17 @@ test('the Judge must come from a different model family than the builder', () =>
   assert.doesNotThrow(() => assertIndependentJudge('openai', 'anthropic'));
   assert.throws(() => assertIndependentJudge('openai', 'openai'));
   assert.throws(() => assertIndependentJudge('openai', undefined));
+  assert.equal(modelFamily('openrouter/qwen/qwen3.8-27b:free'), 'qwen');
+  assert.equal(modelFamily('openrouter/google/gemma-4-31b-it:free'), 'google');
+  assert.equal(modelFamily('gpt-5.4'), 'openai');
+  assert.equal(modelFamily('opus'), 'anthropic');
+  // Two free-lane overrides from the same family must still be rejected.
+  assert.throws(() =>
+    assertIndependentJudge(
+      modelFamily('openrouter/qwen/builder:free'),
+      modelFamily('openrouter/qwen/judge:free'),
+    ),
+  );
 });
 
 test('merge gate: receipt required, must be current, HIGH needs an independent approval', () => {

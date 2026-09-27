@@ -29,8 +29,8 @@ This factory audits and advances five Vercel-connected repositories per nightly 
 
 Use a trusted self-hosted Linux runner with Docker. Configure repository secrets:
 
-- `OPENAI_API_KEY` (builder)
-- `ANTHROPIC_API_KEY` (independent Judge)
+- Model lane: default is the free lane (`OPENROUTER_API_KEY` only; builder and Judge run as OpenRouter `:free` models through OpenCode). Set repository variable `VIBE_MODEL_LANE=paid` to use the paid lane instead, which requires `OPENAI_API_KEY` (builder) and `ANTHROPIC_API_KEY` (independent Judge). Owner decision 2026-09-26: free lane for now, no paid rail.
+- `OPENROUTER_API_KEY` (free lane)
 - `VERCEL_TOKEN`
 - `VERCEL_TEAM_ID`
 - `FLEET_GITHUB_TOKEN`
