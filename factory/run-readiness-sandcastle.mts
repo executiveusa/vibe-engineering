@@ -19,8 +19,10 @@ const openrouterKey = process.env.OPENROUTER_API_KEY;
 // still differ). Owner decision 2026-09-26 (voice note): free lane for now, no paid
 // rail. The free lane authenticates with an OpenRouter key only - never a GitHub
 // token - so the agent sandbox still holds nothing that can push or merge.
-// Lane is explicit via VIBE_MODEL_LANE, else auto: paid only when both paid keys exist.
-const lane = process.env.VIBE_MODEL_LANE || (openaiKey && anthropicKey ? "paid" : "free");
+// Lane is explicit via VIBE_MODEL_LANE. Default is FREE (owner decision 2026-09-26:
+// free lane for now, no paid rail) - paid runs only when explicitly selected,
+// even if legacy paid secrets still exist on the repo.
+const lane = process.env.VIBE_MODEL_LANE || "free";
 if (lane !== "paid" && lane !== "free") throw new Error("VIBE_MODEL_LANE must be paid or free");
 if (lane === "paid") {
   if (!openaiKey) throw new Error("OPENAI_API_KEY is required for the builder");
