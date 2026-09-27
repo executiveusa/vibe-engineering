@@ -1,0 +1,14 @@
+name: merge-gate-caller
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  pull_request_review:
+    types: [submitted, dismissed]
+permissions:
+  contents: read
+  pull-requests: read
+jobs:
+  vibe:
+    uses: executiveusa/vibe-engineering/.github/workflows/vibe-merge-gate.yml@9e7fea18e0063632f76a9126f25be600e97e9e8e
+    with:
+      vibe-ref: 9e7fea18e0063632f76a9126f25be600e97e9e8e
