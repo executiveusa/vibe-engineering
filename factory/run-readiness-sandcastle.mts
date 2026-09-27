@@ -23,12 +23,32 @@ const openrouterKey = process.env.OPENROUTER_API_KEY;
 // free lane for now, no paid rail) - paid runs only when explicitly selected,
 // even if legacy paid secrets still exist on the repo.
 const lane = process.env.VIBE_MODEL_LANE || "free";
-if (lane !== "paid" && lane !== "free") throw new Error("VIBE_MODEL_LANE must be paid or free");
-if (lane === "paid") {
-  if (!openaiKey) throw new Error("OPENAI_API_KEY is required for the builder");
-  if (!anthropicKey) throw new Error("ANTHROPIC_API_KEY is required for the independent Judge");
-} else if (!openrouterKey) {
-  throw new Error("OPENROUTER_API_KEY is required for the free model lane");
+
+const slug = repo.replace(/[^a-zA-Z0-9._-]/g, "-");
+const branch = `vibe/readiness-${slug}-${Date.now()}`;
+
+const report = (decision: string, extra: Record<string, unknown> = {}) => {
+  const output = process.env.GITHUB_OUTPUT;
+  if (output) fs.appendFileSync(output, `branch=${branch}\ndecision=${decision}\n`, "utf8");
+  console.log(JSON.stringify({ repository: repo, branch, decision, lane, ...extra }));
+};
+
+// Fail closed: configuration problems (bad lane, missing credentials) must still
+// record a durable HOLD so the workflow reports it instead of failing empty.
+const validateConfig = () => {
+  if (lane !== "paid" && lane !== "free") throw new Error("VIBE_MODEL_LANE must be paid or free");
+  if (lane === "paid") {
+    if (!openaiKey) throw new Error("OPENAI_API_KEY is required for the builder");
+    if (!anthropicKey) throw new Error("ANTHROPIC_API_KEY is required for the independent Judge");
+  } else if (!openrouterKey) {
+    throw new Error("OPENROUTER_API_KEY is required for the free model lane");
+  }
+};
+try {
+  validateConfig();
+} catch (error) {
+  report("HOLD", { level: "config", reasons: [(error as Error).message] });
+  throw error;
 }
 const builderModel = process.env.VIBE_BUILDER_MODEL || (lane === "paid" ? "gpt-5.4" : "openrouter/qwen/qwen3.8-27b:free");
 const judgeModel = process.env.VIBE_JUDGE_MODEL || (lane === "paid" ? "opus" : "openrouter/google/gemma-4-31b-it:free");
@@ -66,8 +86,6 @@ const judge = () =>
         env: { OPENROUTER_API_KEY: openrouterKey as string },
       });
 
-const slug = repo.replace(/[^a-zA-Z0-9._-]/g, "-");
-const branch = `vibe/readiness-${slug}-${Date.now()}`;
 const sandbox = await sandcastle.createSandbox({
   branch,
   sandbox: docker({ imageName: "sandcastle:vibe-engineering" }),
@@ -80,12 +98,6 @@ const sandbox = await sandcastle.createSandbox({
     },
   },
 });
-
-const report = (decision: string, extra: Record<string, unknown> = {}) => {
-  const output = process.env.GITHUB_OUTPUT;
-  if (output) fs.appendFileSync(output, `branch=${branch}\ndecision=${decision}\n`, "utf8");
-  console.log(JSON.stringify({ repository: repo, branch, decision, lane, builderModel, judgeModel, ...extra }));
-};
 
 try {
   await sandbox.run({
