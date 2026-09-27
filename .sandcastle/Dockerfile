@@ -11,16 +11,16 @@ RUN apt-get update \
 # Builder (Codex), independent Judge (Claude Code) and the free-lane runner (OpenCode), pinned; bump deliberately.
 RUN npm install -g @openai/codex@0.157.1 @anthropic-ai/claude-code@2.1.283 opencode-ai@1.18.32
 
-# Remap only when the requested ids differ, and tolerate collisions: the build
-# tool passes the HOST user ids (root 0:0 on the runner), and groupmod/usermod
-# exit 4 when the target id already belongs to another account.
-RUN if [ "$(id -g node)" != "${AGENT_GID}" ]; then \
-      if getent group "${AGENT_GID}" >/dev/null; then usermod -g ${AGENT_GID} node; \
-      else groupmod -g ${AGENT_GID} node && usermod -g ${AGENT_GID} node; fi; \
-    fi \
-  && if [ "$(id -u node)" != "${AGENT_UID}" ] && ! getent passwd "${AGENT_UID}" >/dev/null; then \
-      usermod -u ${AGENT_UID} node; \
-    fi
+# Run as the requested HOST ids directly (root 0:0 on the runner). A numeric
+# USER needs no remap and keeps bind-mounted checkouts writable: remapping the
+# node account to an already-taken id (root) fails, and leaving it at 1000
+# makes the agent unable to write a root-owned worktree (codex P1 on PR #67).
+RUN mkdir -p /home/agent/workspace \
+  && chown -R ${AGENT_UID}:${AGENT_GID} /home/agent
 
-USER node
+USER ${AGENT_UID}:${AGENT_GID}
 WORKDIR /home/agent/workspace
+
+# Keep the sandbox container alive for sandcastle exec calls; the inherited
+# node CMD exits immediately when started detached.
+CMD ["sleep", "infinity"]
