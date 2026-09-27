@@ -11,8 +11,20 @@ RUN apt-get update \
 # Builder (Codex), independent Judge (Claude Code) and the free-lane runner (OpenCode), pinned; bump deliberately.
 RUN npm install -g @openai/codex@0.157.1 @anthropic-ai/claude-code@2.1.283 opencode-ai@1.18.32
 
-RUN groupmod -g ${AGENT_GID} node \
-  && usermod -u ${AGENT_UID} -g ${AGENT_GID} node
+# Run as the requested HOST ids directly (root 0:0 on the runner). A numeric
+# USER needs no remap and keeps bind-mounted checkouts writable: remapping the
+# node account to an already-taken id (root) fails, and leaving it at 1000
+# makes the agent unable to write a root-owned worktree (codex P1 on PR #67).
+RUN mkdir -p /home/agent/workspace \
+  && chown -R ${AGENT_UID}:${AGENT_GID} /home/agent
 
-USER node
+# A numeric uid has no passwd entry, so $HOME falls back to "/" and git/agent
+# CLIs cannot write their config. Point HOME at the owned workspace root.
+ENV HOME=/home/agent
+
+USER ${AGENT_UID}:${AGENT_GID}
 WORKDIR /home/agent/workspace
+
+# Keep the sandbox container alive for sandcastle exec calls; the inherited
+# node CMD exits immediately when started detached.
+CMD ["sleep", "infinity"]
