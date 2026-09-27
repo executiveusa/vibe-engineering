@@ -8,7 +8,8 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 # Builder (Codex) and independent Judge (Claude Code) CLIs, pinned; bump deliberately.
-RUN npm install -g @openai/codex@0.157.1 @anthropic-ai/claude-code@2.1.283
+# Builder (Codex), independent Judge (Claude Code) and the free-lane runner (OpenCode), pinned; bump deliberately.
+RUN npm install -g @openai/codex@0.157.1 @anthropic-ai/claude-code@2.1.283 opencode-ai@1.18.32
 
 RUN groupmod -g ${AGENT_GID} node \
   && usermod -u ${AGENT_UID} -g ${AGENT_GID} node

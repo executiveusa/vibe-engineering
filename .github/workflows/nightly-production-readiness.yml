@@ -86,6 +86,8 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          VIBE_MODEL_LANE: ${{ vars.VIBE_MODEL_LANE }}
           VIBE_RUN_BUDGET_MINUTES: "120"
           VIBE_MAX_BUILD_ITERATIONS: "4"
         run: npx tsx .vibe-factory/run-readiness-sandcastle.mts
