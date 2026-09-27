@@ -2,7 +2,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import * as sandcastle from "@ai-hero/sandcastle";
 import { docker } from "@ai-hero/sandcastle/sandboxes/docker";
-import { RECEIPT_PATH, assertIndependentJudge, evaluateReceipt } from "./judge-receipt.mjs";
+import { RECEIPT_PATH, assertIndependentJudge, evaluateReceipt, modelFamily } from "./judge-receipt.mjs";
 
 const repo = process.env.TARGET_REPOSITORY;
 if (!repo) throw new Error("TARGET_REPOSITORY is required");
@@ -28,10 +28,12 @@ if (lane === "paid") {
 } else if (!openrouterKey) {
   throw new Error("OPENROUTER_API_KEY is required for the free model lane");
 }
-assertIndependentJudge(lane === "paid" ? "openai" : "qwen", lane === "paid" ? "anthropic" : "google");
-
 const builderModel = process.env.VIBE_BUILDER_MODEL || (lane === "paid" ? "gpt-5.4" : "openrouter/qwen/qwen3.8-27b:free");
 const judgeModel = process.env.VIBE_JUDGE_MODEL || (lane === "paid" ? "opus" : "openrouter/google/gemma-4-31b-it:free");
+
+// Independence on the effective models (defaults or overrides), not lane defaults:
+// two overrides naming the same family must fail here (codex P2 on PR #66).
+assertIndependentJudge(modelFamily(builderModel), modelFamily(judgeModel));
 
 // Budgets: every loop stops. An exhausted budget is HOLD, never a pass.
 const positiveInt = (name: string, fallback: number) => {

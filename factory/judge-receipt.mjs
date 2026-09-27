@@ -51,6 +51,18 @@ export function evaluateReceipt(receipt) {
 }
 
 // Families must differ so the Judge does not share the builder's blind spots.
+// Derive a model family from a model id: openrouter/<vendor>/<model> -> <vendor>;
+// bare paid ids map by prefix (gpt*/o* -> openai, opus/claude -> anthropic).
+// The independence check must run on the EFFECTIVE models, not lane defaults.
+export function modelFamily(model) {
+  if (!model) return model;
+  const or = model.match(/^openrouter\/([^/]+)\//);
+  if (or) return or[1];
+  if (/^(gpt|o[0-9])/.test(model)) return "openai";
+  if (/^(opus|claude)/.test(model)) return "anthropic";
+  return model;
+}
+
 export function assertIndependentJudge(builderFamily, judgeFamily) {
   if (!builderFamily || !judgeFamily || builderFamily === judgeFamily) {
     throw new Error(
