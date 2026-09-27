@@ -18,6 +18,10 @@ RUN npm install -g @openai/codex@0.157.1 @anthropic-ai/claude-code@2.1.283 openc
 RUN mkdir -p /home/agent/workspace \
   && chown -R ${AGENT_UID}:${AGENT_GID} /home/agent
 
+# A numeric uid has no passwd entry, so $HOME falls back to "/" and git/agent
+# CLIs cannot write their config. Point HOME at the owned workspace root.
+ENV HOME=/home/agent
+
 USER ${AGENT_UID}:${AGENT_GID}
 WORKDIR /home/agent/workspace
 
