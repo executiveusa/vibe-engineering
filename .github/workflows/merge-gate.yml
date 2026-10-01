@@ -1,0 +1,17 @@
+name: Merge gate
+
+# Caller for the reusable vibe-merge-gate workflow. Without this file the gate never
+# runs on pull requests (verified 2026-09-26: zero runs, trivial PR #62 mergeable).
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  gate:
+    uses: ./.github/workflows/vibe-merge-gate.yml
+    with:
+      vibe-ref: ${{ github.sha }}
