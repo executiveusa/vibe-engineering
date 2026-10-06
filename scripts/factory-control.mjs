@@ -126,6 +126,7 @@ export async function shipGate(root, { candidate } = {}) {
     'icm-cold-walk.json',
     'independent-review.json',
     'judge-verdict.json',
+    'security-audit.json',
   ];
   const failures = [];
   const receipts = {};
@@ -248,6 +249,37 @@ export async function shipGate(root, { candidate } = {}) {
     failures.push('independent review identities are missing');
   if (receipts['independent-review.json']?.reviewerId && receipts['independent-review.json']?.reviewerId === receipts['independent-review.json']?.builderId)
     failures.push('builder cannot be the independent reviewer');
+  const security = receipts['security-audit.json'];
+  if (security?.status !== 'PASS')
+    failures.push('security audit gate did not PASS');
+  if (security?.candidate !== resolvedCandidate)
+    failures.push('security audit receipt is stale for candidate');
+  if (!security?.auditorId || !security?.builderId)
+    failures.push('security audit identities are missing');
+  if (security?.auditorId && security?.auditorId === security?.builderId)
+    failures.push('builder cannot be the security auditor');
+  if (security?.validatorPassed !== true)
+    failures.push('security audit findings did not pass the vendored validator');
+  if (!Number.isInteger(security?.runCount) || security.runCount < 2)
+    failures.push('security audit must run at least twice on the candidate');
+  if (security?.counts?.confirmed?.critical !== 0 || security?.counts?.confirmed?.high !== 0)
+    failures.push('security audit has confirmed critical or high findings');
+  if (!Array.isArray(security?.dispositions) || security.dispositions.some((entry) => ['critical', 'high', 'medium'].includes(entry?.severity) && !['FIXED', 'WAIVED'].includes(entry?.disposition)))
+    failures.push('security audit has a confirmed medium-or-above finding without a FIXED or WAIVED disposition');
+  if (typeof security?.findingsPath !== 'string' || !security.findingsPath) {
+    failures.push('security audit findings path is missing');
+  } else {
+    const resolvedFindings = path.resolve(root, security.findingsPath);
+    if (resolvedFindings !== root && !resolvedFindings.startsWith(`${root}${path.sep}`)) {
+      failures.push('security audit findings path escapes the workspace');
+    } else if (!(await exists(resolvedFindings))) {
+      failures.push('security audit findings file is missing');
+    } else if (!/^[0-9a-f]{64}$/.test(security?.findingsSha256 ?? '')) {
+      failures.push('security audit findings hash is missing');
+    } else if (hash(await readFile(resolvedFindings)) !== security.findingsSha256) {
+      failures.push('security audit findings file does not match the receipt hash');
+    }
+  }
   if (receipts['judge-verdict.json']?.verdict !== 'SHIP')
     failures.push('Judge did not return SHIP');
   if (receipts['judge-verdict.json']?.candidate !== resolvedCandidate)

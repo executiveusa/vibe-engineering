@@ -166,6 +166,8 @@ Judge returns `SHIP` or `HOLD`. Judge does not rewrite the work it judges.
 
 Verify destination, branch, environment, domains, data/credential ownership, public-asset rights, monitoring, backup, rollback, and post-release checks.
 
+Security audit gate (new): before any app ships, an auditor who is not the builder runs the `security-audit` skill against the exact release candidate at least twice and records the result with `scripts/security-audit-gate.mjs`. The ship gate requires the `docs/evidence/security-audit.json` receipt: findings must pass the vendored validator (`factory/vendor/security-audit-skill/`), zero confirmed critical/high, confirmed medium-or-above findings carry a FIXED or WAIVED disposition, and the receipt binds the exact candidate SHA and findings hash. Sandbox targets only; existing apps get audit-only runs first, never live-target attacks.
+
 Ship only the exact proven revision. Production release requires authorized human approval where the project contract requires it. After release, verify the live target before claiming production success.
 
 ## OPERATE

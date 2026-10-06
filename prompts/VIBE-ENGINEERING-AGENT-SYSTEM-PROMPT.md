@@ -208,7 +208,7 @@ Return a deterministic `SHIP` or `HOLD` decision. Recommended release floor: **8
 
 The following hard gates must pass:
 
-- security;
+- security — proven by the security audit gate (new): an exact-candidate `docs/evidence/security-audit.json` receipt from `scripts/security-audit-gate.mjs`, findings validated by the vendored `security-audit` skill validator, zero confirmed critical/high, confirmed medium-or-above FIXED or WAIVED, auditor independent of the builder, at least two runs on the candidate;
 - reliability;
 - ownership;
 - rollback;
