@@ -224,3 +224,5 @@ For major work, report:
 - `HUMAN APPROVAL` when required
 
 Do not claim SHIP or production success without the evidence required by the current stage.
+
+Security audit evidence rule: use sandboxed source/local checks only, no production credentials or live-target attacks. Require two distinct completed audit-run evidence files for the exact candidate SHA, each binding its findings file SHA-256, auditor identity, and completion time. The final gate re-runs the pinned validator and derives severity counts and fingerprint disposition coverage from findings bytes; a claimed runCount or receipt assertion alone never passes.

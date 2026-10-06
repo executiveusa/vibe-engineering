@@ -14,13 +14,13 @@
  *   - every confirmed MEDIUM-or-above finding needs a recorded disposition
  *     of FIXED or WAIVED (supplied via --dispositions);
  *   - the audit must have run at least twice on the same candidate
- *     (--run-count, default 2);
+ *     (--runs, required evidence files);
  *   - auditor and builder identities are required and must differ.
  *
  * Usage:
  *   node scripts/security-audit-gate.mjs <workspace> --findings <path>
  *     --auditor <id> --builder <id>
- *     [--candidate SHA] [--run-count N] [--dispositions <json-file>]
+ *     [--candidate SHA] --runs <json-file> [--run-count N] [--dispositions <json-file>]
  *
  * --findings is workspace-relative. --dispositions is a JSON file:
  *   [{ "fingerprint": "...", "disposition": "FIXED" | "WAIVED", "note": "..." }]
@@ -62,9 +62,36 @@ function resolveWithin(root, relative) {
   return resolved;
 }
 
+export async function validateAuditRuns(root, refs, candidate, builderId) {
+  const failures = [], verified = [], ids = new Set();
+  if (!Array.isArray(refs) || refs.length < 2) failures.push('security audit requires at least twice-run evidence');
+  for (const ref of Array.isArray(refs) ? refs : []) {
+    try {
+      const rel = typeof ref === 'string' ? ref : ref?.path;
+      if (!rel) throw new Error('run evidence path is missing');
+      const bytes = await readFile(resolveWithin(root, rel));
+      const digest = sha256(bytes);
+      if (typeof ref !== 'string' && ref.sha256 !== digest) throw new Error('run evidence hash mismatch');
+      const run = JSON.parse(bytes);
+      if (!run.runId || ids.has(run.runId)) throw new Error('run evidence needs distinct run IDs');
+      ids.add(run.runId);
+      if (run.candidate !== candidate || run.status !== 'completed' || !run.auditorId || run.auditorId === builderId || !Number.isFinite(Date.parse(run.completedAt)))
+        throw new Error('run evidence is incomplete, stale, or builder-authored');
+      if (!run.findingsPath || !/^[0-9a-f]{64}$/.test(run.findingsSha256 || '')) throw new Error('run findings evidence is missing');
+      const findingsFile = resolveWithin(root, run.findingsPath);
+      const findingsBytes = await readFile(findingsFile);
+      if (sha256(findingsBytes) !== run.findingsSha256) throw new Error('run findings hash mismatch');
+      const validation = spawnSync(process.execPath, [VALIDATOR, findingsFile], { encoding: 'utf8' });
+      if (validation.status !== 0) throw new Error('run findings failed validator');
+      verified.push({ path: rel, sha256: digest, runId: run.runId, auditorId: run.auditorId });
+    } catch (error) { failures.push(`security audit run evidence: ${error.message}`); }
+  }
+  return { failures, verified };
+}
+
 export async function securityAuditGate(
   root,
-  { findings, candidate, auditorId, builderId, runCount = 2, dispositions = [] } = {},
+  { findings, candidate, auditorId, builderId, runCount, runs = [], dispositions = [] } = {},
 ) {
   const failures = [];
   const resolvedCandidate = git(root, ['rev-parse', `${candidate ?? 'HEAD'}^{commit}`]);
@@ -73,8 +100,9 @@ export async function securityAuditGate(
   if (!builderId) failures.push('builder identity is missing');
   if (auditorId && builderId && auditorId === builderId)
     failures.push('builder cannot be the security auditor');
-  if (!Number.isInteger(runCount) || runCount < 2)
-    failures.push('security audit must run at least twice on the candidate');
+  const runCheck = await validateAuditRuns(root, runs, resolvedCandidate, builderId);
+  failures.push(...runCheck.failures);
+  if (runCount !== undefined && runCount !== runCheck.verified.length) failures.push('security audit runCount does not match run evidence');
 
   let findingsBuffer = null;
   let parsed = null;
@@ -154,7 +182,8 @@ export async function securityAuditGate(
     findingsPath: findings ?? null,
     findingsSha256: findingsBuffer ? sha256(findingsBuffer) : null,
     validatorPassed,
-    runCount,
+    runCount: runCheck.verified.length,
+    runs: runCheck.verified,
     auditorId: auditorId ?? null,
     builderId: builderId ?? null,
     counts,
@@ -176,12 +205,15 @@ async function main() {
   if (dispositionsFile)
     dispositions = JSON.parse(await readFile(resolveWithin(root, dispositionsFile), 'utf8'));
   const runCountArg = option(args, '--run-count');
+  const runsFile = option(args, '--runs');
+  const runs = runsFile ? JSON.parse(await readFile(resolveWithin(root, runsFile), 'utf8')) : [];
   const result = await securityAuditGate(root, {
     findings: option(args, '--findings'),
     candidate: option(args, '--candidate'),
     auditorId: option(args, '--auditor'),
     builderId: option(args, '--builder'),
-    runCount: runCountArg === undefined ? 2 : Number(runCountArg),
+    runCount: runCountArg === undefined ? undefined : Number(runCountArg),
+    runs,
     dispositions,
   });
   console.log(JSON.stringify(result, null, 2));

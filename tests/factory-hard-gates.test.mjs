@@ -25,11 +25,13 @@ async function writeHardenedReviewReceipts(evidence, candidate) {
 }
 
 async function writeSecurityAuditReceipts(evidence, candidate, overrides = {}) {
-  const findings = JSON.stringify([]);
+  const findings = JSON.stringify(overrides.counts?.confirmed?.medium ? [confirmedFinding('medium')] : []);
   await writeFile(path.join(evidence, 'security-audit-findings.json'), findings);
+  const runs = await writeRunEvidence(path.dirname(path.dirname(evidence)), candidate, 'docs/evidence/security-audit-findings.json');
   const receipt = {
     schemaVersion: 1,
     test: 'security-audit-gate',
+    runs,
     status: 'PASS',
     candidate,
     findingsPath: 'docs/evidence/security-audit-findings.json',
@@ -45,6 +47,20 @@ async function writeSecurityAuditReceipts(evidence, candidate, overrides = {}) {
     ...overrides,
   };
   await writeFile(path.join(evidence, 'security-audit.json'), JSON.stringify(receipt));
+}
+
+async function writeRunEvidence(target, candidate, findingsPath) {
+  const sha = createHash('sha256').update(await readFile(path.join(target, findingsPath))).digest('hex');
+  const refs = [];
+  for (let n=1;n<=2;n++) {
+    const rel = `audit-run-${n}.json`;
+    await writeFile(path.join(target, rel), JSON.stringify({ runId: `run-${n}`, candidate, auditorId: 'auditor-1', status: 'completed', completedAt: new Date().toISOString(), findingsPath, findingsSha256: sha }));
+    refs.push(rel);
+  }
+  const bound = [];
+  for (const rel of refs) bound.push({ path: rel, sha256: createHash('sha256').update(await readFile(path.join(target, rel))).digest('hex') });
+  await writeFile(path.join(target,'runs.json'), JSON.stringify(refs));
+  return bound;
 }
 
 function confirmedFinding(severity = 'medium', fingerprint = 'src-handler-missing-check') {
@@ -398,8 +414,9 @@ test('security audit gate evaluator validates findings and writes the receipt', 
     git(target, 'commit', '-m', 'candidate');
     const candidate = git(target, 'rev-parse', 'HEAD');
     const script = path.join(root, 'scripts', 'security-audit-gate.mjs');
-    const run = (...args) => spawnSync('node', [script, target, ...args], { encoding: 'utf8' });
+    const run = (...args) => spawnSync('node', [script, target, '--runs', 'runs.json', ...args], { encoding: 'utf8' });
     await writeFile(path.join(target, 'findings.json'), JSON.stringify([]));
+    await writeRunEvidence(target, candidate, 'findings.json');
     let result = run('--findings', 'findings.json', '--auditor', 'auditor-1', '--builder', 'builder-1');
     assert.equal(result.status, 0, result.stderr);
     let receipt = JSON.parse(await readFile(path.join(target, 'docs', 'evidence', 'security-audit.json'), 'utf8'));
@@ -408,6 +425,7 @@ test('security audit gate evaluator validates findings and writes the receipt', 
     assert.equal(receipt.validatorPassed, true);
     const medium = [confirmedFinding('medium')];
     await writeFile(path.join(target, 'findings.json'), JSON.stringify(medium));
+    await writeRunEvidence(target, candidate, 'findings.json');
     result = run('--findings', 'findings.json', '--auditor', 'auditor-1', '--builder', 'builder-1');
     assert.equal(result.status, 1);
     receipt = JSON.parse(await readFile(path.join(target, 'docs', 'evidence', 'security-audit.json'), 'utf8'));
@@ -420,6 +438,7 @@ test('security audit gate evaluator validates findings and writes the receipt', 
     receipt = JSON.parse(await readFile(path.join(target, 'docs', 'evidence', 'security-audit.json'), 'utf8'));
     assert.equal(receipt.status, 'PASS');
     await writeFile(path.join(target, 'findings.json'), JSON.stringify([confirmedFinding('critical')]));
+    await writeRunEvidence(target, candidate, 'findings.json');
     result = run('--findings', 'findings.json', '--auditor', 'auditor-1', '--builder', 'builder-1', '--dispositions', 'dispositions.json');
     assert.equal(result.status, 1);
     receipt = JSON.parse(await readFile(path.join(target, 'docs', 'evidence', 'security-audit.json'), 'utf8'));
@@ -430,4 +449,40 @@ test('security audit gate evaluator validates findings and writes the receipt', 
   } finally {
     await rm(tmp, { recursive: true, force: true });
   }
+});
+
+test('security gate blocks medium findings with omitted dispositions and unsupported run claims', async () => {
+  const tmp = await mkdtemp(path.join(os.tmpdir(), 'vibe-security-regression-'));
+  try {
+    const { target, candidate, evidence } = await initRepoWithEvidence(tmp);
+    const findings = JSON.stringify([confirmedFinding('medium')]);
+    await writeFile(path.join(evidence, 'security-audit-findings.json'), findings);
+    const receipt = JSON.parse(await readFile(path.join(evidence, 'security-audit.json')));
+    receipt.findingsSha256 = createHash('sha256').update(findings).digest('hex');
+    receipt.counts.confirmed.medium=1; receipt.dispositions=[];
+    receipt.runs=await writeRunEvidence(target,candidate,receipt.findingsPath);
+    await writeFile(path.join(evidence,'security-audit.json'),JSON.stringify(receipt));
+    let result=await shipGate(target,{candidate});
+    assert.equal(result.status,'HOLD'); assert.match(result.failures.join('\n'),/missing FIXED or WAIVED/);
+    receipt.dispositions=[{ fingerprint:'src-handler-missing-check',severity:'medium',disposition:'FIXED' }];
+    await writeFile(path.join(evidence,'security-audit-findings.json'), JSON.stringify([confirmedFinding('high')]));
+    receipt.findingsSha256=createHash('sha256').update(await readFile(path.join(evidence,'security-audit-findings.json'))).digest('hex');
+    receipt.counts.confirmed={critical:0,high:0,medium:0,low:0,informational:0};receipt.dispositions=[];
+    receipt.runs=await writeRunEvidence(target,candidate,receipt.findingsPath);
+    await writeFile(path.join(evidence,'security-audit.json'),JSON.stringify(receipt));
+    result=await shipGate(target,{candidate});
+    assert.equal(result.status,'HOLD'); assert.match(result.failures.join('\n'),/counts do not match findings/); assert.match(result.failures.join('\n'),/contain confirmed critical or high/);
+    await writeFile(path.join(evidence,'security-audit-findings.json'),findings);
+    receipt.findingsSha256=createHash('sha256').update(findings).digest('hex');receipt.counts.confirmed.medium=1;
+    receipt.dispositions=[{ fingerprint:'src-handler-missing-check',severity:'medium',disposition:'FIXED' }];
+    receipt.runs=[]; receipt.runCount=2;
+    await writeFile(path.join(evidence,'security-audit.json'),JSON.stringify(receipt));
+    result=await shipGate(target,{candidate});
+    assert.equal(result.status,'HOLD'); assert.match(result.failures.join('\n'),/run evidence/);
+    const script=path.join(root,'scripts','security-audit-gate.mjs');
+    const r=spawnSync('node',[script,target,'--findings',receipt.findingsPath,'--auditor','a','--builder','b','--run-count','2'],{encoding:'utf8'});
+    assert.equal(r.status,1);
+    assert.equal(JSON.parse(r.stdout).runCount,0);
+    assert.match(JSON.parse(r.stdout).failures.join('\n'),/run evidence/);
+  } finally { await rm(tmp,{recursive:true,force:true}); }
 });

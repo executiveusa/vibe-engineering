@@ -44,3 +44,4 @@ The authorized human separately approves production release and any legal, finan
 ## Plain-language proof
 
 Before release, say `NOT VERIFIED`. For web software, include the MISSION v2 decision, declared content policy, proof-matrix status, and every `UNVERIFIED` item with its handling. After release, state where the product is live, which live checks passed, which public assets are rights-cleared, who owns every important account and key, how health is watched, and exactly how to undo the release.
+Security audit evidence rule: use sandboxed source/local checks only, no production credentials or live-target attacks. Require two distinct completed audit-run evidence files for the exact candidate SHA, each binding its findings file SHA-256, auditor identity, and completion time. The final gate re-runs the pinned validator and derives severity counts and fingerprint disposition coverage from findings bytes; a claimed runCount or receipt assertion alone never passes.
