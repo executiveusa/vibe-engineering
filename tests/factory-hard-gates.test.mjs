@@ -84,7 +84,7 @@ function confirmedFinding(severity = 'medium', fingerprint = 'src-handler-missin
     remediation: { strategy: 'Check ownership before the state change.' },
     severity: {
       likelihood: { score: 'medium', reason: 'The operation is directly reachable.' },
-      impact: { score: 'medium', reason: 'The attacker changes one protected object.' },
+      impact: { score: severity, reason: 'The attacker changes one protected object.' },
       overall_severity: severity,
     },
     confidence: { score: 'high', reason: 'The source path and result were reproduced.' },
@@ -484,5 +484,27 @@ test('security gate blocks medium findings with omitted dispositions and unsuppo
     assert.equal(r.status,1);
     assert.equal(JSON.parse(r.stdout).runCount,0);
     assert.match(JSON.parse(r.stdout).failures.join('\n'),/run evidence/);
+  } finally { await rm(tmp,{recursive:true,force:true}); }
+});
+
+test('confirmed run findings cannot disappear from the final audit', async () => {
+  const tmp=await mkdtemp(path.join(os.tmpdir(),'vibe-audit-union-'));
+  try {
+    const {target,candidate,evidence}=await initRepoWithEvidence(tmp);
+    const script=path.join(root,'scripts','security-audit-gate.mjs');
+    for (const severity of ['high','medium']) {
+      await writeFile(path.join(target,'run-findings.json'),JSON.stringify([confirmedFinding(severity)]));
+      const refs=await writeRunEvidence(target,candidate,'run-findings.json');
+      const validation=spawnSync('node',[path.join(root,'factory/vendor/security-audit-skill/validate-findings.cjs'),path.join(target,'run-findings.json')],{encoding:'utf8'});
+      assert.equal(validation.status,0,validation.stdout+validation.stderr);
+      let r=spawnSync('node',[script,target,'--findings','docs/evidence/security-audit-findings.json','--auditor','a','--builder','b','--runs','runs.json'],{encoding:'utf8'});
+      assert.equal(r.status,1);assert.match(JSON.parse(r.stdout).failures.join('\n'),/disappeared/);
+      await writeSecurityAuditReceipts(evidence,candidate);
+      const receipt=JSON.parse(await readFile(path.join(evidence,'security-audit.json')));
+      await writeFile(path.join(target,'run-findings.json'),JSON.stringify([confirmedFinding(severity)]));
+      receipt.runs=await writeRunEvidence(target,candidate,'run-findings.json');
+      await writeFile(path.join(evidence,'security-audit.json'),JSON.stringify(receipt));
+      const result=await shipGate(target,{candidate});assert.equal(result.status,'HOLD');assert.match(result.failures.join('\n'),/disappeared/);
+    }
   } finally { await rm(tmp,{recursive:true,force:true}); }
 });

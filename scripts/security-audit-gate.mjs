@@ -63,7 +63,7 @@ function resolveWithin(root, relative) {
 }
 
 export async function validateAuditRuns(root, refs, candidate, builderId) {
-  const failures = [], verified = [], ids = new Set();
+  const failures = [], verified = [], findings = [], ids = new Set();
   if (!Array.isArray(refs) || refs.length < 2) failures.push('security audit requires at least twice-run evidence');
   for (const ref of Array.isArray(refs) ? refs : []) {
     try {
@@ -83,10 +83,11 @@ export async function validateAuditRuns(root, refs, candidate, builderId) {
       if (sha256(findingsBytes) !== run.findingsSha256) throw new Error('run findings hash mismatch');
       const validation = spawnSync(process.execPath, [VALIDATOR, findingsFile], { encoding: 'utf8' });
       if (validation.status !== 0) throw new Error('run findings failed validator');
+      findings.push(...JSON.parse(findingsBytes));
       verified.push({ path: rel, sha256: digest, runId: run.runId, auditorId: run.auditorId });
     } catch (error) { failures.push(`security audit run evidence: ${error.message}`); }
   }
-  return { failures, verified };
+  return { failures, verified, findings };
 }
 
 export async function securityAuditGate(
@@ -152,6 +153,12 @@ export async function securityAuditGate(
       } else if (finding?.verdict === 'needs_validation') counts.needsValidation += 1;
       else if (finding?.verdict === 'rejected') counts.rejected += 1;
     }
+  }
+  for (const finding of runCheck.findings) {
+    if (finding?.verdict !== 'confirmed') continue;
+    const severity = finding?.severity?.overall_severity;
+    if (confirmedByFingerprint.get(finding.fingerprint) !== severity) failures.push(`security audit run finding ${finding.fingerprint} disappeared or changed in final findings`);
+    if (BLOCKING_SEVERITIES.has(severity)) failures.push(`security audit run has confirmed ${severity} finding`);
   }
   for (const severity of BLOCKING_SEVERITIES) {
     if (counts.confirmed[severity] > 0)

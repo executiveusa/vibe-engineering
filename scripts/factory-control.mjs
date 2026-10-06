@@ -297,6 +297,13 @@ export async function shipGate(root, { candidate } = {}) {
           const entry = entries.get(finding.fingerprint);
           if (['critical','high','medium'].includes(severity) && (entry?.severity !== severity || !['FIXED','WAIVED'].includes(entry?.disposition))) failures.push('security audit confirmed medium-or-above missing FIXED or WAIVED disposition');
         }
+        const finalConfirmed = new Map(findings.filter(x => x?.verdict === 'confirmed').map(x => [x.fingerprint, x.severity?.overall_severity]));
+        for (const finding of runCheck.findings) {
+          if (finding?.verdict !== 'confirmed') continue;
+          const severity = finding?.severity?.overall_severity;
+          if (finalConfirmed.get(finding.fingerprint) !== severity) failures.push('security audit run finding disappeared or changed in final findings');
+          if (['critical','high'].includes(severity)) failures.push('security audit run contains confirmed critical or high');
+        }
         for (const [severity, count] of Object.entries(actualCounts)) if (security.counts?.confirmed?.[severity] !== count) failures.push('security audit counts do not match findings');
       } catch { failures.push('security audit findings could not be checked'); }
     }
