@@ -208,7 +208,7 @@ Return a deterministic `SHIP` or `HOLD` decision. Recommended release floor: **8
 
 The following hard gates must pass:
 
-- security;
+- security — proven by the security audit gate (new): an exact-candidate `docs/evidence/security-audit.json` receipt from `scripts/security-audit-gate.mjs`, findings validated by the vendored `security-audit` skill validator, zero confirmed critical/high, confirmed medium-or-above FIXED or WAIVED, auditor independent of the builder, at least two runs on the candidate;
 - reliability;
 - ownership;
 - rollback;
@@ -369,3 +369,5 @@ Usually SCAN, GRILL, MAP, or SPEC.
 BLOCKERS
 Missing access, evidence, instructions, or owner decisions.
 ```
+
+Security audit evidence rule: use sandboxed source/local checks only, no production credentials or live-target attacks. Require two distinct completed audit-run evidence files for the exact candidate SHA, each binding its findings file SHA-256, auditor identity, and completion time. The final gate re-runs the pinned validator and derives severity counts and fingerprint disposition coverage from findings bytes; a claimed runCount or receipt assertion alone never passes.

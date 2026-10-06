@@ -3,6 +3,7 @@ import { mkdtemp, readFile, rm, writeFile, mkdir } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { createWorkspace } from '../scripts/factory-new.mjs';
@@ -20,6 +21,97 @@ async function writeHardenedReviewReceipts(evidence, candidate) {
   await writeFile(path.join(evidence, 'no-slop-review.json'), JSON.stringify({ schemaVersion: 1, status: 'PASS', candidate, reviewerId: 'slop-reviewer', artifact: 'candidate', categories: { idea: 'PASS', strategy: 'NOT_APPLICABLE', copy: 'NOT_APPLICABLE', ui: 'NOT_APPLICABLE', architecture: 'PASS', code: 'PASS', business: 'NOT_APPLICABLE', production: 'PASS' }, findings: [], evidenceExamined: ['diff', 'tests'], generatedAt: new Date().toISOString() }));
   await writeFile(path.join(evidence, 'subtraction-review.json'), JSON.stringify({ schemaVersion: 1, status: 'NOT_APPLICABLE', applicability: 'NON_USER_FACING', candidate, reviewerId: 'subtraction-reviewer', artifact: 'gate fixture', reason: 'no user-facing surface', generatedAt: new Date().toISOString() }));
   await writeFile(path.join(evidence, 'voice-call-proof.json'), JSON.stringify({ schemaVersion: 1, status: 'NOT_APPLICABLE', applicability: 'NON_VOICE', candidate, reviewerId: 'voice-reviewer', reason: 'no voice or call surface', generatedAt: new Date().toISOString() }));
+  await writeSecurityAuditReceipts(evidence, candidate);
+}
+
+async function writeSecurityAuditReceipts(evidence, candidate, overrides = {}) {
+  const findings = JSON.stringify(overrides.counts?.confirmed?.medium ? [confirmedFinding('medium')] : []);
+  await writeFile(path.join(evidence, 'security-audit-findings.json'), findings);
+  const runs = await writeRunEvidence(path.dirname(path.dirname(evidence)), candidate, 'docs/evidence/security-audit-findings.json');
+  const receipt = {
+    schemaVersion: 1,
+    test: 'security-audit-gate',
+    runs,
+    status: 'PASS',
+    candidate,
+    findingsPath: 'docs/evidence/security-audit-findings.json',
+    findingsSha256: createHash('sha256').update(findings).digest('hex'),
+    validatorPassed: true,
+    runCount: 2,
+    auditorId: 'security-auditor-1',
+    builderId: 'builder-1',
+    counts: { confirmed: { critical: 0, high: 0, medium: 0, low: 0, informational: 0 }, needsValidation: 0, rejected: 0 },
+    dispositions: [],
+    failures: [],
+    generatedAt: new Date().toISOString(),
+    ...overrides,
+  };
+  await writeFile(path.join(evidence, 'security-audit.json'), JSON.stringify(receipt));
+}
+
+async function writeRunEvidence(target, candidate, findingsPath) {
+  const sha = createHash('sha256').update(await readFile(path.join(target, findingsPath))).digest('hex');
+  const refs = [];
+  for (let n=1;n<=2;n++) {
+    const rel = `audit-run-${n}.json`;
+    await writeFile(path.join(target, rel), JSON.stringify({ runId: `run-${n}`, candidate, auditorId: 'auditor-1', status: 'completed', completedAt: new Date().toISOString(), findingsPath, findingsSha256: sha }));
+    refs.push(rel);
+  }
+  const bound = [];
+  for (const rel of refs) bound.push({ path: rel, sha256: createHash('sha256').update(await readFile(path.join(target, rel))).digest('hex') });
+  await writeFile(path.join(target,'runs.json'), JSON.stringify(refs));
+  return bound;
+}
+
+function confirmedFinding(severity = 'medium', fingerprint = 'src-handler-missing-check') {
+  const source = (kind, file, line) => ({ kind, file, line, scope: 'handle', description: 'Attacker data reaches the operation.' });
+  return {
+    verdict: 'confirmed',
+    fingerprint,
+    title: 'Missing ownership check',
+    description: 'An attacker can reach an operation without the intended ownership check.',
+    root_cause: 'handle omits the ownership check before changing the object.',
+    intended_behavior: "Only the object's owner can change it.",
+    trace: [source('entrypoint', 'src/handler.c', 10), source('propagation', 'src/model.c', 20), source('sink', 'src/store.c', 30)],
+    evidence: [{ file: 'src/handler.c', line: 10, description: 'The source performs the operation without the required check.' }],
+    conditions: [],
+    execution: {
+      attacker_perspective: 'An unprivileged remote user with their own account.',
+      payloads: ['An object identifier owned by another user.'],
+      instructions: ['Submit the identifier through the public operation.'],
+      observed_result: "The other user's object changes.",
+    },
+    remediation: { strategy: 'Check ownership before the state change.' },
+    severity: {
+      likelihood: { score: 'medium', reason: 'The operation is directly reachable.' },
+      impact: { score: severity, reason: 'The attacker changes one protected object.' },
+      overall_severity: severity,
+    },
+    confidence: { score: 'high', reason: 'The source path and result were reproduced.' },
+  };
+}
+
+async function initRepoWithEvidence(tmp) {
+  const target = path.join(tmp, 'repo');
+  await mkdir(target);
+  git(target, 'init');
+  git(target, 'config', 'user.email', 'factory@test.invalid');
+  git(target, 'config', 'user.name', 'Factory Test');
+  await mkdir(path.join(target, 'docs', 'evidence'), { recursive: true });
+  await writeFile(path.join(target, 'a'), 'a');
+  git(target, 'add', '.');
+  git(target, 'commit', '-m', 'candidate');
+  const candidate = git(target, 'rev-parse', 'HEAD');
+  const evidence = path.join(target, 'docs', 'evidence');
+  await writeHardenedReviewReceipts(evidence, candidate);
+  await writeFile(path.join(evidence, 'ultimate-bug-scan.json'), JSON.stringify({ status: 'PASS', candidate, scanStatus: 'ok', exitCode: 0, totals: { critical: 0, warning: 0 } }));
+  await writeFile(path.join(evidence, 'open-code-review.json'), JSON.stringify({ status: 'PASS', candidate }));
+  await writeFile(path.join(evidence, 'icm-cold-walk.json'), JSON.stringify({ status: 'PASS', candidate }));
+  await writeFile(path.join(evidence, 'independent-review.json'), JSON.stringify({ status: 'PASS', candidate, builderId: 'builder', reviewerId: 'reviewer' }));
+  await writeFile(path.join(evidence, 'simplicity-review.json'), JSON.stringify({ status: 'PASS', candidate, reviewerId: 'simplicity', frontDoor: 'one chat', before: {}, after: {}, visualEvidence: ['before.png'], functionalEvidence: ['journey'], operatorRecoveryPath: 'runbook' }));
+  await writeFile(path.join(evidence, 'judge-verdict.json'), JSON.stringify({ verdict: 'SHIP', candidate }));
+  await writeFile(path.join(evidence, 'mission-v2-release.json'), JSON.stringify({ schemaVersion: 2, status: 'NOT_APPLICABLE', applicability: 'NON_WEB', candidate, decision: 'NOT APPLICABLE', reason: 'gate fixture is not a web product', workLog: {}, proofMatrix: {}, unverifiedItems: [], independentReview: {}, rollback: 'git revert', generatedAt: new Date().toISOString() }));
+  return { target, candidate, evidence };
 }
 
 test('cold ICM walk traverses every one-job stage and emits an actionable next step', async () => {
@@ -257,4 +349,174 @@ test('Claude and Codex plugin releases point at the same Vibe core version', asy
   );
   assert.equal(pkg.version, claude.version);
   assert.equal(codex.plugins[0].source.path, './plugins/vibe-engineering');
+});
+
+test('ship gate enforces the security audit receipt on the exact candidate', async () => {
+  const tmp = await mkdtemp(path.join(os.tmpdir(), 'vibe-security-gate-'));
+  try {
+    const { target, candidate, evidence } = await initRepoWithEvidence(tmp);
+    let result = await shipGate(target, { candidate });
+    assert.equal(result.status, 'SHIP', JSON.stringify(result.failures));
+    await rm(path.join(evidence, 'security-audit.json'));
+    result = await shipGate(target, { candidate });
+    assert.equal(result.status, 'HOLD');
+    assert.match(result.failures.join('\n'), /missing security-audit\.json/);
+    await writeSecurityAuditReceipts(evidence, candidate, { candidate: '0'.repeat(40) });
+    result = await shipGate(target, { candidate });
+    assert.equal(result.status, 'HOLD');
+    assert.match(result.failures.join('\n'), /security audit receipt is stale/);
+    await writeSecurityAuditReceipts(evidence, candidate, { auditorId: 'builder-1' });
+    result = await shipGate(target, { candidate });
+    assert.equal(result.status, 'HOLD');
+    assert.match(result.failures.join('\n'), /builder cannot be the security auditor/);
+    await writeSecurityAuditReceipts(evidence, candidate, { runCount: 1 });
+    result = await shipGate(target, { candidate });
+    assert.equal(result.status, 'HOLD');
+    assert.match(result.failures.join('\n'), /at least twice/);
+    await writeSecurityAuditReceipts(evidence, candidate, {
+      counts: { confirmed: { critical: 1, high: 0, medium: 0, low: 0, informational: 0 }, needsValidation: 0, rejected: 0 },
+    });
+    result = await shipGate(target, { candidate });
+    assert.equal(result.status, 'HOLD');
+    assert.match(result.failures.join('\n'), /confirmed critical or high/);
+    await writeSecurityAuditReceipts(evidence, candidate, {
+      counts: { confirmed: { critical: 0, high: 0, medium: 1, low: 0, informational: 0 }, needsValidation: 0, rejected: 0 },
+      dispositions: [{ fingerprint: 'src-handler-missing-check', severity: 'medium', disposition: 'OPEN' }],
+    });
+    result = await shipGate(target, { candidate });
+    assert.equal(result.status, 'HOLD');
+    assert.match(result.failures.join('\n'), /FIXED or WAIVED/);
+    await writeSecurityAuditReceipts(evidence, candidate, { findingsSha256: '0'.repeat(64) });
+    result = await shipGate(target, { candidate });
+    assert.equal(result.status, 'HOLD');
+    assert.match(result.failures.join('\n'), /does not match the receipt hash/);
+    await writeSecurityAuditReceipts(evidence, candidate, {
+      counts: { confirmed: { critical: 0, high: 0, medium: 1, low: 0, informational: 0 }, needsValidation: 0, rejected: 0 },
+      dispositions: [{ fingerprint: 'src-handler-missing-check', severity: 'medium', disposition: 'WAIVED', note: 'accepted by owner' }],
+    });
+    result = await shipGate(target, { candidate });
+    assert.equal(result.status, 'SHIP', JSON.stringify(result.failures));
+  } finally {
+    await rm(tmp, { recursive: true, force: true });
+  }
+});
+
+test('security audit gate evaluator validates findings and writes the receipt', async () => {
+  const tmp = await mkdtemp(path.join(os.tmpdir(), 'vibe-security-evaluator-'));
+  try {
+    const target = path.join(tmp, 'repo');
+    await mkdir(target);
+    git(target, 'init');
+    git(target, 'config', 'user.email', 'factory@test.invalid');
+    git(target, 'config', 'user.name', 'Factory Test');
+    await writeFile(path.join(target, 'a'), 'a');
+    git(target, 'add', '.');
+    git(target, 'commit', '-m', 'candidate');
+    const candidate = git(target, 'rev-parse', 'HEAD');
+    const script = path.join(root, 'scripts', 'security-audit-gate.mjs');
+    const run = (...args) => spawnSync('node', [script, target, '--runs', 'runs.json', ...args], { encoding: 'utf8' });
+    await writeFile(path.join(target, 'findings.json'), JSON.stringify([]));
+    await writeRunEvidence(target, candidate, 'findings.json');
+    let result = run('--findings', 'findings.json', '--auditor', 'auditor-1', '--builder', 'builder-1');
+    assert.equal(result.status, 0, result.stderr);
+    let receipt = JSON.parse(await readFile(path.join(target, 'docs', 'evidence', 'security-audit.json'), 'utf8'));
+    assert.equal(receipt.status, 'PASS');
+    assert.equal(receipt.candidate, candidate);
+    assert.equal(receipt.validatorPassed, true);
+    const medium = [confirmedFinding('medium')];
+    await writeFile(path.join(target, 'findings.json'), JSON.stringify(medium));
+    await writeRunEvidence(target, candidate, 'findings.json');
+    result = run('--findings', 'findings.json', '--auditor', 'auditor-1', '--builder', 'builder-1');
+    assert.equal(result.status, 1);
+    receipt = JSON.parse(await readFile(path.join(target, 'docs', 'evidence', 'security-audit.json'), 'utf8'));
+    assert.equal(receipt.status, 'HOLD');
+    assert.match(receipt.failures.join('\n'), /no recorded FIXED or WAIVED disposition/);
+    assert.equal(receipt.counts.confirmed.medium, 1);
+    await writeFile(path.join(target, 'dispositions.json'), JSON.stringify([{ fingerprint: 'src-handler-missing-check', disposition: 'FIXED', note: 'fixed in candidate' }]));
+    result = run('--findings', 'findings.json', '--auditor', 'auditor-1', '--builder', 'builder-1', '--dispositions', 'dispositions.json');
+    assert.equal(result.status, 0, result.stderr);
+    receipt = JSON.parse(await readFile(path.join(target, 'docs', 'evidence', 'security-audit.json'), 'utf8'));
+    assert.equal(receipt.status, 'PASS');
+    await writeFile(path.join(target, 'findings.json'), JSON.stringify([confirmedFinding('critical')]));
+    await writeRunEvidence(target, candidate, 'findings.json');
+    result = run('--findings', 'findings.json', '--auditor', 'auditor-1', '--builder', 'builder-1', '--dispositions', 'dispositions.json');
+    assert.equal(result.status, 1);
+    receipt = JSON.parse(await readFile(path.join(target, 'docs', 'evidence', 'security-audit.json'), 'utf8'));
+    assert.match(receipt.failures.join('\n'), /confirmed critical/);
+    await writeFile(path.join(target, 'findings.json'), '{not json');
+    result = run('--findings', 'findings.json', '--auditor', 'auditor-1', '--builder', 'builder-1');
+    assert.equal(result.status, 1);
+  } finally {
+    await rm(tmp, { recursive: true, force: true });
+  }
+});
+
+test('security gate blocks medium findings with omitted dispositions and unsupported run claims', async () => {
+  const tmp = await mkdtemp(path.join(os.tmpdir(), 'vibe-security-regression-'));
+  try {
+    const { target, candidate, evidence } = await initRepoWithEvidence(tmp);
+    const findings = JSON.stringify([confirmedFinding('medium')]);
+    await writeFile(path.join(evidence, 'security-audit-findings.json'), findings);
+    const receipt = JSON.parse(await readFile(path.join(evidence, 'security-audit.json')));
+    receipt.findingsSha256 = createHash('sha256').update(findings).digest('hex');
+    receipt.counts.confirmed.medium=1; receipt.dispositions=[];
+    receipt.runs=await writeRunEvidence(target,candidate,receipt.findingsPath);
+    await writeFile(path.join(evidence,'security-audit.json'),JSON.stringify(receipt));
+    let result=await shipGate(target,{candidate});
+    assert.equal(result.status,'HOLD'); assert.match(result.failures.join('\n'),/missing FIXED or WAIVED/);
+    receipt.dispositions=[{ fingerprint:'src-handler-missing-check',severity:'medium',disposition:'FIXED' }];
+    await writeFile(path.join(evidence,'security-audit-findings.json'), JSON.stringify([confirmedFinding('high')]));
+    receipt.findingsSha256=createHash('sha256').update(await readFile(path.join(evidence,'security-audit-findings.json'))).digest('hex');
+    receipt.counts.confirmed={critical:0,high:0,medium:0,low:0,informational:0};receipt.dispositions=[];
+    receipt.runs=await writeRunEvidence(target,candidate,receipt.findingsPath);
+    await writeFile(path.join(evidence,'security-audit.json'),JSON.stringify(receipt));
+    result=await shipGate(target,{candidate});
+    assert.equal(result.status,'HOLD'); assert.match(result.failures.join('\n'),/counts do not match findings/); assert.match(result.failures.join('\n'),/contain confirmed critical or high/);
+    await writeFile(path.join(evidence,'security-audit-findings.json'),findings);
+    receipt.findingsSha256=createHash('sha256').update(findings).digest('hex');receipt.counts.confirmed.medium=1;
+    receipt.dispositions=[{ fingerprint:'src-handler-missing-check',severity:'medium',disposition:'FIXED' }];
+    receipt.runs=[]; receipt.runCount=2;
+    await writeFile(path.join(evidence,'security-audit.json'),JSON.stringify(receipt));
+    result=await shipGate(target,{candidate});
+    assert.equal(result.status,'HOLD'); assert.match(result.failures.join('\n'),/run evidence/);
+    const script=path.join(root,'scripts','security-audit-gate.mjs');
+    const r=spawnSync('node',[script,target,'--findings',receipt.findingsPath,'--auditor','a','--builder','b','--run-count','2'],{encoding:'utf8'});
+    assert.equal(r.status,1);
+    assert.equal(JSON.parse(r.stdout).runCount,0);
+    assert.match(JSON.parse(r.stdout).failures.join('\n'),/run evidence/);
+  } finally { await rm(tmp,{recursive:true,force:true}); }
+});
+
+test('confirmed run findings cannot disappear from the final audit', async () => {
+  const tmp=await mkdtemp(path.join(os.tmpdir(),'vibe-audit-union-'));
+  try {
+    const {target,candidate,evidence}=await initRepoWithEvidence(tmp);
+    const script=path.join(root,'scripts','security-audit-gate.mjs');
+    for (const severity of ['high','medium']) {
+      await writeFile(path.join(target,'run-findings.json'),JSON.stringify([confirmedFinding(severity)]));
+      const refs=await writeRunEvidence(target,candidate,'run-findings.json');
+      const validation=spawnSync('node',[path.join(root,'factory/vendor/security-audit-skill/validate-findings.cjs'),path.join(target,'run-findings.json')],{encoding:'utf8'});
+      assert.equal(validation.status,0,validation.stdout+validation.stderr);
+      let r=spawnSync('node',[script,target,'--findings','docs/evidence/security-audit-findings.json','--auditor','a','--builder','b','--runs','runs.json'],{encoding:'utf8'});
+      assert.equal(r.status,1);assert.match(JSON.parse(r.stdout).failures.join('\n'),/disappeared/);
+      await writeSecurityAuditReceipts(evidence,candidate);
+      const receipt=JSON.parse(await readFile(path.join(evidence,'security-audit.json')));
+      await writeFile(path.join(target,'run-findings.json'),JSON.stringify([confirmedFinding(severity)]));
+      receipt.runs=await writeRunEvidence(target,candidate,'run-findings.json');
+      await writeFile(path.join(evidence,'security-audit.json'),JSON.stringify(receipt));
+      const result=await shipGate(target,{candidate});assert.equal(result.status,'HOLD');assert.match(result.failures.join('\n'),/disappeared/);
+    }
+  } finally { await rm(tmp,{recursive:true,force:true}); }
+});
+
+test('generated workspaces include executable audit tooling and pinned validator', async () => {
+  const tmp = await mkdtemp(path.join(os.tmpdir(), 'vibe-audit-scaffold-'));
+  try {
+    const target=path.join(tmp,'project');
+    await createWorkspace({name:'Audit scaffold',target,mode:'brownfield',domain:'factory',audience:'owners'},root);
+    for (const rel of ['scripts/security-audit-gate.mjs','factory/vendor/security-audit-skill/validate-findings.cjs','factory/vendor/security-audit-skill/report-schema.json','factory/vendor/security-audit-skill/LICENSE','factory/vendor/security-audit-skill/PROVENANCE.md']) assert.deepEqual(await readFile(path.join(target,rel)),await readFile(path.join(root,rel)));
+    const check=spawnSync('node',['--check',path.join(target,'scripts/factory-control.mjs')],{encoding:'utf8'});assert.equal(check.status,0,check.stderr);
+    await writeFile(path.join(target,'empty-findings.json'),'[]');
+    const validation=spawnSync('node',[path.join(target,'factory/vendor/security-audit-skill/validate-findings.cjs'),path.join(target,'empty-findings.json')],{encoding:'utf8'});assert.equal(validation.status,0,validation.stdout+validation.stderr);
+  } finally { await rm(tmp,{recursive:true,force:true}); }
 });
