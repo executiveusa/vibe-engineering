@@ -508,3 +508,15 @@ test('confirmed run findings cannot disappear from the final audit', async () =>
     }
   } finally { await rm(tmp,{recursive:true,force:true}); }
 });
+
+test(generated workspaces include executable audit tooling and pinned validator, async () => {
+  const tmp = await mkdtemp(path.join(os.tmpdir(), vibe-audit-scaffold-));
+  try {
+    const target=path.join(tmp,project);
+    await createWorkspace({name:Audit scaffold,target,mode:brownfield,domain:factory,audience:owners},root);
+    for (const rel of [scripts/security-audit-gate.mjs,factory/vendor/security-audit-skill/validate-findings.cjs,factory/vendor/security-audit-skill/report-schema.json,factory/vendor/security-audit-skill/LICENSE,factory/vendor/security-audit-skill/PROVENANCE.md]) assert.deepEqual(await readFile(path.join(target,rel)),await readFile(path.join(root,rel)));
+    const check=spawnSync(node,[--check,path.join(target,scripts/factory-control.mjs)],{encoding:utf8});assert.equal(check.status,0,check.stderr);
+    await writeFile(path.join(target,empty-findings.json),[]);
+    const validation=spawnSync(node,[path.join(target,factory/vendor/security-audit-skill/validate-findings.cjs),path.join(target,empty-findings.json)],{encoding:utf8});assert.equal(validation.status,0,validation.stdout+validation.stderr);
+  } finally { await rm(tmp,{recursive:true,force:true}); }
+});

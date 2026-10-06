@@ -131,6 +131,15 @@ export async function createWorkspace(options, sourceRoot, hooks = {}) {
       path.join(temporaryTarget, 'scripts', 'factory-control.mjs'),
     );
 
+    await copyFile(
+      path.join(sourceRoot, scripts, security-audit-gate.mjs),
+      path.join(temporaryTarget, scripts, security-audit-gate.mjs),
+    );
+    await copyDirectory(
+      path.join(sourceRoot, factory, vendor, security-audit-skill),
+      path.join(temporaryTarget, factory, vendor, security-audit-skill),
+    );
+
     const replacements = {
       PROJECT_NAME: options.name.trim(),
       PROJECT_SLUG: slug,
