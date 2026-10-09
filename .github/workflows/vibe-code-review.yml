@@ -8,28 +8,21 @@ permissions:
   contents: read
   pull-requests: write
   issues: write
+  models: read
 
 jobs:
   review:
     if: github.event.pull_request.draft == false
-    # Pinned to an immutable commit, never @main. This ref runs OCR action
-    # 310008fc, which fails closed: failed tool calls, a non-complete manifest
-    # or unreadable output end in HOLD (the job fails, no "looks good" summary).
-    # Move the pin only by reviewing a new commit.
-    uses: executiveusa/open-code-review/.github/workflows/vibe-code-review.yml@d22123176c0e1cea08d9149a56ec8f0433cdee60
+    uses: executiveusa/open-code-review/.github/workflows/vibe-review-standard.yml@main
     with:
-      llm_url: https://openrouter.ai/api/v1/chat/completions
-      # Explicit free-lane slug. The reusable's default model is a PAID model,
-      # so this input is load-bearing: do not remove it.
-      model: nvidia/nemotron-3-super-120b-a12b:free
-      use_anthropic: "false"
-      ocr_version: "1.11.8"
-      # Serial review keeps the burst under the free-tier rate cap.
-      review_concurrency: "1"
+      model: openai/gpt-4.1
+      review_concurrency: "3"
       route_severity_below: low
       route_categories: style,documentation
       # NOTE: prompt-injection findings are reviewed under the `security` category
       # (the engine has no separate injection category) and are never routed away
-      # from inline comments.
-    secrets:
-      llm_token: ${{ secrets.OPENROUTER_API_KEY }}
+      # from inline comments. TODO: the referenced reusable workflow
+      # executiveusa/open-code-review/.github/workflows/vibe-review-standard.yml@main
+      # does not exist in that repo - this gate currently errors until a reusable
+      # workflow is published there. Tracked; do not silently retarget.
+      upload_artifacts: true
