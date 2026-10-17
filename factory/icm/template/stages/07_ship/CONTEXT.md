@@ -11,13 +11,14 @@ One job: release the approved work reversibly, with ownership and live proof.
 - Layer 3: `../../references/SOURCE_PROVENANCE.md`.
 - Layer 3: `../../shared/OWNERSHIP_RETENTION_STANDARD.md`.
 - Layer 3: `../../shared/VOICE_CALL_PROOF_STANDARD.md` for every software product; exact-candidate N/A receipt required when no voice/call surface exists.
+- Layer 3: `../../shared/SECURITY_AUDIT_LAW.md` - the G15 security audit law: six required phases and rules R1-R10.
 - Layer 3: `../../references/MISSION-V2-MOBILE-FIRST-SITE-PROOF.md` for every website/web app release.
 
 ## Process
 
 1. For a website or web app, run the full owner-supplied MISSION v2 contract as the final product gate. Require all operating work-log fields, an explicit content policy, the applicable proof matrix, classified `UNVERIFIED` items, independent score >=8.5 with no P0/P1, exact-candidate evidence, and rollback. Write `docs/evidence/mission-v2-release.json`. Non-web software must write an exact-candidate `NOT_APPLICABLE` receipt with a specific reason.
 2. Require exact-candidate machine receipts for no-slop, subtraction, and voice/call proof. Non-user-facing and non-voice candidates must declare bounded N/A reasons; silent skips are HOLD.
-3. Require an exact-candidate security audit receipt. An auditor who is not the builder runs the security-audit skill (vendored validator: `factory/vendor/security-audit-skill/`) at least twice on the candidate and records the result with `scripts/security-audit-gate.mjs`, which writes `docs/evidence/security-audit.json`. Zero confirmed critical/high findings; every confirmed medium-or-above finding needs a recorded FIXED or WAIVED disposition. Sandbox targets only; never attack a live production target.
+3. Require an exact-candidate security audit receipt. An auditor who is not the builder runs the security-audit skill (vendored validator: `factory/vendor/security-audit-skill/`) at least twice on the candidate and records the result with `scripts/security-audit-gate.mjs`, which writes `docs/evidence/security-audit.json`. Zero confirmed critical/high findings; every confirmed medium-or-above finding needs a recorded FIXED or WAIVED disposition. Sandbox targets only; never attack a live production target. The full law is `../../shared/SECURITY_AUDIT_LAW.md`: six required phases (recon, hunt, validate, report, structured output, independent verification) and rules R1-R10.
 4. Run `factory:ship-gate` on the exact candidate. It must confirm pinned Open Code Review PASS on that candidate, cold ICM walk PASS, independent review PASS, security audit PASS, and Judge SHIP. Any missing or stale receipt is HOLD.
 5. Prepare a reversible release. Verify destination, branch, environment, domains, data ownership, credentials ownership, monitoring, backup, rollback command, and post-release checks.
 6. Confirm that every public third-party asset has the required rights/attribution record. Remove or replace any `UNVERIFIED` distribution asset before release rather than weakening the gate.
