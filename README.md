@@ -273,3 +273,6 @@ Use it, fork it, inspect it, improve it, and preserve attribution required by up
 This repository is Client Zero. Vibe Engineering is used to build and review Vibe Engineering itself.
 
 A polished demo is not proof. Only call something shipped when the exact released revision has been checked in the real environment and there is a rollback path.
+
+
+<!-- merge-gate verification probe 2026-09-26: trivial no-op change -->
