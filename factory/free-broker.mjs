@@ -108,87 +108,88 @@ export function createBroker({
     // served model is observed AND verified. Buffering is bounded by bytes
     // (64KB) AND time (streamModelTimeoutMs); a stream that ends, overruns or
     // times out without a model field is denied, never forwarded.
+    // Unified SSE event validator (critic v5g review): the stream is parsed
+    // into COMPLETE events (blank-line framing absorbs any chunk split or
+    // coalescing), each event's data payload is JSON.parsed - so a
+    // JSON-escaped key like "\u006dodel" decodes to the real key - and the
+    // .model of EVERY data event must equal the resolved model BEFORE that
+    // event is forwarded. One validator covers the initial prefix and every
+    // later event; there is no prefix/forward seam. NOTHING reaches the
+    // client until the first verified model field (bounded by 64KB and
+    // streamModelTimeoutMs). Forwarded bytes are the event's original TEXT
+    // re-encoded: valid UTF-8 (incl. 4-byte emoji) passes intact, invalid
+    // sequences re-encode as U+FFFD - literal byte-losslessness is NOT
+    // claimed. A stream ending on an incomplete event fails closed (the
+    // unvalidated suffix is never forwarded); a trailing lone quote at EOF is
+    // a documented, accepted fail-closed false positive.
     if (wantStream && up.ok && up.body && typeof up.body.getReader === 'function') {
       const reader = up.body.getReader();
       const dec = new TextDecoder();
-      const buffered = [];
-      let total = 0, text = '', servedModel = null, streamEnded = false;
+      let total = 0, pending = '', destroyed = false, headerSent = false, servedModel = null;
+      const held = []; // validated no-data events (comments) seen before the first model
       const deadline = Date.now() + streamModelTimeoutMs;
-      try {
-        while (total <= 65536 && Date.now() < deadline) {
-          const { done, value } = await Promise.race([
-            reader.read(),
-            new Promise((_, rej) => setTimeout(() => rej(new Error('model-observation deadline')), Math.max(1, deadline - Date.now()))),
-          ]);
-          if (done) { streamEnded = true; break; }
-          total += value.length;
-          if (total > MAX_RESPONSE) { await reader.cancel().catch(() => {}); onEvent({ model, ok: false, stream: true, error: 'response too large' }); return deny(502, 'upstream response too large'); }
-          buffered.push(value);
-          text += dec.decode(value, { stream: true });
-          const m = text.match(/"model"\s*:\s*"([^"]+)"/);
-          if (m) { servedModel = m[1]; break; }
+      const writeHeadOnce = () => {
+        if (!headerSent) {
+          res.writeHead(up.status, { 'content-type': (up.headers && typeof up.headers.get === 'function' && up.headers.get('content-type')) || 'text/event-stream' });
+          headerSent = true;
         }
-      } catch { await reader.cancel().catch(() => {}); onEvent({ model, ok: false, stream: true, error: 'upstream stream failed or model-observation deadline' }); return deny(502, 'upstream stream failed or served model unobservable in time'); }
-      if (!servedModel) {
-        // Fail closed: stream ended / overran / timed out with no model field.
-        await reader.cancel().catch(() => {});
-        onEvent({ model, ok: false, stream: true, error: streamEnded ? 'stream ended with no model field' : 'no model field within bounds' });
-        return deny(502, 'served model unobservable - refusing to forward unverified stream');
-      }
-      if (servedMismatch(servedModel)) {
-        await reader.cancel().catch(() => {});
-        onEvent({ model, ok: false, stream: true, served_model: servedModel });
-        return deny(502, `provider served ${servedModel}, not the resolved ${model}`);
-      }
-      // critic v5: one read() can deliver MULTIPLE SSE chunks - the buffered
-      // prefix must be fully clean, not just its first model field. Scan every
-      // model field in the buffer before any byte is forwarded.
-      for (const m2 of text.matchAll(/"model"\s*:\s*"([^"]+)"/g)) {
-        if (servedMismatch(m2[1])) {
-          await reader.cancel().catch(() => {});
-          onEvent({ model, ok: false, stream: true, served_model: m2[1], error: 'served model changed mid-stream' });
-          return deny(502, `provider served ${m2[1]} mid-stream, not the resolved ${model}`);
-        }
-      }
-      res.writeHead(up.status, { 'content-type': (up.headers && typeof up.headers.get === 'function' && up.headers.get('content-type')) || 'text/event-stream' });
-      for (const c of buffered) res.write(c);
-      let destroyed = false;
-      const destroyWith = (served, why) => { destroyed = true; res.destroy(); onEvent({ model, ok: false, stream: true, served_model: served, error: why }); };
-      // critic v5f review: the forwarding loop must validate EVERY model field
-      // in EVERY chunk (all matches, not the first), including a key, colon or
-      // value SPLIT ACROSS chunks - and never forward a suffix that could
-      // still complete into a model field. Carry-based: scan carry+chunk with
-      // matchAll, forward only the validated prefix, hold back the longest
-      // trailing partial (incl. a lone '"' that could open a key next chunk).
-      // (JSON-escaped occurrences inside content strings carry \" and cannot
-      // complete these patterns.)
-      const MODEL_PARTIAL = /"model"(?:\s*:?(?:\s*"[^"]*)?)?\s*$|"m(?:o(?:d(?:e(?:l)?)?)?)?\s*$|"$/;
-      let carry = '';
+      };
+      const failStream = (served, why) => {
+        destroyed = true;
+        onEvent({ model, ok: false, stream: true, ...(served ? { served_model: served } : {}), error: why });
+        if (headerSent) res.destroy(); else deny(502, why);
+      };
       try {
-        while (true) {
-          const { done, value } = await reader.read();
+        for (;;) {
+          let timer = null;
+          const { done, value } = !servedModel
+            ? await Promise.race([
+                reader.read().finally(() => clearTimeout(timer)),
+                new Promise((_, rej) => { timer = setTimeout(() => rej(new Error('model-observation deadline')), Math.max(1, deadline - Date.now())); }),
+              ])
+            : await reader.read();
           if (done) break;
           total += value.length;
-          if (total > MAX_RESPONSE) { destroyWith(servedModel, 'response too large mid-stream'); return; }
-          const scan = carry + dec.decode(value, { stream: true });
-          for (const mm of scan.matchAll(/"model"\s*:\s*"([^"]*)"/g)) {
-            if (servedMismatch(mm[1])) { destroyWith(mm[1], 'served model changed mid-stream'); return; }
+          if (total > MAX_RESPONSE) { failStream(null, 'upstream response too large'); return; }
+          pending += dec.decode(value, { stream: true });
+          const parts = pending.split(/\r?\n\r?\n/);
+          pending = parts.pop(); // trailing (possibly incomplete) event stays buffered
+          for (const evt of parts) {
+            const dataLines = evt.split(/\r?\n/).filter((l) => l.startsWith('data:')).map((l) => l.slice(5).replace(/^ /, ''));
+            if (!dataLines.length) { // comment / event-only lines: no content, no model info
+              if (servedModel) { writeHeadOnce(); res.write(evt + '\n\n'); } else held.push(evt);
+              continue;
+            }
+            const payload = dataLines.join('\n');
+            if (payload.trim() === '[DONE]') {
+              if (!servedModel) { failStream(null, 'stream ended with no model field'); return; }
+              writeHeadOnce(); res.write(evt + '\n\n'); continue;
+            }
+            let obj;
+            try { obj = JSON.parse(payload); } catch { failStream(null, 'unparseable SSE data event - refusing to forward unverifiable stream'); return; }
+            const served = obj && typeof obj.model === 'string' ? obj.model : null;
+            if (!served) { failStream(null, 'served model unobservable - refusing to forward unverified stream'); return; }
+            if (servedMismatch(served)) {
+              if (!servedModel) failStream(served, `provider served ${served}, not the resolved ${model}`);
+              else failStream(served, 'served model changed mid-stream');
+              return;
+            }
+            if (!servedModel) {
+              servedModel = served;
+              writeHeadOnce();
+              for (const h of held) res.write(h + '\n\n');
+              held.length = 0;
+            }
+            res.write(evt + '\n\n');
           }
-          const hold = scan.match(MODEL_PARTIAL);
-          const cut = hold ? hold.index : scan.length;
-          if (cut > 0) res.write(Buffer.from(scan.slice(0, cut), 'utf8'));
-          carry = scan.slice(cut);
+          if (!servedModel && pending.length > 65536) { failStream(null, 'no model field within bounds'); return; }
         }
-      } catch { destroyWith(servedModel, 'upstream stream failed mid-flight'); return; }
-      carry += dec.decode();
-      if (carry.length > 0) {
-        // Stream ended on an unterminated model field: the held-back suffix
-        // stays unvalidated, so it is never forwarded. Fail closed.
-        destroyWith(servedModel, 'stream ended with unterminated model field');
-        return;
-      }
+      } catch { if (!destroyed) failStream(null, 'upstream stream failed or served model unobservable in time'); return; }
+      pending += dec.decode();
+      if (!servedModel) { failStream(null, 'stream ended with no model field'); return; }
+      if (pending.trim() !== '') { failStream(servedModel, 'stream ended with incomplete SSE event (unvalidated suffix refused)'); return; }
       res.end();
-      if (!destroyed) onEvent({ model, ok: true, status: up.status, served_model: servedModel, stream: true });
+      onEvent({ model, ok: true, status: up.status, served_model: servedModel, stream: true });
       return;
     }
     const text2 = await up.text().catch(() => '');

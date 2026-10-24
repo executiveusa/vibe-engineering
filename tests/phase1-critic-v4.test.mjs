@@ -199,13 +199,16 @@ test('broker: mid-stream model switch destroys the response and records the even
       : new Response(upstreamBody, { status: 200, headers: { 'content-type': 'text/event-stream' } }),
   });
   const { port } = await broker.listen(0, '127.0.0.1');
+  // The connection is destroyed mid-stream: the client reads the verified
+  // prefix, then the stream breaks - the swapped chunk never completes. With
+  // the unified SSE validator the destruction can surface as a rejected fetch
+  // (socket destroyed after headers) instead of a clean 502 - both are
+  // fail-closed; what matters is the swapped bytes never arrive.
   const res = await fetch(`http://127.0.0.1:${port}/v1/chat/completions`, {
     method: 'POST', headers: { authorization: `Bearer ${broker.runToken}`, 'content-type': 'application/json' },
     body: JSON.stringify({ model: 'a/x:free', messages: [], stream: true }),
-  });
-  // The connection is destroyed mid-stream: the client reads the verified
-  // prefix, then the stream breaks - the swapped chunk never completes.
-  const text = await res.text().catch(e => String(e));
+  }).catch(() => null);
+  const text = res ? await res.text().catch(e => String(e)) : '';
   assert.doesNotMatch(text, /llo/); // the post-switch chunk's content never arrives whole
   assert.ok(events.some(e => e.error === 'served model changed mid-stream' && e.served_model === 'evil/swapped:free'));
   await broker.close();

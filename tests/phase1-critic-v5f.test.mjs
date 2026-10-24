@@ -39,8 +39,8 @@ async function runAgainst(pieces) {
   const res = await fetch(`http://127.0.0.1:${port}/v1/chat/completions`, {
     method: 'POST', headers: { authorization: `Bearer ${broker.runToken}`, 'content-type': 'application/json' },
     body: JSON.stringify({ model: 'a/x:free', messages: [], stream: true }),
-  });
-  const text = await res.text().catch(e => String(e));
+  }).catch(() => null); // a destroyed post-headers socket rejects the fetch itself - still fail-closed
+  const text = res ? await res.text().catch(e => String(e)) : '';
   await broker.close();
   return { text, events };
 }
@@ -93,7 +93,7 @@ test('critic v5f: model value split across chunks is reassembled and checked', a
 test('critic v5f: stream ending on an unterminated model field fails closed (suffix never forwarded)', async () => {
   const { text, events } = await runAgainst([seg('a/x:free', 'he'), `data: {"id":"c","model":"a/x:free","choices":[{"delta":{"content":"ok"}},"mod`]);
   assert.ok(!text.includes('"mod')); // the held-back unterminated suffix never reaches the client
-  assert.ok(events.some(e => e.error === 'stream ended with unterminated model field'));
+  assert.ok(events.some(e => e.error === 'stream ended with incomplete SSE event (unvalidated suffix refused)'));
   assert.ok(!events.some(e => e.ok === true && e.stream === true));
 });
 
