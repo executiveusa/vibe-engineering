@@ -82,28 +82,15 @@ jobs:
           case "$TARGET_BRANCH" in
             -*|*[!A-Za-z0-9_./-]*|*..*) echo "bad TARGET_BRANCH: $TARGET_BRANCH" >&2; exit 1 ;;
           esac
-      - name: Detect target visibility (no credentials)
-        # A PUBLIC target needs no token in any lane, so none is used: the
-        # anonymous clone below then applies to the free lane too, and the
-        # fleet token never enters the run. Fails closed: anything other than
-        # an explicit "private": false (404, rate limit, network) counts as
-        # private and routes to the read-only-token path, whose probe refuses
-        # a token that can push.
-        id: vis
-        run: |
-          private=$(curl -sf "https://api.github.com/repos/$TARGET_REPOSITORY" | jq -r '.private' 2>/dev/null || true)
-          if [ "$private" = "false" ]; then echo "public=true" >> "$GITHUB_OUTPUT"; else echo "public=false" >> "$GITHUB_OUTPUT"; fi
-          echo "target visibility: private=${private:-unknown}"
-      - name: Clone target repository (anonymous, dry lane or public target)
+      - name: Clone target repository (anonymous, dry lane)
         # The dry lane carries NO credentials at all: no fleet token, no model
-        # keys, and the control checkout persists no token. A public target is
-        # cloned the same way in every lane. An anonymous clone means no
-        # GitHub credential exists in the environment for target-influenced
-        # code to reach, and nothing that could push.
-        if: ${{ env.LANE == 'dry' || steps.vis.outputs.public == 'true' }}
+        # keys, and the control checkout persists no token. An anonymous clone
+        # of the public target means no credential exists in the environment
+        # for target-influenced code to reach, and nothing that could push.
+        if: ${{ env.LANE == 'dry' }}
         run: git -c credential.helper= clone --branch "$TARGET_BRANCH" "https://github.com/$TARGET_REPOSITORY" target
-      - name: Verify the fleet token is read-only on the target (non-dry lanes, private target)
-        if: ${{ env.LANE != 'dry' && steps.vis.outputs.public != 'true' }}
+      - name: Verify the fleet token is read-only on the target (non-dry lanes)
+        if: ${{ env.LANE != 'dry' }}
         env:
           GH_TOKEN: ${{ secrets.FLEET_GITHUB_TOKEN }}
         run: |
@@ -116,8 +103,8 @@ jobs:
           if [ "$push" != "false" ] || [ "$admin" != "false" ] || [ "$maintain" = "true" ] || [ "$triage" = "true" ]; then
             echo "fleet token is not read-only on the target (push=$push admin=$admin maintain=$maintain triage=$triage)" >&2; exit 1
           fi
-      - name: Clone target repository (fleet token, non-dry lanes, private target)
-        if: ${{ env.LANE != 'dry' && steps.vis.outputs.public != 'true' }}
+      - name: Clone target repository (fleet token, non-dry lanes)
+        if: ${{ env.LANE != 'dry' }}
         env:
           GH_TOKEN: ${{ secrets.FLEET_GITHUB_TOKEN }}
         run: gh repo clone "$TARGET_REPOSITORY" target -- --branch "$TARGET_BRANCH"

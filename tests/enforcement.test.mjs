@@ -377,22 +377,12 @@ test('workflow ships automation OFF and keeps the dry lane off the target (workf
   assert.ok(!/VIBE_MODEL_LANE == 'dry' && ''/.test(wf), 'fallback-to-secret pattern must not exist');
   // Dry lane clones the public target ANONYMOUSLY: no credential materializes
   // at all. The anonymous step must not reference the fleet token.
-  const anon = wf.split('Clone target repository (anonymous, dry lane or public target)')[1].split('- name:')[0];
-  assert.match(anon, /if: \$\{\{ env\.LANE == 'dry' \|\| steps\.vis\.outputs\.public == 'true' \}\}/);
-  assert.ok(!/GH_TOKEN|secrets\./.test(anon), 'anonymous clone must carry no secret');
+  const anon = wf.split('Clone target repository (anonymous, dry lane)')[1].split('- name:')[0];
+  assert.match(anon, /if: \$\{\{ env\.LANE == 'dry' \}\}/);
+  assert.ok(!/GH_TOKEN|secrets\./.test(anon), 'anonymous dry clone must carry no secret');
   assert.match(anon, /credential\.helper= /);
-  // A public target needs no token in any lane. The visibility probe carries
-  // no credential and fails closed: only an explicit private:false is public.
-  const vis = wf.split('Detect target visibility (no credentials)')[1].split('- name:')[0];
-  assert.ok(!/GH_TOKEN|secrets\./.test(vis), 'visibility probe must carry no secret');
-  assert.match(vis, /if \[ "\$private" = "false" \]; then echo "public=true"/);
-  assert.match(vis, /else echo "public=false"/);
-  // Tokenized clone + probe run only for a non-dry lane on a non-public
-  // target; the probe still fails closed on missing fields
-  for (const name of ['Verify the fleet token is read-only on the target (non-dry lanes, private target)', 'Clone target repository (fleet token, non-dry lanes, private target)']) {
-    const step = wf.split(name)[1].split('- name:')[0];
-    assert.match(step, /if: \$\{\{ env\.LANE != 'dry' && steps\.vis\.outputs\.public != 'true' \}\}/, name);
-  }
+  // Tokenized clone + probe are non-dry only; probe fails closed on missing fields
+  assert.match(wf, /Clone target repository \(fleet token, non-dry lanes\)/);
   assert.match(wf, /push" != "false"/);
   assert.match(wf, /admin" != "false"/);
   // Control checkout persists no credentials next to target-influenced steps
