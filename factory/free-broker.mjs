@@ -31,6 +31,35 @@ const DEFAULT_CALL_CAP = 200;
 // agent loop, and a client that asked for SSE must receive SSE. Streamed
 // responses are inspected for the served model BEFORE the first byte reaches
 // the sandbox; a mismatch denies before anything is forwarded downstream.
+// Count top-level "model" keys in a JSON object payload WITHOUT collapsing
+// duplicates: walks the raw text, JSON-decoding depth-1 key strings (escaped
+// twins count as the same key). Only called on payloads that already parsed.
+export function countTopLevelModelKeys(text) {
+  let count = 0, depth = 0, inStr = false, esc = false, keyStart = -1, expectKey = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inStr) {
+      if (esc) esc = false;
+      else if (c === '\\') esc = true;
+      else if (c === '"') {
+        inStr = false;
+        if (depth === 1 && expectKey && keyStart >= 0) {
+          let key = null;
+          try { key = JSON.parse(text.slice(keyStart, i + 1)); } catch { /* unparseable key token: ignore */ }
+          if (key === 'model') count += 1;
+        }
+        expectKey = false;
+      }
+      continue;
+    }
+    if (c === '"') { inStr = true; if (depth === 1 && expectKey) keyStart = i; }
+    else if (c === '{' || c === '[') { depth += 1; if (depth === 1 && c === '{') expectKey = true; }
+    else if (c === '}' || c === ']') depth -= 1;
+    else if (c === ',' && depth === 1) expectKey = true;
+  }
+  return count;
+}
+
 export function createBroker({
   apiKey,
   allowedModels,           // exact OpenRouter ids (no prefix) resolved for this run
@@ -155,6 +184,17 @@ export function createBroker({
           }
           let obj;
           try { obj = JSON.parse(payload); } catch { failStream(null, 'unparseable SSE data event - refusing to forward unverifiable stream'); return false; }
+          // architect 0034 (P2): JSON.parse keeps the LAST duplicate key (and
+          // its reviver walks the collapsed object, so a reviver cannot count
+          // duplicates), so {"model":"evil","model":"honest"} reads honest
+          // here while a first-wins downstream parser reads evil. Count the
+          // top-level "model" keys in the RAW payload with a tiny tokenizer
+          // (key strings JSON-decoded, so an escaped-key twin like
+          // "\u006dodel" counts too); duplicates are anomalous - fail closed.
+          if (countTopLevelModelKeys(payload) > 1) {
+            failStream(null, 'duplicate top-level model key - anomalous event refused');
+            return false;
+          }
           const served = obj && typeof obj.model === 'string' ? obj.model : null;
           if (!served) { failStream(null, 'served model unobservable - refusing to forward unverified stream'); return false; }
           if (servedMismatch(served)) {

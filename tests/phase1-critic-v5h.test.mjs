@@ -84,3 +84,13 @@ test('critic v5h control: honest bare-CR-framed stream is normalized and forward
   assert.ok(text.includes('"he"'));
   assert.ok(events.some(e => e.ok === true && e.stream === true && e.served_model === 'a/x:free'));
 });
+
+test('architect 0034 (P2): duplicate top-level model key fails closed', async () => {
+  // JSON.parse keeps the LAST duplicate key; a first-wins parser would read
+  // the FIRST. An upstream sending duplicate model keys is anomalous: refuse.
+  const dup = `data: {"id":"c","model":"evil/swapped:free","model":"a/x:free","choices":[{"index":0,"delta":{"content":"EVILCONTENT"}}]}\n\n`;
+  const { text, events } = await runAgainst([seg('a/x:free', 'he'), dup, 'data: [DONE]\n\n']);
+  assert.ok(!text.includes('EVILCONTENT'));
+  assert.ok(events.some(e => e.error === 'duplicate top-level model key - anomalous event refused'));
+  assert.ok(!events.some(e => e.ok === true && e.stream === true));
+});
