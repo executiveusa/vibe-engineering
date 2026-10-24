@@ -5,12 +5,12 @@
 // and its one-time provider-catalog cache. Fully offline: the mock upstream
 // stands in for OpenRouter; no real key, no paid call.
 //
-// RUN1 positive: plain SSE completion through the broker (known-good flow).
-//   With SMOKE_TOOL_LOOP=1 the mock first serves a tool_call and the run must
-//   complete a second brokered round-trip carrying the tool result - this
-//   path is EXPERIMENTAL tonight (opencode permission/SSE interplay under
-//   non-interactive exec is not yet reliable; a failed attempt records
-//   inconclusive, not pass).
+// RUN1 positive: TOOL-LOOP completion through the broker. The mock first
+//   serves a tool_call (read probe.txt); the run must execute the tool and
+//   complete a second brokered round-trip carrying the tool result, ending
+//   with the final "smoke ok" text. (Promoted from the experimental
+//   SMOKE_TOOL_LOOP path after 3/3 consecutive green runs at v5e; the earlier
+//   hang was the direct-spawn problem, not SSE interplay.)
 // RUN2 client-side only: the binary rejects a catalog-unknown model itself
 //   (nonzero exit, no broker contact attributable) - NOT broker-refusal proof.
 // RUN3 kill switch: a hostile project opencode.json (bogus baseURL) is inert
@@ -51,7 +51,7 @@ const upstream = http.createServer((req, res) => {
     const model = body.model || 'unknown';
     receipt.upstream_requests.push({ model, has_tool_result: (body.messages || []).some(m => m.role === 'tool'), tools_offered: (body.tools || []).length });
     const gotToolResult = (body.messages || []).some(m => m.role === 'tool');
-    if (process.env.SMOKE_TOOL_LOOP === '1' && !gotToolResult) {
+    if (!gotToolResult) {
       sse(res, model, [
         { role: 'assistant', content: null, tool_calls: [{ index: 0, id: 'call_1', type: 'function', function: { name: 'read', arguments: JSON.stringify({ filePath: probe }) } }] },
         { tool_calls: [{ index: 0, id: 'call_1', type: 'function', function: { name: 'read', arguments: '' } }] },
@@ -127,11 +127,10 @@ const r0ok = direct.status === 403
 
 
 const hitsBefore1 = upstreamHits;
-await runOc('run1_plain_sse_completion', { model: ALLOWED });
-const wantToolLoop = process.env.SMOKE_TOOL_LOOP === '1';
-const r1ok = receipt.runs.run1_plain_sse_completion.exit === 0
-  && /smoke ok/.test(receipt.runs.run1_plain_sse_completion.tail)
-  && (!wantToolLoop || receipt.upstream_requests.slice(hitsBefore1).some(r => r.has_tool_result))
+await runOc('run1_tool_loop_completion', { model: ALLOWED });
+const r1ok = receipt.runs.run1_tool_loop_completion.exit === 0
+  && /smoke ok/.test(receipt.runs.run1_tool_loop_completion.tail)
+  && receipt.upstream_requests.slice(hitsBefore1).some(r => r.has_tool_result)
   && events.some(e => e.ok === true && e.served_model === ALLOWED && e.stream === true);
 
 // RUN2 client-side evidence ONLY (critic v5): opencode rejects a
@@ -164,7 +163,7 @@ receipt.checks = { ...(receipt.checks || {}), run3_project_config_killswitch: r3
 receipt.refusal_evidence = events.filter(e => e.refused_before_upstream === true);
 receipt.probe_note = 'google/gemini-nano-banana-2.1 refusals are the binary\'s INTERNAL probe model (runs 1/3), not the requested model - recorded for transparency';
 receipt.checks.run0_direct_broker_refusal = r0ok;
-receipt.checks.run1_plain_sse_completion = r1ok;
+receipt.checks.run1_tool_loop_completion = r1ok;
 receipt.checks.run2_client_rejects_unknown_model = r2ok;
 receipt.ok = r0ok && r1ok && r2ok && r3ok && receipt.upstream_requests.every(r => r.model === ALLOWED);
 receipt.finished_at = new Date().toISOString();
