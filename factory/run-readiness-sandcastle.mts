@@ -3,6 +3,7 @@ import * as path from "node:path";
 import * as sandcastle from "@ai-hero/sandcastle";
 import { docker } from "@ai-hero/sandcastle/sandboxes/docker";
 import { RECEIPT_PATH, assertIndependentJudge, evaluateReceipt, modelFamily } from "./judge-receipt.mjs";
+import { DRY_RECEIPT_PATH } from "./dry-receipt.mjs";
 import { dryAgent } from "./dry-agent.mjs";
 
 const repo = process.env.TARGET_REPOSITORY;
@@ -26,7 +27,10 @@ const openrouterKey = process.env.OPENROUTER_API_KEY;
 // Lane "dry" (Phase 0): a deterministic in-sandbox agent replaces every model
 // call so the whole pipeline can be exercised with zero keys, zero spend and
 // zero model output. Its receipt is always HOLD and can never pass the gate.
-const lane = process.env.VIBE_MODEL_LANE || "free";
+// Fail closed: an unset lane used to default to free (owner decision 2026-09-26,
+// superseded 2026-10-24 by independent review): an implicit lane can spend on a
+// paid-capable key route without a conscious choice. Unset is now an error.
+const lane = process.env.VIBE_MODEL_LANE;
 
 const slug = repo.replace(/[^a-zA-Z0-9._-]/g, "-");
 const branch = `vibe/readiness-${slug}-${Date.now()}`;
@@ -41,7 +45,14 @@ const report = (decision: string, extra: Record<string, unknown> = {}) => {
 // record a durable HOLD so the workflow reports it instead of failing empty.
 const validateConfig = () => {
   if (lane !== "paid" && lane !== "free" && lane !== "dry") {
-    throw new Error("VIBE_MODEL_LANE must be paid, free or dry");
+    throw new Error("VIBE_MODEL_LANE must be set explicitly to paid, free or dry (no default)");
+  }
+  // The target is interpolated into shell commands by the workflow; reject
+  // anything but a plain owner/repo (a leading dash or extra segments become
+  // option injection downstream). The clone-time branch is guarded in the
+  // workflow itself.
+  if (!/^[A-Za-z0-9_][A-Za-z0-9_.-]*\/[A-Za-z0-9_][A-Za-z0-9_.-]*$/.test(repo)) {
+    throw new Error(`TARGET_REPOSITORY must be a plain owner/repo: ${JSON.stringify(repo)}`);
   }
   if (lane === "dry") return; // dry lane: no credentials needed, no model runs
   if (lane === "paid") {
@@ -144,7 +155,9 @@ try {
   });
 
   // The runner re-checks the receipt; the Judge's word alone is not a SHIP.
-  const receiptFile = path.join(sandbox.worktreePath, RECEIPT_PATH);
+  // Dry lane reads back its own distinct receipt path; the real receipt path
+  // is never populated by a dry run.
+  const receiptFile = path.join(sandbox.worktreePath, lane === "dry" ? DRY_RECEIPT_PATH : RECEIPT_PATH);
   const receipt = fs.existsSync(receiptFile) ? JSON.parse(fs.readFileSync(receiptFile, "utf8")) : null;
   const verdict = evaluateReceipt(receipt);
   report(verdict.decision, { level: verdict.level, reasons: verdict.reasons });

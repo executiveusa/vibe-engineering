@@ -1,8 +1,11 @@
 name: Nightly Production Readiness Factory
 
 on:
-  schedule:
-    - cron: "30 7 * * *"
+  # Automations ship OFF (independent review 2026-10-24): merging this file
+  # must not enable nightly runs. Re-enabling the schedule is a conscious
+  # owner act - uncomment deliberately.
+  # schedule:
+  #   - cron: "30 7 * * *"
   workflow_dispatch:
     inputs:
       target_repository:
@@ -62,7 +65,14 @@ jobs:
       - name: Clone target repository
         env:
           GH_TOKEN: ${{ secrets.FLEET_GITHUB_TOKEN }}
-        run: gh repo clone "$TARGET_REPOSITORY" target -- --branch "$TARGET_BRANCH"
+        run: |
+          case "$TARGET_REPOSITORY" in
+            -*|*[!A-Za-z0-9_./-]*|*//*|/*|*/) echo "bad TARGET_REPOSITORY: $TARGET_REPOSITORY" >&2; exit 1 ;;
+          esac
+          case "$TARGET_BRANCH" in
+            -*|*[!A-Za-z0-9_./-]*|*..*) echo "bad TARGET_BRANCH: $TARGET_BRANCH" >&2; exit 1 ;;
+          esac
+          gh repo clone "$TARGET_REPOSITORY" target -- --branch "$TARGET_BRANCH"
       - name: Install factory prompts
         run: |
           mkdir -p target/.vibe-factory
@@ -71,7 +81,10 @@ jobs:
           cp control/factory/dry-agent.mjs control/factory/dry-agent-run.mjs control/factory/dry-receipt.mjs target/.vibe-factory/
       - name: Install Sandcastle runtime
         working-directory: target
-        run: npm install --no-save @ai-hero/sandcastle@0.6.4 tsx@4.23.15
+        # --ignore-scripts: install hooks are the one code-execution path in this
+        # step; dropping them keeps registry code from running before the
+        # key-bearing factory step. Mitigation only, not an isolation claim.
+        run: npm install --no-save --ignore-scripts @ai-hero/sandcastle@0.6.4 tsx@4.23.15
       # The sandbox image used to be built by hand on a server; build it here instead (A3).
       # sandcastle's build-image reads <cwd>/.sandcastle (verified against the 0.6.4 CLI source),
       # so the control repo's config is copied into the target first.
@@ -96,6 +109,9 @@ jobs:
           VIBE_MAX_BUILD_ITERATIONS: "4"
         run: npx tsx .vibe-factory/run-readiness-sandcastle.mts
       - name: Open pull request from retained branch
+        # The dry lane is pipeline mechanics only: it must never write to the
+        # target repository, even when every stage succeeds.
+        if: ${{ vars.VIBE_MODEL_LANE != 'dry' }}
         working-directory: target
         env:
           GH_TOKEN: ${{ secrets.FLEET_GITHUB_TOKEN }}
