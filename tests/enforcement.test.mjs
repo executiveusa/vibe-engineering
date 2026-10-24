@@ -360,9 +360,18 @@ test('workflow ships automation OFF and keeps the dry lane off the target (workf
     assert.match(wf, new RegExp(`${key}: \\$\\{\\{ vars\\.VIBE_MODEL_LANE != 'dry' && secrets\\.${key} \\|\\| '' \\}\\}`));
   }
   assert.ok(!/VIBE_MODEL_LANE == 'dry' && ''/.test(wf), 'fallback-to-secret pattern must not exist');
-  // Fleet token read-only verification on the target runs before the clone
-  assert.match(wf, /Verify the fleet token is read-only on the target/);
-  assert.match(wf, /dry lane requires a read-only fleet token on the target/);
+  // Dry lane clones the public target ANONYMOUSLY: no credential materializes
+  // at all. The anonymous step must not reference the fleet token.
+  const anon = wf.split('Clone target repository (anonymous, dry lane)')[1].split('- name:')[0];
+  assert.match(anon, /if: \$\{\{ vars\.VIBE_MODEL_LANE == 'dry' \}\}/);
+  assert.ok(!/GH_TOKEN|secrets\./.test(anon), 'anonymous dry clone must carry no secret');
+  assert.match(anon, /credential\.helper= /);
+  // Tokenized clone + probe are non-dry only; probe fails closed on missing fields
+  assert.match(wf, /Clone target repository \(fleet token, non-dry lanes\)/);
+  assert.match(wf, /push" != "false"/);
+  assert.match(wf, /admin" != "false"/);
+  // Control checkout persists no credentials next to target-influenced steps
+  assert.match(wf, /persist-credentials: false/);
 });
 
 test('the dry lane refuses to start with any model key set (runner source pin)', () => {
