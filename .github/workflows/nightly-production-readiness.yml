@@ -1,8 +1,11 @@
 name: Nightly Production Readiness Factory
 
 on:
-  schedule:
-    - cron: "30 7 * * *"
+  # Automations ship OFF (independent review 2026-10-24): merging this file
+  # must not enable nightly runs. Re-enabling the schedule is a conscious
+  # owner act - uncomment deliberately.
+  # schedule:
+  #   - cron: "30 7 * * *"
   workflow_dispatch:
     inputs:
       target_repository:
@@ -26,6 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.batch.outputs.matrix }}
+      has_targets: ${{ steps.batch.outputs.has_targets }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
@@ -37,24 +41,16 @@ jobs:
           VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
           TARGET_REPOSITORY_IN: ${{ inputs.target_repository }}
           TARGET_BRANCH_IN: ${{ inputs.target_branch }}
-        run: |
-          if [ -n "$TARGET_REPOSITORY_IN" ]; then
-            branch="${TARGET_BRANCH_IN:-main}"
-            project="${TARGET_REPOSITORY_IN##*/}"
-            matrix=$(jq -cn --arg p "$project" --arg r "$TARGET_REPOSITORY_IN" --arg b "$branch" '{include:[{project:$p,repository:$r,branch:$b,state:"MANUAL",priority:0}]}')
-            echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
-          else
-            node scripts/select-nightly-vercel-batch.mjs
-          fi
+        run: node scripts/select-nightly-vercel-batch.mjs
 
   audit-prd-build-review:
     needs: select
-    if: ${{ needs.select.outputs.matrix != '' }}
+    if: ${{ needs.select.outputs.has_targets == 'true' }}
     strategy:
       fail-fast: false
       max-parallel: 5
       matrix: ${{ fromJson(needs.select.outputs.matrix) }}
-    runs-on: [self-hosted, linux, x64, vibe-sandcastle]
+    runs-on: ${{ vars.VIBE_FACTORY_RUNS_ON || 'ubuntu-latest' }}
     permissions:
       contents: read
     env:
@@ -66,7 +62,37 @@ jobs:
         with:
           path: control
           persist-credentials: false
-      - name: Clone target repository
+      - name: Guard target coordinates
+        run: |
+          case "$TARGET_REPOSITORY" in
+            -*|*[!A-Za-z0-9_./-]*|*//*|/*|*/) echo "bad TARGET_REPOSITORY: $TARGET_REPOSITORY" >&2; exit 1 ;;
+          esac
+          case "$TARGET_BRANCH" in
+            -*|*[!A-Za-z0-9_./-]*|*..*) echo "bad TARGET_BRANCH: $TARGET_BRANCH" >&2; exit 1 ;;
+          esac
+      - name: Clone target repository (anonymous, dry lane)
+        # The dry lane carries NO credentials at all: no fleet token, no model
+        # keys, and the control checkout persists no token. An anonymous clone
+        # of the public target means no credential exists in the environment
+        # for target-influenced code to reach, and nothing that could push.
+        if: ${{ vars.VIBE_MODEL_LANE == 'dry' }}
+        run: git -c credential.helper= clone --branch "$TARGET_BRANCH" "https://github.com/$TARGET_REPOSITORY" target
+      - name: Verify the fleet token is read-only on the target (non-dry lanes)
+        if: ${{ vars.VIBE_MODEL_LANE != 'dry' }}
+        env:
+          GH_TOKEN: ${{ secrets.FLEET_GITHUB_TOKEN }}
+        run: |
+          # Reports permission NAMES only - never the token. Fails closed:
+          # push and admin must be exactly false (missing/null fields fail).
+          perms=$(gh api "repos/$TARGET_REPOSITORY" --jq '.permissions')
+          echo "fleet token permissions on $TARGET_REPOSITORY: $perms"
+          push=$(echo "$perms" | jq -r '.push'); admin=$(echo "$perms" | jq -r '.admin')
+          maintain=$(echo "$perms" | jq -r '.maintain // "absent"'); triage=$(echo "$perms" | jq -r '.triage // "absent"')
+          if [ "$push" != "false" ] || [ "$admin" != "false" ] || [ "$maintain" = "true" ] || [ "$triage" = "true" ]; then
+            echo "fleet token is not read-only on the target (push=$push admin=$admin maintain=$maintain triage=$triage)" >&2; exit 1
+          fi
+      - name: Clone target repository (fleet token, non-dry lanes)
+        if: ${{ vars.VIBE_MODEL_LANE != 'dry' }}
         env:
           GH_TOKEN: ${{ secrets.FLEET_GITHUB_TOKEN }}
         run: gh repo clone "$TARGET_REPOSITORY" target -- --branch "$TARGET_BRANCH"
@@ -75,23 +101,43 @@ jobs:
           mkdir -p target/.vibe-factory
           cp control/factory/*-prompt.md target/.vibe-factory/
           cp control/factory/run-readiness-sandcastle.mts control/factory/judge-receipt.mjs target/.vibe-factory/
+          cp control/factory/dry-agent.mjs control/factory/dry-agent-run.mjs control/factory/dry-receipt.mjs target/.vibe-factory/
       - name: Install Sandcastle runtime
         working-directory: target
-        run: npm install --no-save @ai-hero/sandcastle@0.6.4 tsx@4.23.15
+        # --ignore-scripts: install hooks are the one code-execution path in this
+        # step; dropping them keeps registry code from running before the
+        # key-bearing factory step. Mitigation only, not an isolation claim.
+        run: npm install --no-save --ignore-scripts @ai-hero/sandcastle@0.6.4 tsx@4.23.15
+      # The sandbox image used to be built by hand on a server; build it here instead (A3).
+      # sandcastle's build-image reads <cwd>/.sandcastle (verified against the 0.6.4 CLI source),
+      # so the control repo's config is copied into the target first.
+      - name: Build the sandcastle image
+        working-directory: target
+        run: |
+          cp -r ../control/.sandcastle .sandcastle
+          start=$(date +%s)
+          npx --yes @ai-hero/sandcastle@0.6.4 docker build-image --image-name sandcastle:vibe-engineering
+          echo "sandcastle image build seconds: $(( $(date +%s) - start ))" >> "$GITHUB_STEP_SUMMARY"
       # Agents run here. This step gets model keys only: no GitHub token, so nothing an agent
       # does in the sandbox can push, merge or change repository settings.
       - id: factory
         name: Run audit, PRD, builder, and independent judge
         working-directory: target
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          # Dry lane runs with NO model secrets: positive non-dry predicate
+          # (the inverse pattern 'lane==dry && '' || secrets.X' would fall back
+          # to the secret). The runner also refuses to start dry with keys set.
+          OPENAI_API_KEY: ${{ vars.VIBE_MODEL_LANE != 'dry' && secrets.OPENAI_API_KEY || '' }}
+          ANTHROPIC_API_KEY: ${{ vars.VIBE_MODEL_LANE != 'dry' && secrets.ANTHROPIC_API_KEY || '' }}
+          OPENROUTER_API_KEY: ${{ vars.VIBE_MODEL_LANE != 'dry' && secrets.OPENROUTER_API_KEY || '' }}
           VIBE_MODEL_LANE: ${{ vars.VIBE_MODEL_LANE }}
           VIBE_RUN_BUDGET_MINUTES: "120"
           VIBE_MAX_BUILD_ITERATIONS: "4"
         run: npx tsx .vibe-factory/run-readiness-sandcastle.mts
       - name: Open pull request from retained branch
+        # The dry lane is pipeline mechanics only: it must never write to the
+        # target repository, even when every stage succeeds.
+        if: ${{ vars.VIBE_MODEL_LANE != 'dry' }}
         working-directory: target
         env:
           GH_TOKEN: ${{ secrets.FLEET_GITHUB_TOKEN }}

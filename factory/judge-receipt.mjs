@@ -27,6 +27,12 @@ export function evaluateReceipt(receipt) {
   if (!receipt || typeof receipt !== 'object' || Array.isArray(receipt)) {
     return { decision: 'HOLD', level: null, reasons: ['receipt is not a JSON object'] };
   }
+  // Dry-lane provenance is never ship-eligible, even under a fully forged SHIP
+  // body overlaid on the dry receipt (independent-review finding). Bounded
+  // guarantee only: receipts without the marker are judged on their numbers.
+  if (receipt.lane === 'dry') {
+    return { decision: 'HOLD', level: null, reasons: ['dry lane receipt: no model ran, never ship-eligible'] };
+  }
   const level = LEVELS.includes(receipt.consequence_level) ? receipt.consequence_level : null;
   if (!level) reasons.push('consequence_level must be LOW, MEDIUM or HIGH');
   if (receipt.decision !== 'SHIP')

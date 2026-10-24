@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -181,7 +181,232 @@ test('nightly factory: agents get model keys only, actions are SHA-pinned, Judge
   }
   const runner = readFileSync(path.join(repoRoot, 'factory/run-readiness-sandcastle.mts'), 'utf8');
   const judgeRun = runner.slice(runner.indexOf('name: "reviewer-judge"'));
-  assert.match(judgeRun, /agent: judge\(\)/);
+  // judgeAgent("judge") resolves to judge() outside the dry lane; the dry lane
+  // substitution is wired through builderAgent/judgeAgent and skips nothing else.
+  assert.match(judgeRun, /agent: judgeAgent\("judge"\)/);
+  assert.match(runner, /const judgeAgent = .*lane === "dry" \? dryAgent\(stage\) : judge\(\)/);
+  assert.match(runner, /if \(lane !== "dry"\) \{\s*assertIndependentJudge/);
   assert.match(runner, /sandcastle\.claudeCode\(/);
   assert.match(runner, /AbortSignal\.timeout/);
+});
+
+// --- Dry lane: a dry run must never be able to SHIP (Phase 0) ---
+// The dry lane calls no model. Its receipt is HOLD by construction, and even a
+// tampered SHIP copy still fails the numeric gates. Both the receipt evaluator
+// and the merge gate must refuse it.
+
+import { dryAgent } from '../factory/dry-agent.mjs';
+import { DRY_RECEIPT_PATH, dryReceipt } from '../factory/dry-receipt.mjs';
+
+test('the dry-lane receipt is always HOLD, even when tampered toward SHIP', () => {
+  const receipt = dryReceipt('deadbeef'.repeat(5));
+  const verdict = evaluateReceipt(receipt);
+  assert.equal(verdict.decision, 'HOLD');
+  assert.ok(verdict.reasons.length > 0);
+  assert.ok(receipt.required_actions.includes('dry lane: no model ran'));
+  // Tampered copies still fail: the numbers behind a SHIP never agree.
+  assert.equal(evaluateReceipt({ ...receipt, decision: 'SHIP' }).decision, 'HOLD');
+  assert.equal(evaluateReceipt({ ...receipt, decision: 'SHIP', score: 100, p0_remaining: 0, p1_remaining: 0 }).decision, 'HOLD');
+});
+
+test('the merge gate refuses a dry-lane receipt regardless of approvals', () => {
+  const receipt = dryReceipt('deadbeef'.repeat(5));
+  for (const approvals of [0, 1, 99]) {
+    const result = gate({ receipt, changedAfterReceipt: [], approvals });
+    assert.equal(result.pass, false);
+  }
+  // Even with a tampered SHIP decision the gate still refuses.
+  assert.equal(
+    gate({ receipt: { ...receipt, decision: 'SHIP' }, changedAfterReceipt: [], approvals: 99 }).pass,
+    false,
+  );
+});
+
+test('the dry agent stages behave deterministically in a scratch repo', () => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'dry-agent-'));
+  try {
+    const run = (cmd, env = {}) =>
+      spawnSync(cmd[0], cmd.slice(1), {
+        cwd: dir,
+        env: { ...process.env, ...env },
+        encoding: 'utf8',
+      });
+    assert.equal(run(['git', 'init', '-q']).status, 0);
+    assert.equal(run(['git', '-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '--allow-empty', '-m', 'init']).status, 0);
+    const dryRun = path.join(repoRoot, 'factory', 'dry-agent-run.mjs');
+    // The sandbox copy layout puts dry-receipt.mjs next to dry-agent-run.mjs.
+    spawnSync('cp', [dryRun, path.join(dir, 'dry-agent-run.mjs')]);
+    spawnSync('cp', [path.join(repoRoot, 'factory', 'dry-receipt.mjs'), path.join(dir, 'dry-receipt.mjs')]);
+    for (const stage of ['auditor', 'prd']) {
+      const r = run(['node', 'dry-agent-run.mjs'], { VIBE_DRY_STAGE: stage });
+      assert.equal(r.status, 0, r.stderr);
+      assert.ok(readFileSync(path.join(dir, 'docs', 'evidence', 'dry', `${stage}.md`), 'utf8').includes('No model ran'));
+    }
+    const b = run(['node', 'dry-agent-run.mjs'], { VIBE_DRY_STAGE: 'builder' });
+    assert.equal(b.status, 0, b.stderr);
+    assert.ok(run(['git', 'rev-list', '--count', 'HEAD']).stdout.trim(), '2');
+    const j = run(['node', 'dry-agent-run.mjs'], { VIBE_DRY_STAGE: 'judge' });
+    assert.equal(j.status, 0, j.stderr);
+    const receipt = JSON.parse(readFileSync(path.join(dir, DRY_RECEIPT_PATH), 'utf8'));
+    assert.equal(evaluateReceipt(receipt).decision, 'HOLD');
+    // The real Judge receipt path must stay empty after a dry run.
+    assert.ok(!existsSync(path.join(dir, 'docs', 'evidence', 'production-readiness-judge.json')));
+    const bad = run(['node', 'dry-agent-run.mjs'], { VIBE_DRY_STAGE: 'sneaky' });
+    assert.notEqual(bad.status, 0);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('the dry provider sandbox command is self-contained (no .vibe-factory dependency)', () => {
+  // Regression: a sandbox only receives the target repo, so the provider's
+  // command must carry everything the dry harness needs. This runs the REAL
+  // command the provider emits, in a scratch repo with no .vibe-factory dir.
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'dry-provider-'));
+  try {
+    const run = (cmd, env = {}) =>
+      spawnSync(cmd[0], cmd.slice(1), {
+        cwd: dir,
+        env: { ...process.env, ...env },
+        encoding: 'utf8',
+      });
+    assert.equal(run(['git', 'init', '-q']).status, 0);
+    assert.equal(
+      run(['git', '-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '--allow-empty', '-m', 'init']).status,
+      0,
+    );
+    for (const stage of ['auditor', 'prd', 'builder', 'judge']) {
+      const provider = dryAgent(stage);
+      const print = provider.buildPrintCommand({ prompt: 'test prompt' });
+      assert.ok(!print.command.includes('.vibe-factory/'), 'command must not depend on .vibe-factory copies');
+      // Provider env deliberately NOT passed: the command must be sufficient
+      // on its own (observed CI: provider env does not reach the sandbox).
+      const r = spawnSync('sh', ['-c', print.command], {
+        cwd: dir,
+        env: { ...process.env, VIBE_DRY_STAGE: '' },
+        input: print.stdin,
+        encoding: 'utf8',
+      });
+      assert.equal(r.status, 0, `${stage}: ${r.stderr}`);
+      assert.ok(r.stdout.includes(`dry:${stage} done`), `${stage}: ${r.stdout}`);
+    }
+    const receipt = JSON.parse(readFileSync(path.join(dir, DRY_RECEIPT_PATH), 'utf8'));
+    assert.equal(evaluateReceipt(receipt).decision, 'HOLD');
+    assert.ok(!existsSync(path.join(dir, 'docs', 'evidence', 'production-readiness-judge.json')));
+    assert.ok(readFileSync(path.join(dir, 'docs', 'evidence', 'dry', 'auditor.md'), 'utf8').includes('No model ran'));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('a fully forged SHIP body on dry provenance still HOLDs (independent-review attack)', () => {
+  // The critic's exact attack: every ship field completed on top of a dry
+  // receipt - decision SHIP, score 90, p0/p1 zero, all required checks PASS.
+  // Partial tampers passed before because the checks were missing; the full
+  // forgery must fail on the lane marker alone.
+  const forge = (over = {}) => ({
+    ...dryReceipt('deadbeef'.repeat(5)),
+    decision: 'SHIP',
+    score: 90,
+    p0_remaining: 0,
+    p1_remaining: 0,
+    checks: Object.fromEntries([
+      'completion_audit', 'prd', 'bounded_execution', 'tests', 'typecheck',
+      'lint', 'security_scan', 'rollback_notes', 'evidence_links',
+      'independent_judge', 'fresh_head', 'system_impact',
+    ].map((k) => [k, 'PASS'])),
+    ...over,
+  });
+  const verdict = evaluateReceipt(forge());
+  assert.equal(verdict.decision, 'HOLD');
+  assert.ok(verdict.reasons.some((r) => r.includes('dry lane')));
+  for (const approvals of [0, 1, 99]) {
+    assert.equal(gate({ receipt: forge(), changedAfterReceipt: [], approvals }).pass, false);
+  }
+  // An unmarked receipt with the same body is NOT blocked by the dry rule:
+  // the marker check is a bounded guarantee, not a provenance claim.
+  const unmarked = forge();
+  delete unmarked.lane;
+  assert.ok(!evaluateReceipt(unmarked).reasons.some((r) => r.includes('dry lane')));
+});
+
+test('the lane is fail-closed and the target coordinates are validated (runner source pins)', () => {
+  const runner = readFileSync(path.join(repoRoot, 'factory', 'run-readiness-sandcastle.mts'), 'utf8');
+  // No implicit lane: an unset VIBE_MODEL_LANE must throw, never default.
+  assert.ok(!/VIBE_MODEL_LANE\s*\|\|\s*["'](free|dry|paid)["']/.test(runner), 'lane must not default');
+  assert.ok(!/VIBE_MODEL_LANE\s*\?\?\s*["'](free|dry|paid)["']/.test(runner), 'lane must not default');
+  assert.match(runner, /must be set explicitly to paid, free or dry/);
+  // owner/repo validation present, leading-dash safe
+  assert.match(runner, /TARGET_REPOSITORY must be a plain owner\/repo/);
+  // Dry lane reads its own receipt path back, not the real one
+  assert.match(runner, /lane === "dry" \? DRY_RECEIPT_PATH : RECEIPT_PATH/);
+});
+
+test('workflow ships automation OFF and keeps the dry lane off the target (workflow source pins)', () => {
+  const wf = readFileSync(path.join(repoRoot, '.github', 'workflows', 'nightly-production-readiness.yml'), 'utf8');
+  // No active schedule cron (commented out only)
+  const uncommented = wf.split('\n').filter((l) => !l.trimStart().startsWith('#') && l.includes('cron:'));
+  assert.equal(uncommented.length, 0, 'schedule must be commented out');
+  // Dry lane never reaches the target push/PR step
+  assert.match(wf, /if: \$\{\{ vars\.VIBE_MODEL_LANE != 'dry' \}\}/);
+  // Install hooks off for the target-side runtime install
+  assert.match(wf, /npm install --no-save --ignore-scripts @ai-hero\/sandcastle/);
+  // Clone-time flag-safety guard present
+  assert.match(wf, /bad TARGET_REPOSITORY/);
+  assert.match(wf, /bad TARGET_BRANCH/);
+  // Dry lane gets NO model secrets: positive non-dry predicate only; the
+  // inverse pattern (lane==dry && '' || secrets.X) must never appear.
+  for (const key of ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY', 'OPENROUTER_API_KEY']) {
+    assert.match(wf, new RegExp(`${key}: \\$\\{\\{ vars\\.VIBE_MODEL_LANE != 'dry' && secrets\\.${key} \\|\\| '' \\}\\}`));
+  }
+  assert.ok(!/VIBE_MODEL_LANE == 'dry' && ''/.test(wf), 'fallback-to-secret pattern must not exist');
+  // Dry lane clones the public target ANONYMOUSLY: no credential materializes
+  // at all. The anonymous step must not reference the fleet token.
+  const anon = wf.split('Clone target repository (anonymous, dry lane)')[1].split('- name:')[0];
+  assert.match(anon, /if: \$\{\{ vars\.VIBE_MODEL_LANE == 'dry' \}\}/);
+  assert.ok(!/GH_TOKEN|secrets\./.test(anon), 'anonymous dry clone must carry no secret');
+  assert.match(anon, /credential\.helper= /);
+  // Tokenized clone + probe are non-dry only; probe fails closed on missing fields
+  assert.match(wf, /Clone target repository \(fleet token, non-dry lanes\)/);
+  assert.match(wf, /push" != "false"/);
+  assert.match(wf, /admin" != "false"/);
+  // Control checkout persists no credentials next to target-influenced steps
+  assert.match(wf, /persist-credentials: false/);
+});
+
+test('the dry lane refuses to start with any model key set (runner source pin)', () => {
+  const runner = readFileSync(path.join(repoRoot, 'factory', 'run-readiness-sandcastle.mts'), 'utf8');
+  assert.match(runner, /dry lane must run with no model keys set/);
+  assert.ok(!/Default is FREE/.test(runner), 'stale free-default comment removed');
+});
+
+test('the dry commit contract: staged normally, empty-with-evidence when the target ignores docs/', () => {
+  const mk = () => mkdtempSync(path.join(os.tmpdir(), 'dry-commit-'));
+  const init = (dir) => {
+    const run = (cmd) => spawnSync(cmd[0], cmd.slice(1), { cwd: dir, env: process.env, encoding: 'utf8' });
+    assert.equal(run(['git', 'init', '-q']).status, 0);
+    assert.equal(run(['git', '-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '--allow-empty', '-m', 'init']).status, 0);
+    spawnSync('cp', [path.join(repoRoot, 'factory', 'dry-agent-run.mjs'), path.join(dir, 'dry-agent-run.mjs')]);
+    spawnSync('cp', [path.join(repoRoot, 'factory', 'dry-receipt.mjs'), path.join(dir, 'dry-receipt.mjs')]);
+  };
+  // Case 1: normal repo - real staged commit
+  let dir = mk();
+  try {
+    init(dir);
+    const r = spawnSync('node', ['dry-agent-run.mjs'], { cwd: dir, env: { ...process.env, VIBE_DRY_STAGE: 'builder' }, encoding: 'utf8' });
+    assert.equal(r.status, 0, r.stderr);
+    assert.ok(r.stdout.includes('with staged changes'), r.stdout);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+  // Case 2: docs/ ignored - the harness reports the cause and commits empty
+  dir = mk();
+  try {
+    init(dir);
+    // Ignore the evidence dir AND the harness copies so nothing stages at all.
+    writeFileSync(path.join(dir, '.gitignore'), 'docs/\n*.mjs\n.gitignore\n');
+    const r = spawnSync('node', ['dry-agent-run.mjs'], { cwd: dir, env: { ...process.env, VIBE_DRY_STAGE: 'builder' }, encoding: 'utf8' });
+    assert.equal(r.status, 0, r.stderr);
+    assert.ok(r.stdout.includes('nothing staged'), r.stdout);
+    assert.ok(r.stdout.includes('check-ignore'), r.stdout);
+    assert.ok(r.stdout.includes('empty'), r.stdout);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
 });

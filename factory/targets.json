@@ -1,0 +1,5 @@
+{
+  "targets": [
+    { "project": "foundry-computer", "repository": "executiveusa/foundry-computer", "branch": "main" }
+  ]
+}
