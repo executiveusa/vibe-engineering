@@ -26,6 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.batch.outputs.matrix }}
+      has_targets: ${{ steps.batch.outputs.has_targets }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
@@ -37,24 +38,16 @@ jobs:
           VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
           TARGET_REPOSITORY_IN: ${{ inputs.target_repository }}
           TARGET_BRANCH_IN: ${{ inputs.target_branch }}
-        run: |
-          if [ -n "$TARGET_REPOSITORY_IN" ]; then
-            branch="${TARGET_BRANCH_IN:-main}"
-            project="${TARGET_REPOSITORY_IN##*/}"
-            matrix=$(jq -cn --arg p "$project" --arg r "$TARGET_REPOSITORY_IN" --arg b "$branch" '{include:[{project:$p,repository:$r,branch:$b,state:"MANUAL",priority:0}]}')
-            echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
-          else
-            node scripts/select-nightly-vercel-batch.mjs
-          fi
+        run: node scripts/select-nightly-vercel-batch.mjs
 
   audit-prd-build-review:
     needs: select
-    if: ${{ needs.select.outputs.matrix != '' }}
+    if: ${{ needs.select.outputs.has_targets == 'true' }}
     strategy:
       fail-fast: false
       max-parallel: 5
       matrix: ${{ fromJson(needs.select.outputs.matrix) }}
-    runs-on: [self-hosted, linux, x64, vibe-sandcastle]
+    runs-on: ${{ vars.VIBE_FACTORY_RUNS_ON || 'ubuntu-latest' }}
     permissions:
       contents: read
     env:
@@ -75,9 +68,20 @@ jobs:
           mkdir -p target/.vibe-factory
           cp control/factory/*-prompt.md target/.vibe-factory/
           cp control/factory/run-readiness-sandcastle.mts control/factory/judge-receipt.mjs target/.vibe-factory/
+          cp control/factory/dry-agent.mjs control/factory/dry-agent-run.mjs control/factory/dry-receipt.mjs target/.vibe-factory/
       - name: Install Sandcastle runtime
         working-directory: target
         run: npm install --no-save @ai-hero/sandcastle@0.6.4 tsx@4.23.15
+      # The sandbox image used to be built by hand on a server; build it here instead (A3).
+      # sandcastle's build-image reads <cwd>/.sandcastle (verified against the 0.6.4 CLI source),
+      # so the control repo's config is copied into the target first.
+      - name: Build the sandcastle image
+        working-directory: target
+        run: |
+          cp -r ../control/.sandcastle .sandcastle
+          start=$(date +%s)
+          npx --yes @ai-hero/sandcastle@0.6.4 docker build-image --image-name sandcastle:vibe-engineering
+          echo "sandcastle image build seconds: $(( $(date +%s) - start ))" >> "$GITHUB_STEP_SUMMARY"
       # Agents run here. This step gets model keys only: no GitHub token, so nothing an agent
       # does in the sandbox can push, merge or change repository settings.
       - id: factory

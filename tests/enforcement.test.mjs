@@ -181,7 +181,76 @@ test('nightly factory: agents get model keys only, actions are SHA-pinned, Judge
   }
   const runner = readFileSync(path.join(repoRoot, 'factory/run-readiness-sandcastle.mts'), 'utf8');
   const judgeRun = runner.slice(runner.indexOf('name: "reviewer-judge"'));
-  assert.match(judgeRun, /agent: judge\(\)/);
+  // judgeAgent("judge") resolves to judge() outside the dry lane; the dry lane
+  // substitution is wired through builderAgent/judgeAgent and skips nothing else.
+  assert.match(judgeRun, /agent: judgeAgent\("judge"\)/);
+  assert.match(runner, /const judgeAgent = .*lane === "dry" \? dryAgent\(stage\) : judge\(\)/);
+  assert.match(runner, /if \(lane !== "dry"\) \{\s*assertIndependentJudge/);
   assert.match(runner, /sandcastle\.claudeCode\(/);
   assert.match(runner, /AbortSignal\.timeout/);
+});
+
+// --- Dry lane: a dry run must never be able to SHIP (Phase 0) ---
+// The dry lane calls no model. Its receipt is HOLD by construction, and even a
+// tampered SHIP copy still fails the numeric gates. Both the receipt evaluator
+// and the merge gate must refuse it.
+
+import { dryReceipt } from '../factory/dry-receipt.mjs';
+
+test('the dry-lane receipt is always HOLD, even when tampered toward SHIP', () => {
+  const receipt = dryReceipt('deadbeef'.repeat(5));
+  const verdict = evaluateReceipt(receipt);
+  assert.equal(verdict.decision, 'HOLD');
+  assert.ok(verdict.reasons.length > 0);
+  assert.ok(receipt.required_actions.includes('dry lane: no model ran'));
+  // Tampered copies still fail: the numbers behind a SHIP never agree.
+  assert.equal(evaluateReceipt({ ...receipt, decision: 'SHIP' }).decision, 'HOLD');
+  assert.equal(evaluateReceipt({ ...receipt, decision: 'SHIP', score: 100, p0_remaining: 0, p1_remaining: 0 }).decision, 'HOLD');
+});
+
+test('the merge gate refuses a dry-lane receipt regardless of approvals', () => {
+  const receipt = dryReceipt('deadbeef'.repeat(5));
+  for (const approvals of [0, 1, 99]) {
+    const result = gate({ receipt, changedAfterReceipt: [], approvals });
+    assert.equal(result.pass, false);
+  }
+  // Even with a tampered SHIP decision the gate still refuses.
+  assert.equal(
+    gate({ receipt: { ...receipt, decision: 'SHIP' }, changedAfterReceipt: [], approvals: 99 }).pass,
+    false,
+  );
+});
+
+test('the dry agent stages behave deterministically in a scratch repo', () => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'dry-agent-'));
+  try {
+    const run = (cmd, env = {}) =>
+      spawnSync(cmd[0], cmd.slice(1), {
+        cwd: dir,
+        env: { ...process.env, ...env },
+        encoding: 'utf8',
+      });
+    assert.equal(run(['git', 'init', '-q']).status, 0);
+    assert.equal(run(['git', '-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '--allow-empty', '-m', 'init']).status, 0);
+    const dryRun = path.join(repoRoot, 'factory', 'dry-agent-run.mjs');
+    // The sandbox copy layout puts dry-receipt.mjs next to dry-agent-run.mjs.
+    spawnSync('cp', [dryRun, path.join(dir, 'dry-agent-run.mjs')]);
+    spawnSync('cp', [path.join(repoRoot, 'factory', 'dry-receipt.mjs'), path.join(dir, 'dry-receipt.mjs')]);
+    for (const stage of ['auditor', 'prd']) {
+      const r = run(['node', 'dry-agent-run.mjs'], { VIBE_DRY_STAGE: stage });
+      assert.equal(r.status, 0, r.stderr);
+      assert.ok(readFileSync(path.join(dir, 'docs', 'evidence', 'dry', `${stage}.md`), 'utf8').includes('No model ran'));
+    }
+    const b = run(['node', 'dry-agent-run.mjs'], { VIBE_DRY_STAGE: 'builder' });
+    assert.equal(b.status, 0, b.stderr);
+    assert.ok(run(['git', 'rev-list', '--count', 'HEAD']).stdout.trim(), '2');
+    const j = run(['node', 'dry-agent-run.mjs'], { VIBE_DRY_STAGE: 'judge' });
+    assert.equal(j.status, 0, j.stderr);
+    const receipt = JSON.parse(readFileSync(path.join(dir, 'docs', 'evidence', 'production-readiness-judge.json'), 'utf8'));
+    assert.equal(evaluateReceipt(receipt).decision, 'HOLD');
+    const bad = run(['node', 'dry-agent-run.mjs'], { VIBE_DRY_STAGE: 'sneaky' });
+    assert.notEqual(bad.status, 0);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
