@@ -167,10 +167,8 @@ test('nightly factory: agents get model keys only, actions are SHA-pinned, Judge
     path.join(repoRoot, '.github/workflows/nightly-production-readiness.yml'),
     'utf8',
   );
-  const factoryStep = workflow.slice(
-    workflow.indexOf('- id: factory'),
-    workflow.indexOf('- name: Open pull request'),
-  );
+  const factoryStep = workflow.slice(workflow.indexOf('- id: factory'));
+  assert.ok(!/gh pr create|git push --set-upstream/.test(factoryStep), 'factory step never writes to the target');
   assert.doesNotMatch(factoryStep, /GH_TOKEN|FLEET_GITHUB_TOKEN|GITHUB_TOKEN/);
   assert.match(factoryStep, /ANTHROPIC_API_KEY/);
   for (const file of ['nightly-production-readiness.yml', 'vibe-merge-gate.yml']) {
@@ -185,7 +183,13 @@ test('nightly factory: agents get model keys only, actions are SHA-pinned, Judge
   // substitution is wired through builderAgent/judgeAgent and skips nothing else.
   assert.match(judgeRun, /agent: judgeAgent\("judge"\)/);
   assert.match(runner, /const judgeAgent = .*lane === "dry" \? dryAgent\(stage\) : judge\(\)/);
-  assert.match(runner, /if \(lane !== "dry"\) \{\s*assertIndependentJudge/);
+  // Phase 1: three roles, three families. Free lane resolves the live :free
+  // list and asserts 3-family independence; paid lane keeps the 2-role check;
+  // the dry lane is the only skip.
+  assert.match(runner, /lane === "free"[\s\S]{0,400}assertIndependent\(/);
+  assert.match(runner, /assertIndependentJudge\(modelFamily\(builderModel\), modelFamily\(judgeModel\)\)/);
+  assert.match(runner, /reviewerAgent\("reviewer"\)/);
+  assert.match(runner, /reviewer edited outside/);
   assert.match(runner, /sandcastle\.claudeCode\(/);
   assert.match(runner, /AbortSignal\.timeout/);
 });

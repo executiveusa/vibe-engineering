@@ -50,6 +50,11 @@ if (stage === 'auditor') {
 } else if (stage === 'builder') {
   write('docs/evidence/dry/builder.md', `# Dry builder\n\nNo model ran. One trivial evidence file, committed, so the pipeline's commit handling is exercised.\n`);
   commit('dry lane: builder evidence (no model ran)');
+} else if (stage === 'reviewer') {
+  // Deterministic review artifact: CLEAN verdict, zero findings, committed, so
+  // the pipeline's reviewer->fix->judge routing is exercised with no model.
+  write('docs/evidence/review.json', JSON.stringify({ findings: [], p0: 0, p1: 0, p2: 0, verdict: 'CLEAN' }, null, 2) + '\n');
+  commit('dry lane: reviewer verdict (CLEAN, no model ran)');
 } else if (stage === 'judge') {
   // The dry receipt never occupies the real Judge receipt path: the merge gate
   // must find no ship-eligible artifact from a dry run, even under forgery.

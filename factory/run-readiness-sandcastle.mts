@@ -5,6 +5,9 @@ import { docker } from "@ai-hero/sandcastle/sandboxes/docker";
 import { RECEIPT_PATH, assertIndependentJudge, evaluateReceipt, modelFamily } from "./judge-receipt.mjs";
 import { DRY_RECEIPT_PATH } from "./dry-receipt.mjs";
 import { dryAgent } from "./dry-agent.mjs";
+import { resolveModels, assertIndependent, familyOf } from "./model-resolve.mjs";
+import { writeStageRecord, writeIndex, sha256File } from "./evidence-chain.mjs";
+import { execFileSync } from "node:child_process";
 
 const repo = process.env.TARGET_REPOSITORY;
 if (!repo) throw new Error("TARGET_REPOSITORY is required");
@@ -77,14 +80,46 @@ try {
   report("HOLD", { level: "config", reasons: [(error as Error).message] });
   throw error;
 }
-const builderModel = process.env.VIBE_BUILDER_MODEL || (lane === "paid" ? "gpt-5.4" : "openrouter/qwen/qwen3.8-27b:free");
-const judgeModel = process.env.VIBE_JUDGE_MODEL || (lane === "paid" ? "opus" : "openrouter/google/gemma-4-31b-it:free");
+// Phase 1: three roles, three families. The free lane resolves pinned
+// preferences against the LIVE :free listing at run time (no silent
+// substitution; unresolvable = HOLD, never a paid fallback).
+let builderModel = process.env.VIBE_BUILDER_MODEL || "";
+let reviewerModel = process.env.VIBE_REVIEWER_MODEL || "";
+let judgeModel = process.env.VIBE_JUDGE_MODEL || "";
+if (lane === "free" && (!builderModel || !reviewerModel || !judgeModel)) {
+  let listing: unknown = null;
+  try {
+    const res = await fetch("https://openrouter.ai/api/v1/models", { signal: AbortSignal.timeout(20000) });
+    listing = ((await res.json()) as { data?: { id?: string }[] }).data?.map((m) => m.id) ?? null;
+  } catch { listing = null; }
+  const r = resolveModels(listing as string[] | null);
+  if (!r.ok) {
+    report("HOLD", { level: "model-resolution", reasons: [r.hold as string] });
+    throw new Error(`model resolution HOLD: ${r.hold}`);
+  }
+  builderModel = builderModel || `openrouter/${r.resolved.builder}`;
+  reviewerModel = reviewerModel || `openrouter/${r.resolved.reviewer}`;
+  judgeModel = judgeModel || `openrouter/${r.resolved.judge}`;
+} else if (lane === "paid") {
+  builderModel = builderModel || "gpt-5.4";
+  judgeModel = judgeModel || "opus";
+  reviewerModel = reviewerModel || "openrouter/google/gemma-4-31b-it:free"; // third family vs OpenAI/Anthropic
+  if (!openrouterKey) {
+    report("HOLD", { level: "config", reasons: ["paid lane needs OPENROUTER_API_KEY for the third-family reviewer"] });
+    throw new Error("OPENROUTER_API_KEY is required for the reviewer (paid lane)");
+  }
+}
 
 // Independence on the effective models (defaults or overrides), not lane defaults:
-// two overrides naming the same family must fail here (codex P2 on PR #66).
-// The dry lane uses one deterministic provider for both roles, so there is no
+// overrides collapsing two roles into one family must fail here (codex P2 on PR #66).
+// The dry lane uses one deterministic provider for every role, so there is no
 // model family to be independent of; the check is skipped ONLY for this lane.
-if (lane !== "dry") {
+if (lane === "dry") {
+  // no model families
+} else if (lane === "free") {
+  const strip = (m: string) => m.replace(/^openrouter\//, "");
+  assertIndependent(strip(builderModel), strip(reviewerModel), strip(judgeModel));
+} else {
   assertIndependentJudge(modelFamily(builderModel), modelFamily(judgeModel));
 }
 
@@ -100,6 +135,7 @@ const budget = AbortSignal.timeout(budgetMinutes * 60 * 1000);
 
 const builderAgent = (stage: string) => (lane === "dry" ? dryAgent(stage) : builder());
 const judgeAgent = (stage: string) => (lane === "dry" ? dryAgent(stage) : judge());
+const reviewerAgent = (stage: string) => (lane === "dry" ? dryAgent(stage) : reviewer());
 const builder = () =>
   lane === "paid"
     ? sandcastle.codex(builderModel, {
@@ -118,6 +154,10 @@ const judge = () =>
     : sandcastle.opencode(judgeModel, {
         env: { OPENROUTER_API_KEY: openrouterKey as string },
       });
+const reviewer = () =>
+  sandcastle.opencode(reviewerModel, {
+    env: { OPENROUTER_API_KEY: openrouterKey as string },
+  });
 
 const sandbox = await sandcastle.createSandbox({
   branch,
@@ -132,36 +172,95 @@ const sandbox = await sandcastle.createSandbox({
   },
 });
 
+// Evidence chain (Phase 1 spec 4.2): SHAs come from the sandbox worktree,
+// records land in evidence/<base_sha>/ on the runner and are uploaded as the
+// factory-evidence-<run_id> artifact. Any chain break is a HOLD (fail closed).
+const wt = () => sandbox.worktreePath;
+const headSha = () => execFileSync("git", ["-C", wt(), "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+const baseSha = headSha();
+const evidenceDir = path.join(process.cwd(), "evidence", baseSha);
+fs.mkdirSync(path.join(evidenceDir, "logs"), { recursive: true });
+let stageNn = 0;
+const modelOf = (role: string) =>
+  lane === "dry" ? { model: "dry-agent", family: "dry" }
+    : role === "builder" ? { model: builderModel, family: familyOf(builderModel.replace(/^openrouter\//, "")) }
+    : role === "reviewer" ? { model: reviewerModel, family: familyOf(reviewerModel.replace(/^openrouter\//, "")) }
+    : { model: judgeModel, family: familyOf(judgeModel.replace(/^openrouter\//, "")) };
+
+const runStage = async (opts: {
+  stage: string; name: string; role: "builder" | "reviewer" | "judge";
+  agent: unknown; promptFile: string; maxIterations: number; findingsCount?: number;
+}) => {
+  stageNn += 1;
+  const inputSha = headSha();
+  const started = new Date().toISOString();
+  let status: "ok" | "hold" | "failed" = "ok";
+  let result: unknown = null;
+  try {
+    result = await sandbox.run({
+      name: opts.name,
+      maxIterations: opts.maxIterations,
+      agent: opts.agent,
+      promptFile: opts.promptFile,
+      signal: budget,
+    });
+  } catch (e) {
+    status = budget.aborted ? "hold" : "failed";
+    result = { error: String((e as Error).message || e).slice(0, 500) };
+  }
+  const finished = new Date().toISOString();
+  const outputSha = headSha();
+  const logPath = path.join(evidenceDir, "logs", `${String(stageNn).padStart(2, "0")}-${opts.stage}.log`);
+  fs.writeFileSync(logPath, JSON.stringify(result, null, 2) + "\n");
+  const m = modelOf(opts.role);
+  writeStageRecord(evidenceDir, stageNn, {
+    stage: opts.stage, agent: opts.name, model: m.model, model_family: m.family,
+    input_sha: inputSha, output_sha: outputSha, started_at: started, finished_at: finished,
+    status, findings_count: opts.findingsCount ?? 0, artifacts: [], log_sha256: sha256File(logPath),
+  });
+  if (status !== "ok") throw new Error(`stage ${opts.stage} ${status}`);
+  return result;
+};
+
+const REVIEW_JSON = "docs/evidence/review.json";
+const readReview = (): { verdict: string; p0: number; p1: number } | null => {
+  try {
+    const r = JSON.parse(fs.readFileSync(path.join(wt(), REVIEW_JSON), "utf8"));
+    return { verdict: String(r.verdict || ""), p0: Number(r.p0) || 0, p1: Number(r.p1) || 0 };
+  } catch { return null; }
+};
+
 try {
-  await sandbox.run({
-    name: "completion-auditor",
-    maxIterations: 1,
-    agent: builderAgent("auditor"),
-    promptFile: ".vibe-factory/audit-prompt.md",
-    signal: budget,
-  });
-  await sandbox.run({
-    name: "prd-builder",
-    maxIterations: 1,
-    agent: builderAgent("prd"),
-    promptFile: ".vibe-factory/prd-builder-prompt.md",
-    signal: budget,
-  });
-  const build = await sandbox.run({
-    name: "production-builder",
-    maxIterations: maxBuildIterations,
-    agent: builderAgent("builder"),
-    promptFile: ".vibe-factory/builder-prompt.md",
-    signal: budget,
-  });
-  if (!build.commits.length) throw new Error("Builder produced no commits");
-  await sandbox.run({
-    name: "reviewer-judge",
-    maxIterations: 2,
-    agent: judgeAgent("judge"),
-    promptFile: ".vibe-factory/reviewer-judge-prompt.md",
-    signal: budget,
-  });
+  await runStage({ stage: "audit", name: "completion-auditor", role: "builder", agent: builderAgent("auditor"), promptFile: ".vibe-factory/audit-prompt.md", maxIterations: 1 });
+  await runStage({ stage: "prd", name: "prd-builder", role: "builder", agent: builderAgent("prd"), promptFile: ".vibe-factory/prd-builder-prompt.md", maxIterations: 1 });
+  const build = (await runStage({ stage: "build", name: "production-builder", role: "builder", agent: builderAgent("builder"), promptFile: ".vibe-factory/builder-prompt.md", maxIterations: maxBuildIterations })) as { commits?: unknown[] };
+  if (!build?.commits?.length) throw new Error("Builder produced no commits");
+
+  // Independent reviewer: fresh eyes, may not edit code - enforced by checking
+  // the stage's file changes touch ONLY docs/evidence/review.json.
+  const reviewIn = headSha();
+  await runStage({ stage: "review", name: "independent-reviewer", role: "reviewer", agent: reviewerAgent("reviewer"), promptFile: ".vibe-factory/reviewer-prompt.md", maxIterations: 1 });
+  const reviewOut = headSha();
+  if (reviewOut !== reviewIn) {
+    const changed = execFileSync("git", ["-C", wt(), "diff", "--name-only", `${reviewIn}..${reviewOut}`], { encoding: "utf8" })
+      .trim().split("\n").filter(Boolean);
+    const disallowed = changed.filter((f) => f !== REVIEW_JSON);
+    if (disallowed.length) throw new Error(`reviewer edited outside ${REVIEW_JSON}: ${disallowed.join(", ").slice(0, 300)}`);
+  }
+  const review = readReview();
+  if (!review) throw new Error("reviewer produced no readable review.json");
+  if (review.verdict !== "CLEAN" && review.p0 + review.p1 > 0) {
+    await runStage({ stage: "build-fix", name: "builder-review-fixes", role: "builder", agent: builderAgent("builder"), promptFile: ".vibe-factory/builder-fix-prompt.md", maxIterations: 2, findingsCount: review.p0 + review.p1 });
+  }
+
+  await runStage({ stage: "judge", name: "reviewer-judge", role: "judge", agent: judgeAgent("judge"), promptFile: ".vibe-factory/reviewer-judge-prompt.md", maxIterations: 2 });
+
+  // Chain check BEFORE trusting any receipt: a broken chain is a HOLD.
+  const index = writeIndex(evidenceDir, baseSha, process.env.GITHUB_RUN_ID || "local");
+  if (!index.ok) {
+    report("HOLD", { level: "evidence-chain", reasons: [index.reason as string] });
+    throw new Error(`evidence chain HOLD: ${index.reason}`);
+  }
 
   // The runner re-checks the receipt; the Judge's word alone is not a SHIP.
   // Dry lane reads back its own distinct receipt path; the real receipt path
