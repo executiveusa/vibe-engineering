@@ -153,25 +153,40 @@ export function createBroker({
       res.writeHead(up.status, { 'content-type': (up.headers && typeof up.headers.get === 'function' && up.headers.get('content-type')) || 'text/event-stream' });
       for (const c of buffered) res.write(c);
       let destroyed = false;
+      const destroyWith = (served, why) => { destroyed = true; res.destroy(); onEvent({ model, ok: false, stream: true, served_model: served, error: why }); };
+      // critic v5f review: the forwarding loop must validate EVERY model field
+      // in EVERY chunk (all matches, not the first), including a key, colon or
+      // value SPLIT ACROSS chunks - and never forward a suffix that could
+      // still complete into a model field. Carry-based: scan carry+chunk with
+      // matchAll, forward only the validated prefix, hold back the longest
+      // trailing partial (incl. a lone '"' that could open a key next chunk).
+      // (JSON-escaped occurrences inside content strings carry \" and cannot
+      // complete these patterns.)
+      const MODEL_PARTIAL = /"model"(?:\s*:?(?:\s*"[^"]*)?)?\s*$|"m(?:o(?:d(?:e(?:l)?)?)?)?\s*$|"$/;
+      let carry = '';
       try {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
           total += value.length;
-          if (total > MAX_RESPONSE) { destroyed = true; res.destroy(); onEvent({ model, ok: false, stream: true, served_model: servedModel, error: 'response too large mid-stream' }); return; }
-          // critic v5: a model observed in the first chunk is not a guarantee
-          // for the rest - re-check EVERY chunk. (JSON-escaped occurrences
-          // inside content strings carry \" and cannot match this pattern.)
-          const chunkText = dec.decode(value, { stream: true });
-          const mm = chunkText.match(/"model"\s*:\s*"([^"]+)"/);
-          if (mm && servedMismatch(mm[1])) {
-            destroyed = true; res.destroy();
-            onEvent({ model, ok: false, stream: true, served_model: mm[1], error: 'served model changed mid-stream' });
-            return;
+          if (total > MAX_RESPONSE) { destroyWith(servedModel, 'response too large mid-stream'); return; }
+          const scan = carry + dec.decode(value, { stream: true });
+          for (const mm of scan.matchAll(/"model"\s*:\s*"([^"]*)"/g)) {
+            if (servedMismatch(mm[1])) { destroyWith(mm[1], 'served model changed mid-stream'); return; }
           }
-          res.write(value);
+          const hold = scan.match(MODEL_PARTIAL);
+          const cut = hold ? hold.index : scan.length;
+          if (cut > 0) res.write(Buffer.from(scan.slice(0, cut), 'utf8'));
+          carry = scan.slice(cut);
         }
-      } catch { destroyed = true; res.destroy(); onEvent({ model, ok: false, stream: true, served_model: servedModel, error: 'upstream stream failed mid-flight' }); return; }
+      } catch { destroyWith(servedModel, 'upstream stream failed mid-flight'); return; }
+      carry += dec.decode();
+      if (carry.length > 0) {
+        // Stream ended on an unterminated model field: the held-back suffix
+        // stays unvalidated, so it is never forwarded. Fail closed.
+        destroyWith(servedModel, 'stream ended with unterminated model field');
+        return;
+      }
       res.end();
       if (!destroyed) onEvent({ model, ok: true, status: up.status, served_model: servedModel, stream: true });
       return;
