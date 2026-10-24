@@ -220,3 +220,22 @@ test('broker: mid-stream model switch destroys the response and records the even
   assert.ok(events.some(e => e.error === 'served model changed mid-stream' && e.served_model === 'evil/swapped:free'));
   await broker.close();
 });
+
+// Architect 0025 nit: the broker route is an EXACT pathname match.
+test('broker: route gate rejects look-alike paths and query variants', async () => {
+  const broker = createBroker({ apiKey: 'k', allowedModels: ['a/x:free'], fetchImpl: async () => { throw new Error('no net'); } });
+  const { port } = await broker.listen(0, '127.0.0.1');
+  const post = (p) => fetch(`http://127.0.0.1:${port}${p}`, {
+    method: 'POST', headers: { authorization: `Bearer ${broker.runToken}`, 'content-type': 'application/json' },
+    body: JSON.stringify({ model: 'a/x:free', messages: [] }),
+  });
+  for (const bad of ['/v1/chat/completionsXYZ', '/v1/chat/completions/']) {
+    assert.equal((await post(bad)).status, 404, bad);
+  }
+  // the exact path - with or without a query string, which is the SAME route
+  // in HTTP terms - still reaches the real gates (503 here: pricing
+  // unverifiable with a throwing fetch)
+  assert.equal((await post('/v1/chat/completions')).status, 503);
+  assert.equal((await post('/v1/chat/completions?stream=1')).status, 503);
+  await broker.close();
+});

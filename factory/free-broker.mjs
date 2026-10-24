@@ -63,7 +63,10 @@ export function createBroker({
 
   const server = http.createServer(async (req, res) => {
     const deny = (code, msg) => { res.writeHead(code, { 'content-type': 'application/json' }); res.end(JSON.stringify({ error: msg })); };
-    if (req.method !== 'POST' || !req.url.startsWith('/v1/chat/completions')) return deny(404, 'not found');
+    // Exact route match (architect 0025 nit): parse the URL; a prefix match
+    // would also pass /v1/chat/completionsXYZ or query variants.
+    let pathname = ''; try { pathname = new URL(req.url, 'http://broker.local').pathname; } catch {}
+    if (req.method !== 'POST' || pathname !== '/v1/chat/completions') return deny(404, 'not found');
     if (req.headers.authorization !== `Bearer ${runToken}`) return deny(401, 'bad broker token');
     if (calls >= callCap) return deny(429, 'per-run call cap reached');
     const chunks = [];
