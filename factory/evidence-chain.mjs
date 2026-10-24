@@ -113,6 +113,26 @@ export function verifyChain(dir, baseSha) {
       if (!Array.isArray(r.served_models) || !r.served_models.length) {
         return { ok: false, breakAt: f, reason: 'non-dry stage has no served_models - model calls were not observed and verified' };
       }
+      // resolve_ref is MANDATORY on every non-dry stage (critic v4 finding 3):
+      // a chain that never names the :free listing it resolved against is
+      // unverifiable. Same-hash-across-stages is already enforced above.
+      if (typeof r.resolve_ref !== 'string') {
+        return { ok: false, breakAt: f, reason: 'non-dry stage has no resolve_ref - the :free listing binding is missing' };
+      }
+    }
+    // Bind the chain to the actual fetched receipt on disk (critic v4 finding
+    // 3): resolve-receipt.json must exist and its listing hash must BE the
+    // hash every stage referenced. A record referencing a receipt that was
+    // never written (or a different listing) fails closed.
+    const receiptPath = path.join(dir, 'resolve-receipt.json');
+    if (!existsSync(receiptPath)) {
+      return { ok: false, reason: 'non-dry chain has no resolve-receipt.json - the fetched :free listing receipt is missing' };
+    }
+    let receipt = null;
+    try { receipt = JSON.parse(readFileSync(receiptPath, 'utf8')); }
+    catch { return { ok: false, reason: 'resolve-receipt.json is unparseable' }; }
+    if (!receipt || typeof receipt.listing_sha256 !== 'string' || receipt.listing_sha256 !== resolveRef) {
+      return { ok: false, reason: 'resolve-receipt.json listing_sha256 does not match the stages\' resolve_ref (tampered or misrecorded)' };
     }
   }
   return { ok: true, finalSha: prev, stages: files.length };

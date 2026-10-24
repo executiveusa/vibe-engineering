@@ -82,3 +82,24 @@ export function assertIndependent(builder, reviewer, judge) {
   if (new Set(fams).size !== 3) throw new Error(`independence check: builder/reviewer/judge must be three families, got ${fams.join(', ')}`);
   return true;
 }
+
+// Revalidation (critic v4 finding 3): re-fetch the :free listing at verify
+// time and recompute its hash. 'match' = the receipt still names live
+// provider truth; 'stale' = the listing drifted mid-run (evidence no longer
+// verifiable - the runner treats this as HOLD); 'unverifiable' = fetch
+// failed (fail closed).
+export async function revalidateListingHash(receipt, fetchImpl = fetch, modelsUrl = 'https://openrouter.ai/api/v1/models') {
+  if (!receipt || typeof receipt.listing_sha256 !== 'string') return { status: 'unverifiable', reason: 'no receipt hash' };
+  try {
+    const res = await fetchImpl(modelsUrl, { signal: AbortSignal.timeout(20000) });
+    const text = await res.text();
+    if (!res.ok) return { status: 'unverifiable', reason: `listing fetch ${res.status}` };
+    const { createHash } = await import('node:crypto');
+    const live = createHash('sha256').update(text).digest('hex');
+    return live === receipt.listing_sha256
+      ? { status: 'match', listing_sha256: live }
+      : { status: 'stale', receipt: receipt.listing_sha256, live };
+  } catch (e) {
+    return { status: 'unverifiable', reason: String((e && e.message) || e) };
+  }
+}

@@ -155,9 +155,17 @@ export function createBroker({
     // not just our declaration). A mismatch is a routing failure: deny loudly.
     let served = null;
     try { served = JSON.parse(text2); } catch {}
-    if (up.ok && served && typeof served.model === 'string' && servedMismatch(served.model)) {
-      onEvent({ model, ok: false, status: up.status, served_model: served.model });
-      return deny(502, `provider served ${served.model}, not the resolved ${model}`);
+    if (up.ok) {
+      // FAIL CLOSED (critic v4 finding 4): a successful response with no
+      // observable model field is UNVERIFIED - deny, never forward its bytes.
+      if (!served || typeof served.model !== 'string' || !served.model) {
+        onEvent({ model, ok: false, status: up.status, error: 'non-stream response has no model field' });
+        return deny(502, 'served model unobservable - refusing to forward unverified response');
+      }
+      if (servedMismatch(served.model)) {
+        onEvent({ model, ok: false, status: up.status, served_model: served.model });
+        return deny(502, `provider served ${served.model}, not the resolved ${model}`);
+      }
     }
     onEvent({ model, ok: up.ok, status: up.status, served_model: served && served.model });
     res.writeHead(up.status, { 'content-type': 'application/json' });

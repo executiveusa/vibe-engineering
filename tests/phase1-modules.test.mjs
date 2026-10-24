@@ -61,13 +61,17 @@ const ROLE_FAMILY = { audit: 'fb', prd: 'fb', build: 'fb', 'build-fix': 'fb', re
 const rec = (stage, input, output) => ({ stage, agent: stage, model: `${ROLE_FAMILY[stage]}/x:free`, model_family: ROLE_FAMILY[stage],
   input_sha: input, output_sha: output, started_at: '2026-10-24T00:00:00Z', finished_at: '2026-10-24T00:01:00Z',
   status: 'ok', findings_count: 0, artifacts: [], log_sha256: '0'.repeat(64),
-  served_models: [`${ROLE_FAMILY[stage]}/x:free`] }); // non-dry evidence must bind the served model
+  served_models: [`${ROLE_FAMILY[stage]}/x:free`], // non-dry evidence must bind the served model
+  resolve_ref: 'f'.repeat(64) }); // non-dry stages MUST name the :free listing hash (critic v4 finding 3)
 // put() writes the stage log first, then the record with the log's REAL hash:
 // the verifier rehashes logs, so fixtures must be honest about them.
 const put = (dir, nn, record, logContent = `log for ${record.stage} ${nn}\n`) => {
   mkdirSync(path.join(dir, 'logs'), { recursive: true });
   const lp = path.join(dir, 'logs', `${String(nn).padStart(2, '0')}-${record.stage}.log`);
   writeFileSync(lp, logContent);
+  // Honest fixtures carry the fetched receipt on disk too: the verifier binds
+  // every stage's resolve_ref to resolve-receipt.json (critic v4 finding 3).
+  writeFileSync(path.join(dir, 'resolve-receipt.json'), JSON.stringify({ listing_sha256: 'f'.repeat(64), fetched_at: '2026-10-24T00:00:00Z', resolved: {} }) + '\n');
   return writeStageRecord(dir, nn, { ...record, log_sha256: createHash('sha256').update(readFileSync(lp)).digest('hex') });
 };
 
@@ -172,8 +176,15 @@ test('family independence is verified from the chain records themselves', () => 
 test('resolve_ref: every stage references the same :free listing hash (0018 rule 3)', () => {
   const L = '9'.repeat(64);
   const dir = mkdtempSync(path.join(tmpdir(), 'ev-'));
-  fullChain(dir);
+  // a chain honestly consistent at a NON-default listing hash: every record
+  // AND the on-disk receipt at L (critic v4 finding 3: the verifier binds
+  // records to the receipt, so all of them must move together).
+  put(dir, 1, { ...rec('audit', BASE, S2), resolve_ref: L });
+  put(dir, 2, { ...rec('prd', S2, S3), resolve_ref: L });
+  put(dir, 3, { ...rec('build', S3, S4), resolve_ref: L });
+  put(dir, 4, { ...rec('review', S4, S5), resolve_ref: L });
   put(dir, 5, { ...rec('judge', S5, S6), resolve_ref: L });
+  writeFileSync(path.join(dir, 'resolve-receipt.json'), JSON.stringify({ listing_sha256: L, fetched_at: '2026-10-24T00:00:00Z', resolved: {} }) + '\n');
   assert.equal(verifyChain(dir, BASE).ok, true, 'single consistent resolve_ref passes');
   // a second stage with a DIFFERENT listing hash breaks the chain
   const dir2 = mkdtempSync(path.join(tmpdir(), 'ev-'));

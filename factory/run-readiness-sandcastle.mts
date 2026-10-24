@@ -5,7 +5,8 @@ import { docker } from "@ai-hero/sandcastle/sandboxes/docker";
 import { RECEIPT_PATH, assertIndependentJudge, evaluateReceipt, modelFamily } from "./judge-receipt.mjs";
 import { DRY_RECEIPT_PATH } from "./dry-receipt.mjs";
 import { dryAgent } from "./dry-agent.mjs";
-import { resolveModels, assertIndependent, familyOf } from "./model-resolve.mjs";
+import { resolveModels, assertIndependent, familyOf, revalidateListingHash } from "./model-resolve.mjs";
+import { projectConfigViolation } from "./config-guard.mjs";
 import { writeStageRecord, writeIndex, sha256File } from "./evidence-chain.mjs";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -198,7 +199,10 @@ if (lane === "free") {
     $schema: "https://opencode.ai/config.json",
     provider: { openrouter: { options: { baseURL: `http://${bound.host}:${bound.port}/v1` } } },
   }, null, 2) + "\n");
-  brokerEnv = { OPENROUTER_API_KEY: broker.runToken, OPENCODE_CONFIG: cfgPath };
+  // OPENCODE_DISABLE_PROJECT_CONFIG (string present in the opencode 1.19.4
+  // binary, smoke-verified): belt-and-braces kill switch so NO project-level
+  // config surface (root json/jsonc, .opencode/*) can reroute providers.
+  brokerEnv = { OPENROUTER_API_KEY: broker.runToken, OPENCODE_CONFIG: cfgPath, OPENCODE_DISABLE_PROJECT_CONFIG: "1" };
 } else if (lane === "paid") {
   brokerEnv = { OPENROUTER_API_KEY: openrouterKey as string }; // paid lane reviewer uses its own third-family key (no broker)
 }
@@ -246,20 +250,17 @@ const wt = () => sandbox.worktreePath;
 // un-broker the run; with only the worthless run token in the sandbox that
 // fails closed anyway, but we refuse LOUDLY instead of failing mysteriously.
 // Unparseable project config = unverifiable = same HOLD.
-if (lane === "free" && brokerEnv.OPENCODE_CONFIG) {
-  const brokerBase = brokerBaseUrl.replace(/\/v1$/, "");
-  for (const name of ["opencode.json", "opencode.jsonc"]) {
-    const pp = path.join(wt(), name);
-    if (!fs.existsSync(pp)) continue;
-    let override: unknown = "unparseable";
-    try { override = (JSON.parse(fs.readFileSync(pp, "utf8")) as { provider?: { openrouter?: { options?: { baseURL?: string } } } })?.provider?.openrouter?.options?.baseURL ?? null; }
-    catch { /* stays 'unparseable' */ }
-    if (override === "unparseable" || (typeof override === "string" && override && !override.startsWith(brokerBase))) {
-      report("HOLD", { level: "config-override", reasons: [`target ${name} ${override === "unparseable" ? "is unparseable (unverifiable)" : "overrides the openrouter baseURL away from the broker"} - refusing to run`] });
-      throw new Error(`target ${name} conflicts with the broker route`);
-    }
+// Project-config override guard (factory/config-guard.mjs): exact-URL match
+// (critic v4 finding 1), per-stage + all surfaces + plugins (finding 2).
+const assertProjectConfigSafe = (when: string) => {
+  if (lane !== "free" || !brokerEnv.OPENCODE_CONFIG) return;
+  const why = projectConfigViolation(wt(), brokerBaseUrl);
+  if (why) {
+    report("HOLD", { level: "config-override", reasons: [`${why} (${when}) - refusing to run`] });
+    throw new Error(`${why} (${when})`);
   }
-}
+};
+assertProjectConfigSafe("pre-run");
 const headSha = () => execFileSync("git", ["-C", wt(), "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
 const baseSha = headSha();
 baseShaGlobal = baseSha;
@@ -285,6 +286,7 @@ const runStage = async (opts: {
   const eventMark = brokerEvents.length;
   let status: "ok" | "hold" | "failed" = "ok";
   let result: unknown = null;
+  assertProjectConfigSafe(`before ${opts.stage}`);
   try {
     result = await sandbox.run({
       name: opts.name,
@@ -298,6 +300,7 @@ const runStage = async (opts: {
     result = { error: String((e as Error).message || e).slice(0, 500) };
   }
   const finished = new Date().toISOString();
+  assertProjectConfigSafe(`after ${opts.stage}`);
   const outputSha = headSha();
   const logPath = path.join(evidenceDir, "logs", `${String(stageNn).padStart(2, "0")}-${opts.stage}.log`);
   fs.writeFileSync(logPath, JSON.stringify(result, null, 2) + "\n");
@@ -351,6 +354,18 @@ try {
   }
 
   await runStage({ stage: "judge", name: "reviewer-judge", role: "judge", agent: judgeAgent("judge"), promptFile: ".vibe-factory/reviewer-judge-prompt.md", maxIterations: 2 });
+
+  // critic v4 finding 3: re-fetch the :free listing and prove the receipt's
+  // hash still names live provider truth BEFORE trusting the chain. A stale
+  // or unverifiable listing is a HOLD (fail closed).
+  if (resolveReceipt) {
+    const rv = (await revalidateListingHash(resolveReceipt)) as { status: string; reason?: string; receipt?: string; live?: string };
+    if (rv.status !== "match") {
+      const why = rv.reason ?? `receipt ${rv.receipt} != live ${rv.live}`;
+      report("HOLD", { level: "listing-revalidation", reasons: [`live :free listing revalidation: ${rv.status} (${why})`] });
+      throw new Error(`listing revalidation ${rv.status}: ${why}`);
+    }
+  }
 
   // Chain check BEFORE trusting any receipt: a broken chain is a HOLD.
   const index = writeIndex(evidenceDir, baseSha, process.env.GITHUB_RUN_ID || "local");
