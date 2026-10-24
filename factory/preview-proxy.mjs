@@ -7,7 +7,7 @@
 import http from 'node:http';
 import { randomBytes } from 'node:crypto';
 
-export function createPreviewProxy({ basicAuth, appPort = 8000, appAuth }) {
+export function createPreviewProxy({ basicAuth, appHost = '127.0.0.1', appPort = 8000, appAuth, listenHost = '127.0.0.1' }) {
   // basicAuth: 'user:password' the PUBLIC must present (the real secret).
   // appAuth: { user, password, apiKey } run-only randoms the app checks.
   if (!basicAuth || !basicAuth.includes(':')) throw new Error('proxy needs basicAuth user:password');
@@ -24,7 +24,7 @@ export function createPreviewProxy({ basicAuth, appPort = 8000, appAuth }) {
     delete headers.authorization;
     if (req.url.startsWith('/api/')) headers.authorization = `Bearer ${appAuth.apiKey}`;
     else headers.authorization = appBasic;
-    const up = http.request({ host: '127.0.0.1', port: appPort, path: req.url, method: req.method, headers }, (r) => {
+    const up = http.request({ host: appHost, port: appPort, path: req.url, method: req.method, headers }, (r) => {
       res.writeHead(r.statusCode, r.headers);
       r.pipe(res);
     });
@@ -32,7 +32,7 @@ export function createPreviewProxy({ basicAuth, appPort = 8000, appAuth }) {
     req.pipe(up);
   });
   return {
-    listen: (port = 0) => new Promise((r) => server.listen(port, '127.0.0.1', () => r(server.address().port))),
+    listen: (port = 0) => new Promise((r) => server.listen(port, listenHost, () => r(server.address().port))),
     close: () => new Promise((r) => server.close(r)),
   };
 }
@@ -58,6 +58,15 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.error('preview-proxy: FACTORY_PREVIEW_BASIC_AUTH (user:pass) + RUN_ONLY_PREVIEW_PASSWORD + RUN_ONLY_API_KEY required');
     process.exit(2);
   }
-  const proxy = createPreviewProxy({ basicAuth, appPort: Number(process.env.APP_PORT || 8000), appAuth });
-  proxy.listen(Number(process.env.PROXY_PORT || 8010)).then((p) => console.log(`preview-proxy on 127.0.0.1:${p} -> app :${process.env.APP_PORT || 8000}`));
+  // APP_HOST: inside compose the app is a sibling service on the internal
+  // network; on a bare runner it is 127.0.0.1. PROXY_HOST: the container must
+  // listen on 0.0.0.0 (compose publishes to host 127.0.0.1 only).
+  const proxy = createPreviewProxy({
+    basicAuth,
+    appHost: process.env.APP_HOST || '127.0.0.1',
+    appPort: Number(process.env.APP_PORT || 8000),
+    appAuth,
+    listenHost: process.env.PROXY_HOST || '127.0.0.1',
+  });
+  proxy.listen(Number(process.env.PROXY_PORT || 8010)).then((p) => console.log(`preview-proxy on ${process.env.PROXY_HOST || '127.0.0.1'}:${p} -> ${process.env.APP_HOST || '127.0.0.1'}:${process.env.APP_PORT || 8000}`));
 }

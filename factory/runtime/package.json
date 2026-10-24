@@ -1,0 +1,10 @@
+{
+  "name": "factory-runtime",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Pinned control-side runtime for the nightly factory runner. Installed ONLY in the control checkout, never in a target repo (registry-override / dependency-substitution isolation).",
+  "dependencies": {
+    "@ai-hero/sandcastle": "0.6.4",
+    "tsx": "4.23.15"
+  }
+}

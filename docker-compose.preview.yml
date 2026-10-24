@@ -1,21 +1,60 @@
 # Control-side preview compose (Phase 1): PINNED in this repo, never taken from
 # the judged worktree. The worktree supplies only the application source as the
 # build context; no secrets exist at build time. Runtime creds are RUN-ONLY
-# randoms (see factory/preview-proxy.mjs); the real viewer secret never enters
-# the app environment. No docker socket, no host mounts, localhost-only port.
+# randoms (see factory/preview-proxy.mjs); the real viewer secret exists ONLY in
+# the pinned proxy service's env, never in the app's.
+# Egress: the judged app sits on an INTERNAL network only - no route off the
+# docker host. The trusted proxy bridges app traffic to a localhost-only
+# published port for the tunnel.
 services:
   foundry-preview:
     build:
       context: ./target
       dockerfile: Dockerfile
       network: none        # build-time egress disabled: model-written Dockerfile cannot phone home with the build
-    ports:
-      - "127.0.0.1:8000:8000"
+    networks:
+      - appnet             # internal only: the judged app has NO outbound route
+    expose:
+      - "8000"             # reachable by the proxy over appnet; never published to the host
     environment:
       FOUNDRY_API_KEY: ${RUN_ONLY_API_KEY}
       FOUNDRY_PREVIEW_USER: preview
       FOUNDRY_PREVIEW_PASSWORD: ${RUN_ONLY_PREVIEW_PASSWORD}
       FOUNDRY_RUNTIME: mock
       FOUNDRY_MOCK_ALLOW_BASH: "false"
+    mem_limit: 512m
+    cpus: 1.0
+    pids_limit: 256
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     restart: "no"
     # No volumes: the preview is ephemeral by construction; teardown is `down`.
+  preview-proxy:
+    # Pinned control code on a pinned image (digest from Docker Hub, recorded
+    # 2026-10-24). The ONLY component that ever sees the real viewer secret.
+    image: node:22-alpine@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914
+    command: ["node", "/proxy/preview-proxy.mjs"]
+    volumes:
+      - ./factory/preview-proxy.mjs:/proxy/preview-proxy.mjs:ro
+    environment:
+      FACTORY_PREVIEW_BASIC_AUTH: ${FACTORY_PREVIEW_BASIC_AUTH}
+      RUN_ONLY_PREVIEW_PASSWORD: ${RUN_ONLY_PREVIEW_PASSWORD}
+      RUN_ONLY_API_KEY: ${RUN_ONLY_API_KEY}
+      APP_HOST: foundry-preview
+      APP_PORT: "8000"
+      PROXY_HOST: 0.0.0.0
+      PROXY_PORT: "8010"
+    networks:
+      - appnet
+      - hostnet
+    ports:
+      - "127.0.0.1:8010:8010"  # the ONLY published port; the app has none
+    depends_on:
+      - foundry-preview
+    restart: "no"
+networks:
+  appnet:
+    internal: true   # no external connectivity for anything attached here
+  hostnet: {}

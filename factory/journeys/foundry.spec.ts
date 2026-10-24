@@ -9,6 +9,10 @@ import { writeFileSync, mkdirSync } from 'node:fs';
 
 const URL_ = process.env.TUNNEL_URL || '';
 const BASIC = process.env.FACTORY_PREVIEW_BASIC_AUTH || ''; // user:pass (viewer secret; the proxy injects run-only app creds)
+// The journey drives pages served by the UNTRUSTED judged app: the real
+// viewer secret answers a Basic challenge ONLY for the tunnel origin, so an
+// app redirect/frame to another origin can never harvest it.
+const TUNNEL_ORIGIN = (() => { try { return new URL(URL_).origin; } catch { return undefined; } })();
 const JUDGED_SHA = process.env.JUDGED_SHA || '';
 const OUT = process.env.JOURNEY_OUT || 'evidence/journey';
 const steps: { step: string; pass: boolean; note?: string }[] = [];
@@ -17,7 +21,7 @@ const record = (step: string, pass: boolean, note?: string) => { steps.push({ st
 test.use({
   ...devices['iPhone 15'],
   httpCredentials: BASIC.includes(':')
-    ? { username: BASIC.split(':')[0], password: BASIC.split(':').slice(1).join(':') }
+    ? { username: BASIC.split(':')[0], password: BASIC.split(':').slice(1).join(':'), ...(TUNNEL_ORIGIN ? { origin: TUNNEL_ORIGIN } : {}) }
     : undefined,
 });
 

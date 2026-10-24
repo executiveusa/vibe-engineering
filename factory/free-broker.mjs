@@ -26,6 +26,11 @@ const MAX_BODY = 512 * 1024;
 const MAX_RESPONSE = 4 * 1024 * 1024;
 const DEFAULT_CALL_CAP = 200;
 
+// Agentic clients (opencode) send tools/tool_choice and usually stream.
+// Both pass through (capped by MAX_BODY): dropping tools silently breaks the
+// agent loop, and a client that asked for SSE must receive SSE. Streamed
+// responses are inspected for the served model BEFORE the first byte reaches
+// the sandbox; a mismatch denies before anything is forwarded downstream.
 export function createBroker({
   apiKey,
   allowedModels,           // exact OpenRouter ids (no prefix) resolved for this run
@@ -64,13 +69,20 @@ export function createBroker({
     if (!allowedModels.includes(model)) return deny(403, `model ${model} not in this run's resolved set`);
     if (!(await zeroPricingOk())) return deny(503, 'zero-pricing unverifiable - failing closed');
     calls += 1;
+    const wantStream = body.stream === true;
     const forwarded = {
       model,
       messages: Array.isArray(body.messages) ? body.messages : [],
       max_tokens: Math.min(Number.isInteger(body.max_tokens) ? body.max_tokens : 4096, 8192),
-      stream: false,
+      stream: wantStream,
       provider: { allow_fallbacks: false, max_price: { prompt: '0', completion: '0' } }, // provider-side ceiling on EVERY call
     };
+    // Agentic-loop fields the model needs; everything else stays dropped.
+    if (Array.isArray(body.tools)) forwarded.tools = body.tools;
+    if (typeof body.tool_choice === 'string' || (body.tool_choice && typeof body.tool_choice === 'object')) forwarded.tool_choice = body.tool_choice;
+    for (const k of ['temperature', 'top_p', 'stop', 'seed', 'response_format']) {
+      if (body[k] !== undefined) forwarded[k] = body[k];
+    }
     let up;
     try {
       up = await fetchImpl(UPSTREAM, {
@@ -83,20 +95,61 @@ export function createBroker({
       onEvent({ model, ok: false, error: 'upstream' });
       return deny(502, 'upstream unreachable');
     }
-    const text = await up.text().catch(() => '');
-    if (text.length > MAX_RESPONSE) return deny(502, 'upstream response too large');
+    const servedMismatch = (served) => served && served !== model && !served.endsWith('/' + model);
+    // Streaming path: buffer until the served model is observed (first SSE
+    // chunks carry it), verify BEFORE forwarding a single byte, then pipe
+    // with byte accounting. Mismatch or oversize after headers = destroy.
+    if (wantStream && up.ok && up.body && typeof up.body.getReader === 'function') {
+      const reader = up.body.getReader();
+      const dec = new TextDecoder();
+      const buffered = [];
+      let total = 0, text = '', servedModel = null;
+      try {
+        while (total <= 65536) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          total += value.length;
+          if (total > MAX_RESPONSE) { await reader.cancel().catch(() => {}); onEvent({ model, ok: false, stream: true, error: 'response too large' }); return deny(502, 'upstream response too large'); }
+          buffered.push(value);
+          text += dec.decode(value, { stream: true });
+          const m = text.match(/"model"\s*:\s*"([^"]+)"/);
+          if (m) { servedModel = m[1]; break; }
+        }
+      } catch { await reader.cancel().catch(() => {}); onEvent({ model, ok: false, stream: true, error: 'upstream stream failed' }); return deny(502, 'upstream stream failed'); }
+      if (servedMismatch(servedModel)) {
+        await reader.cancel().catch(() => {});
+        onEvent({ model, ok: false, stream: true, served_model: servedModel });
+        return deny(502, `provider served ${servedModel}, not the resolved ${model}`);
+      }
+      res.writeHead(up.status, { 'content-type': (up.headers && typeof up.headers.get === 'function' && up.headers.get('content-type')) || 'text/event-stream' });
+      for (const c of buffered) res.write(c);
+      let destroyed = false;
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          total += value.length;
+          if (total > MAX_RESPONSE) { destroyed = true; res.destroy(); onEvent({ model, ok: false, stream: true, served_model: servedModel, error: 'response too large mid-stream' }); return; }
+          res.write(value);
+        }
+      } catch { destroyed = true; res.destroy(); onEvent({ model, ok: false, stream: true, served_model: servedModel, error: 'upstream stream failed mid-flight' }); return; }
+      res.end();
+      if (!destroyed) onEvent({ model, ok: true, status: up.status, served_model: servedModel, stream: true });
+      return;
+    }
+    const text2 = await up.text().catch(() => '');
+    if (text2.length > MAX_RESPONSE) return deny(502, 'upstream response too large');
     // The provider must have served the ACTUAL resolved model (family truth,
     // not just our declaration). A mismatch is a routing failure: deny loudly.
     let served = null;
-    try { served = JSON.parse(text); } catch {}
-    if (up.ok && served && typeof served.model === 'string'
-        && served.model !== model && !served.model.endsWith('/' + model)) {
+    try { served = JSON.parse(text2); } catch {}
+    if (up.ok && served && typeof served.model === 'string' && servedMismatch(served.model)) {
       onEvent({ model, ok: false, status: up.status, served_model: served.model });
       return deny(502, `provider served ${served.model}, not the resolved ${model}`);
     }
     onEvent({ model, ok: up.ok, status: up.status, served_model: served && served.model });
     res.writeHead(up.status, { 'content-type': 'application/json' });
-    res.end(text);
+    res.end(text2);
   });
 
   return {

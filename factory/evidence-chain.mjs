@@ -20,6 +20,7 @@ export function validateStageRecord(r) {
   if (!Array.isArray(r.artifacts)) return 'artifacts must be an array';
   if (!/^[0-9a-f]{64}$/.test(r.log_sha256)) return 'log_sha256 must be 64-hex';
   if (!['ok', 'hold', 'failed'].includes(r.status)) return 'status must be ok|hold|failed';
+  if ('served_models' in r && !(Array.isArray(r.served_models) && r.served_models.every(m => typeof m === 'string'))) return 'served_models must be an array of model id strings';
   return null;
 }
 
@@ -36,6 +37,11 @@ export function writeStageRecord(dir, nn, record) {
 // previous output_sha, and the first input_sha equals baseSha. Returns
 // { ok, breakAt, reason } - the runner treats !ok as HOLD (fail closed).
 export const REQUIRED_STAGES = ['audit', 'prd', 'build', 'review', 'judge']; // 'build-fix' optional, between review and judge
+
+// Which role runs each stage: independence is verified across ROLES, and a
+// role's stages must agree on one family (a mid-run model swap is a break).
+export const STAGE_ROLE = { audit: 'builder', prd: 'builder', build: 'builder', 'build-fix': 'builder', review: 'reviewer', judge: 'judge' };
+const DRY_FAMILY = 'dry'; // the dry lane uses one deterministic agent; no model families exist to be independent
 
 export function verifyChain(dir, baseSha) {
   if (!existsSync(dir)) return { ok: false, reason: `no evidence dir for ${dir}` };
@@ -54,6 +60,7 @@ export function verifyChain(dir, baseSha) {
   }
   if (seq.length) return { ok: false, reason: `missing stages: ${seq.join(', ')}` };
   let prev = baseSha;
+  const roleFamilies = {}; // role -> family seen (must be singular per role)
   for (const f of files) {
     let r; try { r = JSON.parse(readFileSync(path.join(dir, f), 'utf8')); }
     catch { return { ok: false, breakAt: f, reason: 'unparseable record' }; }
@@ -61,7 +68,37 @@ export function verifyChain(dir, baseSha) {
     if (err) return { ok: false, breakAt: f, reason: err };
     if (r.input_sha !== prev) return { ok: false, breakAt: f, reason: `chain break: input_sha ${r.input_sha} != previous output_sha ${prev}` };
     if (r.status !== 'ok') return { ok: false, breakAt: f, reason: `stage status ${r.status}` };
+    // Rehash the actual log: a record carrying a well-formed but invented
+    // log_sha256 must not pass. Missing or tampered logs fail closed.
+    const logPath = path.join(dir, 'logs', f.replace(/\.json$/, '.log'));
+    if (!existsSync(logPath)) return { ok: false, breakAt: f, reason: `stage log missing: logs/${f.replace(/\.json$/, '.log')}` };
+    if (sha256File(logPath) !== r.log_sha256) return { ok: false, breakAt: f, reason: 'log_sha256 does not match the actual stage log (tampered or misrecorded)' };
+    // Served-model binding: when the run recorded what the provider actually
+    // served, every served id must BE the declared model (family truth, not
+    // declaration). The broker already denies mismatches at call time; this
+    // keeps a hand-written record from claiming an unchecked call.
+    const strip = (m) => String(m).replace(/^openrouter\//, '');
+    if (Array.isArray(r.served_models) && r.served_models.length) {
+      for (const sm of r.served_models) {
+        if (strip(sm) !== strip(r.model)) return { ok: false, breakAt: f, reason: `served model ${sm} != declared ${r.model}` };
+      }
+    }
+    const role = STAGE_ROLE[r.stage];
+    if (role) {
+      if (roleFamilies[role] && roleFamilies[role] !== r.model_family) return { ok: false, breakAt: f, reason: `role ${role} changed family mid-run (${roleFamilies[role]} -> ${r.model_family})` };
+      roleFamilies[role] = r.model_family;
+    }
     prev = r.output_sha;
+  }
+  // Family independence on the chain itself: three roles, three families -
+  // checked from the RECORDS, so a config-side collapse cannot slip past.
+  // The dry lane (all families 'dry') has no models and is exempt.
+  const fams = Object.values(roleFamilies);
+  if (fams.length && !fams.every(f => f === DRY_FAMILY)) {
+    const need = ['builder', 'reviewer', 'judge'];
+    for (const role of need) if (!roleFamilies[role]) return { ok: false, reason: `no ${role} stage family recorded` };
+    const distinct = new Set(need.map(r => roleFamilies[r]));
+    if (distinct.size !== 3) return { ok: false, reason: `builder/reviewer/judge families must be three distinct families, got ${need.map(r => roleFamilies[r]).join(', ')}` };
   }
   return { ok: true, finalSha: prev, stages: files.length };
 }

@@ -114,21 +114,37 @@ jobs:
           cp control/factory/*-prompt.md target/.vibe-factory/
           cp control/factory/run-readiness-sandcastle.mts control/factory/judge-receipt.mjs target/.vibe-factory/
           cp control/factory/dry-agent.mjs control/factory/dry-agent-run.mjs control/factory/dry-receipt.mjs target/.vibe-factory/
-      - name: Install Sandcastle runtime
-        working-directory: target
-        # --ignore-scripts: install hooks are the one code-execution path in this
-        # step; dropping them keeps registry code from running before the
-        # key-bearing factory step. Mitigation only, not an isolation claim.
-        run: npm install --no-save --ignore-scripts @ai-hero/sandcastle@0.6.4 tsx@4.23.15
+      - name: Install the pinned factory runtime (control side, NEVER the target)
+        working-directory: control/factory/runtime
+        # The key-bearing factory step must not resolve a single package through
+        # the target repo (.npmrc registry override or package.json dependency
+        # substitution; --ignore-scripts does not stop swapped code at import).
+        # The runtime installs from OUR committed lockfile in OUR checkout,
+        # with an explicit registry pin and an empty ambient config.
+        run: npm ci --ignore-scripts --userconfig ./.npmrc --registry https://registry.npmjs.org
+      - name: Stage the trusted runner inside the runtime tree
+        # ESM resolution walks up from the SCRIPT location, so the runner and
+        # its factory modules run from inside the runtime tree: every import
+        # resolves to the pinned install, even though the step's cwd is the
+        # target (sandcastle discovers the repo from cwd).
+        run: |
+          mkdir -p control/factory/runtime/run
+          cp control/factory/run-readiness-sandcastle.mts control/factory/runtime/run/
+          cp control/factory/judge-receipt.mjs control/factory/dry-agent.mjs control/factory/dry-agent-run.mjs control/factory/runtime/run/
+          cp control/factory/dry-receipt.mjs control/factory/model-resolve.mjs control/factory/runtime/run/
+          cp control/factory/evidence-chain.mjs control/factory/free-broker.mjs control/factory/runtime/run/
       # The sandbox image used to be built by hand on a server; build it here instead (A3).
       # sandcastle's build-image reads <cwd>/.sandcastle (verified against the 0.6.4 CLI source),
       # so the control repo's config is copied into the target first.
       - name: Build the sandcastle image
         working-directory: target
+        # sandcastle's build-image reads <cwd>/.sandcastle, so cwd stays the
+        # target, but the BINARY is the pinned control-side runtime - npx from
+        # a target cwd would resolve the package through the target's .npmrc.
         run: |
           cp -r ../control/.sandcastle .sandcastle
           start=$(date +%s)
-          npx --yes @ai-hero/sandcastle@0.6.4 docker build-image --image-name sandcastle:vibe-engineering
+          "$GITHUB_WORKSPACE/control/factory/runtime/node_modules/.bin/sandcastle" docker build-image --image-name sandcastle:vibe-engineering
           echo "sandcastle image build seconds: $(( $(date +%s) - start ))" >> "$GITHUB_STEP_SUMMARY"
       # Agents run here. This step gets model keys only: no GitHub token, so nothing an agent
       # does in the sandbox can push, merge or change repository settings.
@@ -136,16 +152,17 @@ jobs:
         name: Run audit, PRD, builder, and independent judge
         working-directory: target
         env:
-          # Dry lane runs with NO model secrets: positive non-dry predicate
-          # (the inverse pattern 'lane==dry && '' || secrets.X' would fall back
-          # to the secret). The runner also refuses to start dry with keys set.
-          OPENAI_API_KEY: ${{ env.LANE != 'dry' && secrets.OPENAI_API_KEY || '' }}
-          ANTHROPIC_API_KEY: ${{ env.LANE != 'dry' && secrets.ANTHROPIC_API_KEY || '' }}
-          OPENROUTER_API_KEY: ${{ env.LANE != 'dry' && secrets.OPENROUTER_API_KEY || '' }}
+          # The free lane carries ONLY the OpenRouter key (positive lane
+          # predicate; the dry lane must see NO model secrets, and OpenAI /
+          # Anthropic keys are never present in any Phase 1 lane). The runner
+          # also refuses to start dry with keys set.
+          OPENROUTER_API_KEY: ${{ env.LANE == 'free' && secrets.OPENROUTER_API_KEY || '' }}
           VIBE_MODEL_LANE: ${{ env.LANE }}
           VIBE_RUN_BUDGET_MINUTES: "120"
           VIBE_MAX_BUILD_ITERATIONS: "4"
-        run: npx tsx .vibe-factory/run-readiness-sandcastle.mts
+        # cwd stays the target (sandcastle discovers the repo from it) but the
+        # script and ALL its imports resolve from the pinned control runtime.
+        run: node "$GITHUB_WORKSPACE/control/factory/runtime/node_modules/tsx/dist/cli.mjs" "$GITHUB_WORKSPACE/control/factory/runtime/run/run-readiness-sandcastle.mts"
       # Phase 1+: this job writes NOTHING to the target repository. The
       # read-only fleet token guard above stays; results leave the run as
       # workflow artifacts (evidence chain, logs) and the preview. Opening a PR
@@ -174,7 +191,7 @@ jobs:
     # environment. A HOLD verdict never previews: the evidence index must exist
     # with ok:true and its finalSha must equal the judged SHA.
     needs: [select, audit-prd-build-review]
-    if: ${{ needs.select.outputs.has_targets == 'true' && (inputs.lane || vars.VIBE_MODEL_LANE || 'dry') == 'free' && needs.audit-prd-build-review.outputs.decision != '' && needs.audit-prd-build-review.outputs.decision != 'HOLD' }}
+    if: ${{ needs.select.outputs.has_targets == 'true' && (inputs.lane || vars.VIBE_MODEL_LANE || 'dry') == 'free' && needs.audit-prd-build-review.outputs.decision == 'SHIP' }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.select.outputs.matrix) }}
@@ -220,24 +237,33 @@ jobs:
           echo "RUN_ONLY_API_KEY=run-only-$(openssl rand -hex 24)" >> "$GITHUB_ENV"
         env:
           FACTORY_PREVIEW_BASIC_AUTH: ${{ secrets.FACTORY_PREVIEW_BASIC_AUTH }}
-      - name: Start Foundry via the PINNED control-side compose (mock, no sockets/mounts)
-        working-directory: control
-        run: |
-          mv ../target target
-          RUN_ONLY_API_KEY="$RUN_ONLY_API_KEY" RUN_ONLY_PREVIEW_PASSWORD="$RUN_ONLY_PREVIEW_PASSWORD"             docker compose -f docker-compose.preview.yml up -d --build
-          for i in $(seq 1 30); do curl -sf http://127.0.0.1:8000/healthz && break || sleep 2; done
-      - name: Start the trusted auth proxy (real secret lives ONLY here)
+      - name: Start Foundry + the trusted auth proxy via the PINNED control-side compose
+        # The compose file (control repo) builds the judged app with no build
+        # network, pins it to an internal-only network (no egress, no published
+        # port, mem/cpu/pid caps, no-new-privileges, cap_drop ALL) and runs the
+        # auth proxy as a pinned image mounting the pinned proxy source. The
+        # real viewer secret exists ONLY in the proxy service's env.
         working-directory: control
         env:
           FACTORY_PREVIEW_BASIC_AUTH: ${{ secrets.FACTORY_PREVIEW_BASIC_AUTH }}
         run: |
-          APP_PORT=8000 PROXY_PORT=8010 node factory/preview-proxy.mjs > proxy.log 2>&1 &
-          echo $! > proxy.pid
-          sleep 1
-          curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8010/ | grep -q 401
+          mv ../target target
+          docker compose -f docker-compose.preview.yml up -d --build
+          # The app is unpublished by design; the readiness signal is the PROXY
+          # refusing anonymous requests on its localhost-only port.
+          ok=""
+          for i in $(seq 1 45); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8010/ || true)
+            if [ "$code" = "401" ]; then ok=1; break; fi
+            sleep 2
+          done
+          test -n "$ok" || { echo 'proxy never came up refusing anonymous'; docker compose -f docker-compose.preview.yml logs --tail 50; exit 1; }
       - name: Open the quick tunnel to the PROXY (never the app directly)
         run: |
           curl -sSfL -o cloudflared https://github.com/cloudflare/cloudflared/releases/download/2024.12.2/cloudflared-linux-amd64
+          # Pin + verify the release's PUBLISHED sha256 (release notes of
+          # cloudflared 2024.12.2) before the binary is ever executed.
+          echo "5237675a5e806120729acc78c5be02f9db5f406717699587abfa72b49b39fe40  cloudflared" | sha256sum -c -
           chmod +x cloudflared
           ./cloudflared tunnel --url http://127.0.0.1:8010 --no-autoupdate > tunnel.log 2>&1 &
           echo $! > cloudflared.pid
@@ -288,5 +314,4 @@ jobs:
         working-directory: control
         run: |
           test ! -f ../cloudflared.pid || kill "$(cat ../cloudflared.pid)" || true
-          test ! -f proxy.pid || kill "$(cat proxy.pid)" || true
           docker compose -f docker-compose.preview.yml down --remove-orphans || true

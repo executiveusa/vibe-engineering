@@ -170,7 +170,13 @@ test('nightly factory: agents get model keys only, actions are SHA-pinned, Judge
   const factoryStep = workflow.slice(workflow.indexOf('- id: factory'));
   assert.ok(!/gh pr create|git push --set-upstream/.test(factoryStep), 'factory step never writes to the target');
   assert.doesNotMatch(factoryStep, /GH_TOKEN|FLEET_GITHUB_TOKEN|GITHUB_TOKEN/);
-  assert.match(factoryStep, /ANTHROPIC_API_KEY/);
+  // Phase 1 lanes carry ONLY the OpenRouter key, and only in the free lane
+  // (critic 2026-10-24: the free lane must never see OpenAI/Anthropic keys).
+  assert.doesNotMatch(factoryStep, /secrets\.OPENAI_API_KEY|secrets\.ANTHROPIC_API_KEY/);
+  assert.match(factoryStep, /OPENROUTER_API_KEY: \$\{\{ env\.LANE == 'free' && secrets\.OPENROUTER_API_KEY \|\| '' \}\}/);
+  // The key-bearing step executes the pinned control-side runtime, never a
+  // package resolved through the target checkout.
+  assert.match(factoryStep, /control\/factory\/runtime\/node_modules\/tsx\/dist\/cli\.mjs/);
   for (const file of ['nightly-production-readiness.yml', 'vibe-merge-gate.yml']) {
     const text = readFileSync(path.join(repoRoot, '.github/workflows', file), 'utf8');
     for (const [, ref] of text.matchAll(/uses:\s*actions\/[\w-]+@(\S+)/g)) {
@@ -355,16 +361,19 @@ test('workflow ships automation OFF and keeps the dry lane off the target (workf
   assert.ok(!/gh pr create|git push --set-upstream/.test(wf), 'no target write step exists in any lane');
   // Lane is per-run: dispatch input wins over the repo variable, then dry
   assert.match(wf, /LANE: \$\{\{ inputs\.lane \|\| vars\.VIBE_MODEL_LANE \|\| 'dry' \}\}/);
-  // Install hooks off for the target-side runtime install
-  assert.match(wf, /npm install --no-save --ignore-scripts @ai-hero\/sandcastle/);
+  // No npm install runs in the target checkout at all: the runtime is our
+  // committed lockfile installed in the CONTROL tree (registry pinned).
+  assert.match(wf, /npm ci --ignore-scripts --userconfig \.\/\.npmrc --registry https:\/\/registry\.npmjs\.org/);
+  assert.ok(!/working-directory: target[\s\S]{0,220}?npm (install|ci)/.test(wf), 'target cwd must never see an npm install');
   // Clone-time flag-safety guard present
   assert.match(wf, /bad TARGET_REPOSITORY/);
   assert.match(wf, /bad TARGET_BRANCH/);
   // Dry lane gets NO model secrets: positive non-dry predicate only; the
   // inverse pattern (lane==dry && '' || secrets.X) must never appear.
-  for (const key of ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY', 'OPENROUTER_API_KEY']) {
-    assert.match(wf, new RegExp(`${key}: \\$\\{\\{ env\\.LANE != 'dry' && secrets\\.${key} \\|\\| '' \\}\\}`));
+  for (const key of ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY']) {
+    assert.ok(!new RegExp(`secrets\\.${key}`).test(wf), `${key} is never referenced in any Phase 1 lane`);
   }
+  assert.match(wf, /OPENROUTER_API_KEY: \$\{\{ env\.LANE == 'free' && secrets\.OPENROUTER_API_KEY \|\| '' \}\}/);
   assert.ok(!/VIBE_MODEL_LANE == 'dry' && ''/.test(wf), 'fallback-to-secret pattern must not exist');
   // Dry lane clones the public target ANONYMOUSLY: no credential materializes
   // at all. The anonymous step must not reference the fleet token.

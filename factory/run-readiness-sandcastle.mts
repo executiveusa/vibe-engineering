@@ -157,17 +157,34 @@ const reviewer = () =>
   });
 
 // Free lane: the broker alone holds the provider key, on the runner, outside
-// the sandbox. opencode receives only the broker base URL + run token.
-// NOTE: opencode's OPENROUTER_BASE_URL env contract is UNVERIFIED as of this
-// commit - confirm before any non-dry dispatch (review item, not a runtime claim).
-let broker: { close: () => Promise<void>; sandboxEnv: (port: number, host?: string) => Record<string, string> } | null = null;
+// the sandbox. opencode receives only the run token + a config pointing its
+// openrouter provider at the broker.
+// baseURL contract VERIFIED 2026-10-24 (https://opencode.ai/docs/providers/,
+// https://opencode.ai/docs/config/): provider baseURL is an opencode config
+// option, not an env var; OPENCODE_CONFIG names a custom file loaded between
+// global and project config. The broker still enforces the model allowlist,
+// the injected zero-price ceiling and the call cap if any config layer
+// disagrees. Full opencode-binary smoke against the broker remains a
+// pre-dispatch check; the broker's OpenAI-compatible tool/stream flow is
+// covered by phase1-broker-proxy tests.
+const brokerEvents: { model?: string; served_model?: string; ok?: boolean }[] = [];
+let broker: { close: () => Promise<void>; runToken: string } | null = null;
 let brokerEnv: Record<string, string> = {};
 if (lane === "free") {
   const { createBroker } = await import("./free-broker.mjs");
   const strip = (m: string) => m.replace(/^openrouter\//, "");
-  broker = createBroker({ apiKey: openrouterKey as string, allowedModels: [strip(builderModel), strip(reviewerModel), strip(judgeModel)] });
+  broker = createBroker({
+    apiKey: openrouterKey as string,
+    allowedModels: [strip(builderModel), strip(reviewerModel), strip(judgeModel)],
+    onEvent: (e: { model?: string; served_model?: string; ok?: boolean }) => brokerEvents.push(e),
+  }) as unknown as { close: () => Promise<void>; runToken: string };
   const bound = await (broker as unknown as { listen: () => Promise<{ port: number; host: string }> }).listen();
-  brokerEnv = (broker as unknown as { sandboxEnv: (p: number, h?: string) => Record<string, string> }).sandboxEnv(bound.port, bound.host);
+  const cfgPath = path.join(process.cwd(), ".vibe-factory", "opencode.factory.json");
+  fs.writeFileSync(cfgPath, JSON.stringify({
+    $schema: "https://opencode.ai/config.json",
+    provider: { openrouter: { options: { baseURL: `http://${bound.host}:${bound.port}/v1` } } },
+  }, null, 2) + "\n");
+  brokerEnv = { OPENROUTER_API_KEY: broker.runToken, OPENCODE_CONFIG: cfgPath };
 } else if (lane === "paid") {
   brokerEnv = { OPENROUTER_API_KEY: openrouterKey as string }; // paid lane reviewer uses its own third-family key (no broker)
 }
@@ -210,6 +227,7 @@ const runStage = async (opts: {
   stageNn += 1;
   const inputSha = headSha();
   const started = new Date().toISOString();
+  const eventMark = brokerEvents.length;
   let status: "ok" | "hold" | "failed" = "ok";
   let result: unknown = null;
   try {
@@ -229,10 +247,17 @@ const runStage = async (opts: {
   const logPath = path.join(evidenceDir, "logs", `${String(stageNn).padStart(2, "0")}-${opts.stage}.log`);
   fs.writeFileSync(logPath, JSON.stringify(result, null, 2) + "\n");
   const m = modelOf(opts.role);
+  // Bind the stage to what the provider ACTUALLY served during it (broker
+  // events); the chain verifier requires served == declared when present.
+  const declared = m.model.replace(/^openrouter\//, "");
+  const served = [...new Set(brokerEvents.slice(eventMark)
+    .filter((e) => e.model === declared && typeof e.served_model === "string")
+    .map((e) => e.served_model as string))];
   writeStageRecord(evidenceDir, stageNn, {
     stage: opts.stage, agent: opts.name, model: m.model, model_family: m.family,
     input_sha: inputSha, output_sha: outputSha, started_at: started, finished_at: finished,
     status, findings_count: opts.findingsCount ?? 0, artifacts: [], log_sha256: sha256File(logPath),
+    ...(served.length ? { served_models: served } : {}),
   });
   if (status !== "ok") throw new Error(`stage ${opts.stage} ${status}`);
   return result;

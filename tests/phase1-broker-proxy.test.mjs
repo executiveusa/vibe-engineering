@@ -43,6 +43,71 @@ test('broker: auth, allowlist, ceiling injection, response-model check', async (
   await b.close();
 });
 
+test('broker: tools/tool_choice pass through (agentic loop needs them)', async () => {
+  const { b, calls } = brokerSetup();
+  const { port } = await b.listen(0, '127.0.0.1');
+  const tools = [{ type: 'function', function: { name: 'read', parameters: { type: 'object' } } }];
+  const r = await post(port, '/v1/chat/completions', { authorization: `Bearer ${b.runToken}` },
+    { model: 'google/gemma-4-31b-it:free', messages: [{ role: 'user', content: 'x' }], tools, tool_choice: 'auto', temperature: 0.2 });
+  assert.equal(r.status, 200);
+  assert.deepEqual(calls[0].tools, tools);
+  assert.equal(calls[0].tool_choice, 'auto');
+  assert.equal(calls[0].temperature, 0.2);
+  await b.close();
+});
+
+// SSE upstream fake: a web ReadableStream of chat.completion.chunk lines.
+const sseUpstream = (model, chunks = 3) => () => ({
+  ok: true, status: 200,
+  headers: { get: (k) => (k === 'content-type' ? 'text/event-stream' : null) },
+  body: new ReadableStream({
+    start(c) {
+      for (let i = 0; i < chunks; i++) {
+        c.enqueue(new TextEncoder().encode(`data: {"id":"cmpl-${i}","model":"${model}","choices":[{"delta":{"content":"w${i}"}}]}\n\n`));
+      }
+      c.enqueue(new TextEncoder().encode('data: [DONE]\n\n'));
+      c.close();
+    },
+  }),
+});
+
+test('broker: streaming passes SSE through after the served model is verified', async () => {
+  const events = [];
+  const calls = [];
+  const fetchImpl = async (url, init) => {
+    if (String(url).endsWith('/models')) return { ok: true, json: async () => MODELS };
+    calls.push(JSON.parse(init.body));
+    return sseUpstream('google/gemma-4-31b-it:free')();
+  };
+  const b = createBroker({ apiKey: 'K', allowedModels: ['google/gemma-4-31b-it:free'], fetchImpl, onEvent: (e) => events.push(e) });
+  const { port } = await b.listen(0, '127.0.0.1');
+  const r = await post(port, '/v1/chat/completions', { authorization: `Bearer ${b.runToken}` },
+    { model: 'google/gemma-4-31b-it:free', messages: [{ role: 'user', content: 'x' }], stream: true });
+  assert.equal(r.status, 200);
+  assert.match(r.body, /chat|data: /);
+  assert.match(r.body, /"model":"google\/gemma-4-31b-it:free"/);
+  assert.equal(calls[0].stream, true, 'stream requested upstream');
+  assert.equal(events.at(-1).served_model, 'google/gemma-4-31b-it:free', 'served model recorded on the event');
+  assert.equal(events.at(-1).stream, true);
+  await b.close();
+});
+
+test('broker: streamed model mismatch is denied BEFORE any byte reaches the client', async () => {
+  const events = [];
+  const fetchImpl = async (url) => String(url).endsWith('/models')
+    ? { ok: true, json: async () => MODELS }
+    : sseUpstream('openai/gpt-5')();
+  const b = createBroker({ apiKey: 'K', allowedModels: ['google/gemma-4-31b-it:free'], fetchImpl, onEvent: (e) => events.push(e) });
+  const { port } = await b.listen(0, '127.0.0.1');
+  const r = await post(port, '/v1/chat/completions', { authorization: `Bearer ${b.runToken}` },
+    { model: 'google/gemma-4-31b-it:free', messages: [], stream: true });
+  assert.equal(r.status, 502);
+  assert.match(r.body, /served openai\/gpt-5/);
+  assert.ok(!r.body.includes('data:'), 'no upstream chunk leaked to the client');
+  assert.equal(events.at(-1).served_model, 'openai/gpt-5');
+  await b.close();
+});
+
 test('broker: response model mismatch is denied (family truth, not declaration)', async () => {
   const { b } = brokerSetup(() => ({ ok: true, status: 200, text: async () => JSON.stringify({ model: 'openai/gpt-5', choices: [] }) }));
   const { port } = await b.listen(0, '127.0.0.1');
