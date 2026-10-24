@@ -147,3 +147,119 @@ jobs:
       # workflow artifacts (evidence chain, logs) and the preview. Opening a PR
       # on the target is a separate, later, owner-gated step with its own
       # write-scoped token.
+      - name: Upload the evidence chain and worktree bundle
+        # Evidence + a git bundle of the sandcastle worktree leave the run as
+        # artifacts - never as target writes. The preview job checks out from
+        # the bundle, not from a pushed branch.
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: factory-evidence-${{ github.run_id }}-${{ matrix.project }}
+          path: |
+            target/evidence/
+            target/factory.bundle
+          if-no-files-found: warn
+          retention-days: 90
+
+  preview:
+    # Phase 1 (4.3/4.4): basic-auth preview over a cloudflared quick tunnel +
+    # iPhone journey, $0. CODE ONLY until the owner channel clears the tunnel
+    # placement; the job also fails closed without its secrets.
+    needs: [select, audit-prd-build-review]
+    if: ${{ needs.select.outputs.has_targets == 'true' && (inputs.lane || vars.VIBE_MODEL_LANE || 'dry') == 'free' }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.select.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      TARGET_REPOSITORY: ${{ matrix.repository }}
+      TARGET_BRANCH: ${{ matrix.branch }}
+      TARGET_PROJECT: ${{ matrix.project }}
+      PREVIEW_MINUTES: "45"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          path: control
+          persist-credentials: false
+      - name: Download this leg's evidence + bundle
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        with:
+          name: factory-evidence-${{ github.run_id }}-${{ matrix.project }}
+          path: incoming
+      - name: Check out the sandcastle worktree from the bundle (never pushed)
+        run: |
+          test -f incoming/factory.bundle
+          git clone incoming/factory.bundle target
+          JUDGED_SHA=$(git -C target rev-parse HEAD)
+          echo "JUDGED_SHA=$JUDGED_SHA" >> "$GITHUB_ENV"
+          test -f "incoming/evidence/$JUDGED_SHA/index.json" || find incoming/evidence -name index.json
+          echo "${JUDGED_SHA}" > target/web/BUILD_SHA
+      - name: Fail closed without preview secrets
+        run: |
+          test -n "$FACTORY_PREVIEW_BASIC_AUTH" || { echo 'FACTORY_PREVIEW_BASIC_AUTH secret missing'; exit 1; }
+          test ${#FACTORY_PREVIEW_API_KEY} -ge 16 || { echo 'FACTORY_PREVIEW_API_KEY missing or < 16 chars'; exit 1; }
+        env:
+          FACTORY_PREVIEW_BASIC_AUTH: ${{ secrets.FACTORY_PREVIEW_BASIC_AUTH }}
+          FACTORY_PREVIEW_API_KEY: ${{ secrets.FACTORY_PREVIEW_API_KEY }}
+      - name: Start Foundry (simulated providers, mock bash off)
+        working-directory: target
+        env:
+          FACTORY_PREVIEW_BASIC_AUTH: ${{ secrets.FACTORY_PREVIEW_BASIC_AUTH }}
+          FACTORY_PREVIEW_API_KEY: ${{ secrets.FACTORY_PREVIEW_API_KEY }}
+        run: |
+          printf 'FOUNDRY_API_KEY=%s\n' "$FACTORY_PREVIEW_API_KEY" > .env
+          printf 'FOUNDRY_PREVIEW_USER=%s\n' "${FACTORY_PREVIEW_BASIC_AUTH%%:*}" >> .env
+          printf 'FOUNDRY_PREVIEW_PASSWORD=%s\n' "${FACTORY_PREVIEW_BASIC_AUTH#*:}" >> .env
+          printf 'FOUNDRY_RUNTIME=mock\nFOUNDRY_MOCK_ALLOW_BASH=false\n' >> .env
+          docker compose up -d --build
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:8000/healthz && break || sleep 2; done
+      - name: Open the quick tunnel
+        run: |
+          curl -sSfL -o cloudflared https://github.com/cloudflare/cloudflared/releases/download/2024.12.2/cloudflared-linux-amd64
+          chmod +x cloudflared
+          ./cloudflared tunnel --url http://127.0.0.1:8000 --no-autoupdate > tunnel.log 2>&1 &
+          echo $! > cloudflared.pid
+          for i in $(seq 1 30); do
+            URL=$(grep -o 'https://[a-z0-9-]*\.trycloudflare.com' tunnel.log | head -1) && break || sleep 2
+          done
+          test -n "$URL" || { echo 'no tunnel URL'; exit 1; }
+          echo "TUNNEL_URL=$URL" >> "$GITHUB_ENV"
+          echo "preview URL (basic-auth protected): $URL" >> "$GITHUB_STEP_SUMMARY"
+      - name: "Gate: anonymous is refused BEFORE anything is exposed"
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' "$TUNNEL_URL/")
+          test "$code" = 401 || { echo "anonymous got $code, expected 401 - tearing down"; exit 1; }
+      - name: "Gate: BUILD_SHA through the tunnel equals the judged SHA"
+        env:
+          FACTORY_PREVIEW_BASIC_AUTH: ${{ secrets.FACTORY_PREVIEW_BASIC_AUTH }}
+        run: |
+          got=$(curl -sf -u "$FACTORY_PREVIEW_BASIC_AUTH" "$TUNNEL_URL/BUILD_SHA")
+          test "$got" = "$JUDGED_SHA" || { echo "BUILD_SHA mismatch: $got != $JUDGED_SHA"; exit 1; }
+      - name: iPhone journey (Playwright)
+        working-directory: control
+        env:
+          TUNNEL_URL: ${{ env.TUNNEL_URL }}
+          JUDGED_SHA: ${{ env.JUDGED_SHA }}
+          FACTORY_PREVIEW_BASIC_AUTH: ${{ secrets.FACTORY_PREVIEW_BASIC_AUTH }}
+          FACTORY_PREVIEW_API_KEY: ${{ secrets.FACTORY_PREVIEW_API_KEY }}
+          JOURNEY_OUT: journey-out
+        run: |
+          npm install --no-save --ignore-scripts @playwright/test@1.49.1
+          npx playwright install --with-deps chromium
+          npx playwright test factory/journeys/foundry.spec.ts --reporter=line
+      - name: Upload journey evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: factory-journey-${{ github.run_id }}-${{ matrix.project }}
+          path: control/journey-out/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Teardown (always, durable)
+        if: ${{ always() }}
+        working-directory: target
+        run: |
+          test ! -f ../cloudflared.pid || kill "$(cat ../cloudflared.pid)" || true
+          docker compose down -v --remove-orphans || true
+          rm -f .env

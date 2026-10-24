@@ -262,6 +262,9 @@ try {
     throw new Error(`evidence chain HOLD: ${index.reason}`);
   }
 
+  // The worktree leaves the run as a git bundle artifact (never pushed).
+  execFileSync("git", ["-C", wt(), "bundle", "create", path.join(process.cwd(), "factory.bundle"), "--all"], { stdio: "inherit" });
+
   // The runner re-checks the receipt; the Judge's word alone is not a SHIP.
   // Dry lane reads back its own distinct receipt path; the real receipt path
   // is never populated by a dry run.
