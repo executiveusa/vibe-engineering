@@ -195,6 +195,7 @@ test('nightly factory: agents get model keys only, actions are SHA-pinned, Judge
 // tampered SHIP copy still fails the numeric gates. Both the receipt evaluator
 // and the merge gate must refuse it.
 
+import { dryAgent } from '../factory/dry-agent.mjs';
 import { dryReceipt } from '../factory/dry-receipt.mjs';
 
 test('the dry-lane receipt is always HOLD, even when tampered toward SHIP', () => {
@@ -250,6 +251,44 @@ test('the dry agent stages behave deterministically in a scratch repo', () => {
     assert.equal(evaluateReceipt(receipt).decision, 'HOLD');
     const bad = run(['node', 'dry-agent-run.mjs'], { VIBE_DRY_STAGE: 'sneaky' });
     assert.notEqual(bad.status, 0);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('the dry provider sandbox command is self-contained (no .vibe-factory dependency)', () => {
+  // Regression: a sandbox only receives the target repo, so the provider's
+  // command must carry everything the dry harness needs. This runs the REAL
+  // command the provider emits, in a scratch repo with no .vibe-factory dir.
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'dry-provider-'));
+  try {
+    const run = (cmd, env = {}) =>
+      spawnSync(cmd[0], cmd.slice(1), {
+        cwd: dir,
+        env: { ...process.env, ...env },
+        encoding: 'utf8',
+      });
+    assert.equal(run(['git', 'init', '-q']).status, 0);
+    assert.equal(
+      run(['git', '-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '--allow-empty', '-m', 'init']).status,
+      0,
+    );
+    for (const stage of ['auditor', 'prd', 'builder', 'judge']) {
+      const provider = dryAgent(stage);
+      const print = provider.buildPrintCommand({ prompt: 'test prompt' });
+      assert.ok(!print.command.includes('.vibe-factory/'), 'command must not depend on .vibe-factory copies');
+      const r = spawnSync('sh', ['-c', print.command], {
+        cwd: dir,
+        env: { ...process.env, ...provider.env },
+        input: print.stdin,
+        encoding: 'utf8',
+      });
+      assert.equal(r.status, 0, `${stage}: ${r.stderr}`);
+      assert.ok(r.stdout.includes(`dry:${stage} done`), `${stage}: ${r.stdout}`);
+    }
+    const receipt = JSON.parse(readFileSync(path.join(dir, 'docs', 'evidence', 'production-readiness-judge.json'), 'utf8'));
+    assert.equal(evaluateReceipt(receipt).decision, 'HOLD');
+    assert.ok(readFileSync(path.join(dir, 'docs', 'evidence', 'dry', 'auditor.md'), 'utf8').includes('No model ran'));
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
