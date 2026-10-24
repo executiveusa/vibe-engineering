@@ -58,24 +58,55 @@ test('stage record validation', () => {
   assert.match(validateStageRecord({ ...rec('audit', BASE, S2), status: 'weird' }), /status/);
 });
 
-test('chain verifies a clean run and fails closed on any break', () => {
-  const dir = mkdtempSync(path.join(tmpdir(), 'ev-'));
+const S4 = 'd'.repeat(40), S5 = 'e'.repeat(40), S6 = '1'.repeat(40);
+const fullChain = (dir) => {
   writeStageRecord(dir, 1, rec('audit', BASE, S2));
   writeStageRecord(dir, 2, rec('prd', S2, S3));
+  writeStageRecord(dir, 3, rec('build', S3, S4));
+  writeStageRecord(dir, 4, rec('review', S4, S5));
+  writeStageRecord(dir, 5, rec('judge', S5, S6));
+};
+
+test('chain verifies a clean full run and fails closed on any break', () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'ev-'));
+  fullChain(dir);
   const ok = verifyChain(dir, BASE);
-  assert.equal(ok.ok, true); assert.equal(ok.finalSha, S3); assert.equal(ok.stages, 2);
+  assert.equal(ok.ok, true); assert.equal(ok.finalSha, S6); assert.equal(ok.stages, 5);
   const idx = writeIndex(dir, BASE, 'run-1');
   assert.equal(idx.ok, true);
-  // break the chain
-  writeStageRecord(dir, 3, rec('build', 'f'.repeat(40), 'e'.repeat(40)));
-  const bad = verifyChain(dir, BASE);
-  assert.equal(bad.ok, false); assert.match(bad.reason, /chain break/);
+  // break the link
+  writeStageRecord(dir, 6, rec('build-fix', 'f'.repeat(40), '0'.repeat(40)));
+  assert.match(verifyChain(dir, BASE).reason, /build-fix out of position|chain break/);
   // non-ok stage fails closed
   const dir2 = mkdtempSync(path.join(tmpdir(), 'ev-'));
-  writeStageRecord(dir2, 1, { ...rec('audit', BASE, S2), status: 'failed' });
+  fullChain(dir2);
+  writeStageRecord(dir2, 4, { ...rec('review', S4, S5), status: 'failed' });
   assert.equal(verifyChain(dir2, BASE).ok, false);
   // missing dir / empty dir
   assert.equal(verifyChain(path.join(dir2, 'nope'), BASE).ok, false);
   const dir3 = mkdtempSync(path.join(tmpdir(), 'ev-'));
   assert.equal(verifyChain(dir3, BASE).ok, false);
+});
+
+test('a lone well-formed judge record is NOT a chain (fake-judge attack)', () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'ev-'));
+  writeStageRecord(dir, 1, rec('judge', BASE, S2));
+  const v = verifyChain(dir, BASE);
+  assert.equal(v.ok, false); assert.match(v.reason, /stage sequence broken/);
+});
+
+test('build-fix is legal between review and judge; missing stages fail', () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'ev-'));
+  writeStageRecord(dir, 1, rec('audit', BASE, S2));
+  writeStageRecord(dir, 2, rec('prd', S2, S3));
+  writeStageRecord(dir, 3, rec('build', S3, S4));
+  writeStageRecord(dir, 4, rec('review', S4, S5));
+  writeStageRecord(dir, 5, rec('build-fix', S5, S4)); // fix produces a new tree
+  writeStageRecord(dir, 6, rec('judge', S4, S6));
+  assert.equal(verifyChain(dir, BASE).ok, true);
+  const dir2 = mkdtempSync(path.join(tmpdir(), 'ev-'));
+  writeStageRecord(dir2, 1, rec('audit', BASE, S2));
+  writeStageRecord(dir2, 2, rec('prd', S2, S3));
+  const v = verifyChain(dir2, BASE);
+  assert.equal(v.ok, false); assert.match(v.reason, /missing stages: build, review, judge/);
 });

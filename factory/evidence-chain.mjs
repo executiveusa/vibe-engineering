@@ -35,10 +35,24 @@ export function writeStageRecord(dir, nn, record) {
 // Verify the chain in a directory: sorted NN files, each input_sha equals the
 // previous output_sha, and the first input_sha equals baseSha. Returns
 // { ok, breakAt, reason } - the runner treats !ok as HOLD (fail closed).
+export const REQUIRED_STAGES = ['audit', 'prd', 'build', 'review', 'judge']; // 'build-fix' optional, between review and judge
+
 export function verifyChain(dir, baseSha) {
   if (!existsSync(dir)) return { ok: false, reason: `no evidence dir for ${dir}` };
   const files = readdirSync(dir).filter(f => /^\d+-[a-z-]+\.json$/.test(f) && f !== 'index.json').sort();
   if (!files.length) return { ok: false, reason: 'no stage records' };
+  // Sequence: the required stages must appear exactly once, in order; a lone
+  // well-formed record (e.g. a fake judge) is NOT a chain.
+  const names = files.map(f => f.replace(/^\d+-/, '').replace(/\.json$/, ''));
+  const seq = [...REQUIRED_STAGES];
+  for (const n of names) {
+    if (n === 'build-fix') {
+      if (seq[0] !== 'judge') return { ok: false, breakAt: n, reason: 'build-fix out of position' };
+      continue;
+    }
+    if (seq.shift() !== n) return { ok: false, breakAt: n, reason: `stage sequence broken at ${n} (expected ${REQUIRED_STAGES.join('>')}, build-fix optional)` };
+  }
+  if (seq.length) return { ok: false, reason: `missing stages: ${seq.join(', ')}` };
   let prev = baseSha;
   for (const f of files) {
     let r; try { r = JSON.parse(readFileSync(path.join(dir, f), 'utf8')); }

@@ -1,0 +1,21 @@
+# Control-side preview compose (Phase 1): PINNED in this repo, never taken from
+# the judged worktree. The worktree supplies only the application source as the
+# build context; no secrets exist at build time. Runtime creds are RUN-ONLY
+# randoms (see factory/preview-proxy.mjs); the real viewer secret never enters
+# the app environment. No docker socket, no host mounts, localhost-only port.
+services:
+  foundry-preview:
+    build:
+      context: ./target
+      dockerfile: Dockerfile
+      network: none        # build-time egress disabled: model-written Dockerfile cannot phone home with the build
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      FOUNDRY_API_KEY: ${RUN_ONLY_API_KEY}
+      FOUNDRY_PREVIEW_USER: preview
+      FOUNDRY_PREVIEW_PASSWORD: ${RUN_ONLY_PREVIEW_PASSWORD}
+      FOUNDRY_RUNTIME: mock
+      FOUNDRY_MOCK_ALLOW_BASH: "false"
+    restart: "no"
+    # No volumes: the preview is ephemeral by construction; teardown is `down`.

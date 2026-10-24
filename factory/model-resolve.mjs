@@ -18,9 +18,33 @@ export function familyOf(modelId) {
   return i > 0 ? modelId.slice(0, i) : '';
 }
 
+function pricingOf(listing, id) {
+  const m = listing.find(x => x && typeof x === 'object' && x.id === id);
+  return m && m.pricing ? m.pricing : null;
+}
+export function isZeroPriced(listing, id) {
+  const p = pricingOf(listing, id);
+  if (!p) return false; // unknown pricing is NOT free
+  return Number(p.prompt) === 0 && Number(p.completion) === 0;
+}
+// The free lane must be provably $0: re-checked before every stage call. A
+// free->paid price flip must fail closed, never spend unbounded through a
+// key-carrying sandbox. (TOCTOU residual between check and call is documented.)
+export function assertZeroPricing(listing, ids) {
+  if (!Array.isArray(listing)) throw new Error('pricing re-check unreadable - HOLD');
+  for (const id of ids) {
+    if (!isZeroPriced(listing, id)) throw new Error(`${id} is not zero-priced in the live listing - refusing the free-lane call`);
+  }
+  return true;
+}
+
 export function resolveModels(listing, preferences = FAMILY_PREFERENCES) {
   if (!Array.isArray(listing)) throw new Error('listing unreadable - HOLD (cannot verify free availability)');
-  const free = new Set(listing.filter(m => typeof m === 'string' ? m.endsWith(':free') : m && typeof m.id === 'string' && m.id.endsWith(':free')).map(m => typeof m === 'string' ? m : m.id));
+  const free = new Set(listing.filter(m => {
+    const id = typeof m === 'string' ? m : m && m.id;
+    if (!id || !id.endsWith(':free')) return false;
+    return typeof m === 'string' ? true : isZeroPriced(listing, id); // object entries must prove $0
+  }).map(m => typeof m === 'string' ? m : m.id));
   const taken = new Set();
   const resolved = {};
   const reasons = [];

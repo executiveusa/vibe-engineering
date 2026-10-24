@@ -19,16 +19,11 @@ const openaiKey = process.env.OPENAI_API_KEY;
 const anthropicKey = process.env.ANTHROPIC_API_KEY;
 const openrouterKey = process.env.OPENROUTER_API_KEY;
 
-// Model lane: "paid" uses OpenAI builder + Anthropic judge; "free" uses OpenRouter
-// :free models through OpenCode (builder qwen3.8-27b, judge gemma-4-31b - families
-// still differ). Owner decision 2026-09-26 (voice note): free lane for now, no paid
-// rail. The free lane authenticates with an OpenRouter key only - never a GitHub
-// token - so the agent sandbox still holds nothing that can push or merge.
 // Lane is explicit via VIBE_MODEL_LANE and fails closed when unset: an
 // implicit default can spend on a paid-capable key route without a conscious
-// choice (independent review 2026-10-24). An earlier comment here claimed a
-// 2026-09-26 owner decision defaulting to free; that claim lives only in this
-// repo's content and is unverified, so the code no longer relies on it.
+// choice (independent review 2026-10-24). In the FREE lane no provider key
+// enters the sandbox at all: agents reach models through factory/free-broker.mjs
+// on the runner (model allowlist, injected zero-price ceiling, call cap).
 // Lane "dry" (Phase 0): a deterministic in-sandbox agent replaces every model
 // call so the whole pipeline can be exercised with zero keys, zero spend and
 // zero model output. Its receipt is always HOLD and can never pass the gate.
@@ -37,10 +32,12 @@ const lane = process.env.VIBE_MODEL_LANE;
 const slug = repo.replace(/[^a-zA-Z0-9._-]/g, "-");
 const branch = `vibe/readiness-${slug}-${Date.now()}`;
 
+let finalOutputSha = "";
+let baseShaGlobal = "";
 const report = (decision: string, extra: Record<string, unknown> = {}) => {
   const output = process.env.GITHUB_OUTPUT;
-  if (output) fs.appendFileSync(output, `branch=${branch}\ndecision=${decision}\n`, "utf8");
-  console.log(JSON.stringify({ repository: repo, branch, decision, lane, ...extra }));
+  if (output) fs.appendFileSync(output, `branch=${branch}\ndecision=${decision}\noutput_sha=${finalOutputSha}\nbase_sha=${baseShaGlobal}\n`, "utf8");
+  console.log(JSON.stringify({ repository: repo, branch, decision, lane, output_sha: finalOutputSha, ...extra }));
 };
 
 // Fail closed: configuration problems (bad lane, missing credentials) must still
@@ -143,7 +140,7 @@ const builder = () =>
         env: { OPENAI_API_KEY: openaiKey as string },
       })
     : sandcastle.opencode(builderModel, {
-        env: { OPENROUTER_API_KEY: openrouterKey as string },
+        env: brokerEnv as Record<string, string>,
       });
 const judge = () =>
   lane === "paid"
@@ -152,12 +149,28 @@ const judge = () =>
         env: { ANTHROPIC_API_KEY: anthropicKey as string },
       })
     : sandcastle.opencode(judgeModel, {
-        env: { OPENROUTER_API_KEY: openrouterKey as string },
+        env: brokerEnv as Record<string, string>,
       });
 const reviewer = () =>
   sandcastle.opencode(reviewerModel, {
-    env: { OPENROUTER_API_KEY: openrouterKey as string },
+    env: brokerEnv as Record<string, string>,
   });
+
+// Free lane: the broker alone holds the provider key, on the runner, outside
+// the sandbox. opencode receives only the broker base URL + run token.
+// NOTE: opencode's OPENROUTER_BASE_URL env contract is UNVERIFIED as of this
+// commit - confirm before any non-dry dispatch (review item, not a runtime claim).
+let broker: { close: () => Promise<void>; sandboxEnv: (port: number, host?: string) => Record<string, string> } | null = null;
+let brokerEnv: Record<string, string> = {};
+if (lane === "free") {
+  const { createBroker } = await import("./free-broker.mjs");
+  const strip = (m: string) => m.replace(/^openrouter\//, "");
+  broker = createBroker({ apiKey: openrouterKey as string, allowedModels: [strip(builderModel), strip(reviewerModel), strip(judgeModel)] });
+  const bound = await (broker as unknown as { listen: () => Promise<{ port: number; host: string }> }).listen();
+  brokerEnv = (broker as unknown as { sandboxEnv: (p: number, h?: string) => Record<string, string> }).sandboxEnv(bound.port, bound.host);
+} else if (lane === "paid") {
+  brokerEnv = { OPENROUTER_API_KEY: openrouterKey as string }; // paid lane reviewer uses its own third-family key (no broker)
+}
 
 const sandbox = await sandcastle.createSandbox({
   branch,
@@ -166,7 +179,9 @@ const sandbox = await sandcastle.createSandbox({
     sandbox: {
       onSandboxReady: [
         { command: "git status --short" },
-        { command: "test ! -f package-lock.json || npm ci", timeoutMs: 300000 },
+        // --ignore-scripts: target-controlled install hooks must never execute
+        // in an environment that carries provider routes.
+        { command: "test ! -f package-lock.json || npm ci --ignore-scripts", timeoutMs: 300000 },
       ],
     },
   },
@@ -178,6 +193,7 @@ const sandbox = await sandcastle.createSandbox({
 const wt = () => sandbox.worktreePath;
 const headSha = () => execFileSync("git", ["-C", wt(), "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
 const baseSha = headSha();
+baseShaGlobal = baseSha;
 const evidenceDir = path.join(process.cwd(), "evidence", baseSha);
 fs.mkdirSync(path.join(evidenceDir, "logs"), { recursive: true });
 let stageNn = 0;
@@ -257,6 +273,7 @@ try {
 
   // Chain check BEFORE trusting any receipt: a broken chain is a HOLD.
   const index = writeIndex(evidenceDir, baseSha, process.env.GITHUB_RUN_ID || "local");
+  finalOutputSha = (index.finalSha as string) || "";
   if (!index.ok) {
     report("HOLD", { level: "evidence-chain", reasons: [index.reason as string] });
     throw new Error(`evidence chain HOLD: ${index.reason}`);
@@ -277,4 +294,5 @@ try {
   report("HOLD", { reasons: [`budget exhausted after ${budgetMinutes} minutes`] });
 } finally {
   await sandbox.close();
+  if (broker) await broker.close();
 }

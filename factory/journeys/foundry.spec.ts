@@ -8,8 +8,7 @@ import { test, expect, request, devices } from '@playwright/test';
 import { writeFileSync, mkdirSync } from 'node:fs';
 
 const URL_ = process.env.TUNNEL_URL || '';
-const BASIC = process.env.FACTORY_PREVIEW_BASIC_AUTH || ''; // user:pass
-const API_KEY = process.env.FACTORY_PREVIEW_API_KEY || '';
+const BASIC = process.env.FACTORY_PREVIEW_BASIC_AUTH || ''; // user:pass (viewer secret; the proxy injects run-only app creds)
 const JUDGED_SHA = process.env.JUDGED_SHA || '';
 const OUT = process.env.JOURNEY_OUT || 'evidence/journey';
 const steps: { step: string; pass: boolean; note?: string }[] = [];
@@ -52,7 +51,9 @@ test('foundry preview phone journey', async ({ page }, testInfo) => {
   expect(bodySha).toBe(JUDGED_SHA);
 
   // 3. Create a workspace via the documented API (no UI form exists - grounded).
-  const api = await request.newContext({ baseURL: URL_, extraHTTPHeaders: { Authorization: `Bearer ${API_KEY}` } });
+  // API calls go through the same trusted proxy with the viewer basic auth;
+  // the proxy injects the run-only Bearer. No app credential exists here.
+  const api = await request.newContext({ baseURL: URL_, extraHTTPHeaders: { Authorization: 'Basic ' + Buffer.from(BASIC).toString('base64') } });
   const name = `journey-${Date.now()}`;
   const create = await api.post('/api/workspaces', { data: { name } });
   record('create workspace via API (no UI form exists)', create.status() === 201, `status ${create.status()}`);
