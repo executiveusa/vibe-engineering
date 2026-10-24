@@ -67,7 +67,7 @@ export function createBroker({
     for await (const c of req) { size += c.length; if (size > MAX_BODY) return deny(413, 'request too large'); chunks.push(c); }
     let body; try { body = JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { return deny(400, 'bad json'); }
     const model = String(body && body.model || '').replace(/^openrouter\//, '');
-    if (!allowedModels.includes(model)) return deny(403, `model ${model} not in this run's resolved set`);
+    if (!allowedModels.includes(model)) { onEvent({ model, ok: false, error: 'refused: model not in resolved set', refused_before_upstream: true }); return deny(403, `model ${model} not in this run's resolved set`); }
     if (!(await zeroPricingOk())) return deny(503, 'zero-pricing unverifiable - failing closed');
     calls += 1;
     const wantStream = body.stream === true;
