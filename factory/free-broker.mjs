@@ -139,6 +139,39 @@ export function createBroker({
         onEvent({ model, ok: false, stream: true, ...(served ? { served_model: served } : {}), error: why });
         if (headerSent) res.destroy(); else deny(502, why);
       };
+      const processCompleteEvents = () => {
+        const parts = pending.split('\n\n');
+        pending = parts.pop(); // trailing (possibly incomplete) event stays buffered
+        for (const evt of parts) {
+          const dataLines = evt.split('\n').filter((l) => l.startsWith('data:')).map((l) => l.slice(5).replace(/^ /, ''));
+          if (!dataLines.length) { // comment / event-only lines: no content, no model info
+            if (servedModel) { writeHeadOnce(); res.write(evt + '\n\n'); } else held.push(evt);
+            continue;
+          }
+          const payload = dataLines.join('\n');
+          if (payload.trim() === '[DONE]') {
+            if (!servedModel) { failStream(null, 'stream ended with no model field'); return false; }
+            writeHeadOnce(); res.write(evt + '\n\n'); continue;
+          }
+          let obj;
+          try { obj = JSON.parse(payload); } catch { failStream(null, 'unparseable SSE data event - refusing to forward unverifiable stream'); return false; }
+          const served = obj && typeof obj.model === 'string' ? obj.model : null;
+          if (!served) { failStream(null, 'served model unobservable - refusing to forward unverified stream'); return false; }
+          if (servedMismatch(served)) {
+            if (!servedModel) failStream(served, `provider served ${served}, not the resolved ${model}`);
+            else failStream(served, 'served model changed mid-stream');
+            return false;
+          }
+          if (!servedModel) {
+            servedModel = served;
+            writeHeadOnce();
+            for (const h of held) res.write(h + '\n\n');
+            held.length = 0;
+          }
+          res.write(evt + '\n\n');
+        }
+        return true;
+      };
       try {
         for (;;) {
           let timer = null;
@@ -152,40 +185,24 @@ export function createBroker({
           total += value.length;
           if (total > MAX_RESPONSE) { failStream(null, 'upstream response too large'); return; }
           pending += dec.decode(value, { stream: true });
-          const parts = pending.split(/\r?\n\r?\n/);
-          pending = parts.pop(); // trailing (possibly incomplete) event stays buffered
-          for (const evt of parts) {
-            const dataLines = evt.split(/\r?\n/).filter((l) => l.startsWith('data:')).map((l) => l.slice(5).replace(/^ /, ''));
-            if (!dataLines.length) { // comment / event-only lines: no content, no model info
-              if (servedModel) { writeHeadOnce(); res.write(evt + '\n\n'); } else held.push(evt);
-              continue;
-            }
-            const payload = dataLines.join('\n');
-            if (payload.trim() === '[DONE]') {
-              if (!servedModel) { failStream(null, 'stream ended with no model field'); return; }
-              writeHeadOnce(); res.write(evt + '\n\n'); continue;
-            }
-            let obj;
-            try { obj = JSON.parse(payload); } catch { failStream(null, 'unparseable SSE data event - refusing to forward unverifiable stream'); return; }
-            const served = obj && typeof obj.model === 'string' ? obj.model : null;
-            if (!served) { failStream(null, 'served model unobservable - refusing to forward unverified stream'); return; }
-            if (servedMismatch(served)) {
-              if (!servedModel) failStream(served, `provider served ${served}, not the resolved ${model}`);
-              else failStream(served, 'served model changed mid-stream');
-              return;
-            }
-            if (!servedModel) {
-              servedModel = served;
-              writeHeadOnce();
-              for (const h of held) res.write(h + '\n\n');
-              held.length = 0;
-            }
-            res.write(evt + '\n\n');
-          }
+          // critic v5h review: CR is a spec-valid SSE line break on its own.
+          // Without normalization a bare CR hides a data line inside what a
+          // naive \\r?\\n splitter sees as one comment line - the broker
+          // forwards bytes a compliant client parses as an UNVALIDATED event.
+          // Normalize CRLF and bare CR to LF BEFORE framing and forwarding,
+          // so broker and client always parse the SAME line structure. A
+          // chunk-trailing CR is held until its pair (\\n or not) is known.
+          let trailingCr = '';
+          if (pending.endsWith('\r')) { trailingCr = '\r'; pending = pending.slice(0, -1); }
+          pending = pending.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+          if (!processCompleteEvents()) return;
+          pending += trailingCr; // unresolved CR waits for the next chunk (or EOF)
           if (!servedModel && pending.length > 65536) { failStream(null, 'no model field within bounds'); return; }
         }
       } catch { if (!destroyed) failStream(null, 'upstream stream failed or served model unobservable in time'); return; }
       pending += dec.decode();
+      pending = pending.replace(/\r\n/g, '\n').replace(/\r/g, '\n'); // final normalize (incl. a held trailing CR)
+      if (!processCompleteEvents()) return; // frame + validate any events completed by the tail
       if (!servedModel) { failStream(null, 'stream ended with no model field'); return; }
       if (pending.trim() !== '') { failStream(servedModel, 'stream ended with incomplete SSE event (unvalidated suffix refused)'); return; }
       res.end();
