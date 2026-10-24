@@ -1,0 +1,5 @@
+{
+  "judge": ["nvidia/nemotron-3-ultra-550b-a55b:free", "nvidia/", "cohere/", "thinkingmachines/"],
+  "reviewer": ["google/gemma-4-31b-it:free", "google/"],
+  "builder": ["qwen/", "recursive/", "xingchen-agi/", "dots-studio/", "liquid/", "poolside/"]
+}

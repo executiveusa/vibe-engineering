@@ -8,6 +8,7 @@ import { dryAgent } from "./dry-agent.mjs";
 import { resolveModels, assertIndependent, familyOf } from "./model-resolve.mjs";
 import { writeStageRecord, writeIndex, sha256File } from "./evidence-chain.mjs";
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 
 const repo = process.env.TARGET_REPOSITORY;
 if (!repo) throw new Error("TARGET_REPOSITORY is required");
@@ -83,17 +84,28 @@ try {
 let builderModel = process.env.VIBE_BUILDER_MODEL || "";
 let reviewerModel = process.env.VIBE_REVIEWER_MODEL || "";
 let judgeModel = process.env.VIBE_JUDGE_MODEL || "";
+// Architect 0018 rule 3: the resolve receipt stores the sha256 of the fetched
+// :free listing, its fetch time and the resolved ids; every stage record
+// references the same listing hash (resolve_ref).
+let resolveReceipt: { listing_sha256: string; fetched_at: string; resolved: Record<string, string | null> } | null = null;
 if (lane === "free" && (!builderModel || !reviewerModel || !judgeModel)) {
   let listing: unknown = null;
+  let listingRaw = "";
   try {
     const res = await fetch("https://openrouter.ai/api/v1/models", { signal: AbortSignal.timeout(20000) });
-    listing = ((await res.json()) as { data?: { id?: string }[] }).data?.map((m) => m.id) ?? null;
+    listingRaw = await res.text();
+    listing = (JSON.parse(listingRaw) as { data?: { id?: string }[] }).data?.map((m) => m.id) ?? null;
   } catch { listing = null; }
   const r = resolveModels(listing as string[] | null);
   if (!r.ok) {
     report("HOLD", { level: "model-resolution", reasons: [r.hold as string] });
     throw new Error(`model resolution HOLD: ${r.hold}`);
   }
+  resolveReceipt = {
+    listing_sha256: createHash("sha256").update(listingRaw).digest("hex"),
+    fetched_at: new Date().toISOString(),
+    resolved: r.resolved,
+  };
   builderModel = builderModel || `openrouter/${r.resolved.builder}`;
   reviewerModel = reviewerModel || `openrouter/${r.resolved.reviewer}`;
   judgeModel = judgeModel || `openrouter/${r.resolved.judge}`;
@@ -213,6 +225,9 @@ const baseSha = headSha();
 baseShaGlobal = baseSha;
 const evidenceDir = path.join(process.cwd(), "evidence", baseSha);
 fs.mkdirSync(path.join(evidenceDir, "logs"), { recursive: true });
+if (resolveReceipt) {
+  fs.writeFileSync(path.join(evidenceDir, "resolve-receipt.json"), JSON.stringify(resolveReceipt, null, 2) + "\n");
+}
 let stageNn = 0;
 const modelOf = (role: string) =>
   lane === "dry" ? { model: "dry-agent", family: "dry" }
@@ -258,6 +273,7 @@ const runStage = async (opts: {
     input_sha: inputSha, output_sha: outputSha, started_at: started, finished_at: finished,
     status, findings_count: opts.findingsCount ?? 0, artifacts: [], log_sha256: sha256File(logPath),
     ...(served.length ? { served_models: served } : {}),
+    ...(resolveReceipt ? { resolve_ref: resolveReceipt.listing_sha256 } : {}),
   });
   if (status !== "ok") throw new Error(`stage ${opts.stage} ${status}`);
   return result;

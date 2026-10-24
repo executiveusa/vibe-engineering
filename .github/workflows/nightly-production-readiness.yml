@@ -133,6 +133,7 @@ jobs:
           cp control/factory/judge-receipt.mjs control/factory/dry-agent.mjs control/factory/dry-agent-run.mjs control/factory/runtime/run/
           cp control/factory/dry-receipt.mjs control/factory/model-resolve.mjs control/factory/runtime/run/
           cp control/factory/evidence-chain.mjs control/factory/free-broker.mjs control/factory/runtime/run/
+          cp control/factory/model-preferences.json control/factory/runtime/run/
       # The sandbox image used to be built by hand on a server; build it here instead (A3).
       # sandcastle's build-image reads <cwd>/.sandcastle (verified against the 0.6.4 CLI source),
       # so the control repo's config is copied into the target first.
@@ -162,7 +163,9 @@ jobs:
           VIBE_MAX_BUILD_ITERATIONS: "4"
         # cwd stays the target (sandcastle discovers the repo from it) but the
         # script and ALL its imports resolve from the pinned control runtime.
-        run: node "$GITHUB_WORKSPACE/control/factory/runtime/node_modules/tsx/dist/cli.mjs" "$GITHUB_WORKSPACE/control/factory/runtime/run/run-readiness-sandcastle.mts"
+        # --tsconfig pins the compiler config too: a target tsconfig `paths`
+        # remap could otherwise redirect bare imports to target files.
+        run: node "$GITHUB_WORKSPACE/control/factory/runtime/node_modules/tsx/dist/cli.mjs" --tsconfig "$GITHUB_WORKSPACE/control/factory/runtime/tsconfig.json" "$GITHUB_WORKSPACE/control/factory/runtime/run/run-readiness-sandcastle.mts"
       # Phase 1+: this job writes NOTHING to the target repository. The
       # read-only fleet token guard above stays; results leave the run as
       # workflow artifacts (evidence chain, logs) and the preview. Opening a PR

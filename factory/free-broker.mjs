@@ -37,6 +37,7 @@ export function createBroker({
   callCap = DEFAULT_CALL_CAP,
   fetchImpl = fetch,
   listingRefreshMs = 60000,
+  streamModelTimeoutMs = 30000, // fail closed if no served model is observed in time
   onEvent = () => {},
 } = {}) {
   if (!apiKey) throw new Error('broker needs the real key (runner env only)');
@@ -96,18 +97,23 @@ export function createBroker({
       return deny(502, 'upstream unreachable');
     }
     const servedMismatch = (served) => served && served !== model && !served.endsWith('/' + model);
-    // Streaming path: buffer until the served model is observed (first SSE
-    // chunks carry it), verify BEFORE forwarding a single byte, then pipe
-    // with byte accounting. Mismatch or oversize after headers = destroy.
+    // Streaming path, FAIL CLOSED: NOTHING reaches the client until the
+    // served model is observed AND verified. Buffering is bounded by bytes
+    // (64KB) AND time (streamModelTimeoutMs); a stream that ends, overruns or
+    // times out without a model field is denied, never forwarded.
     if (wantStream && up.ok && up.body && typeof up.body.getReader === 'function') {
       const reader = up.body.getReader();
       const dec = new TextDecoder();
       const buffered = [];
-      let total = 0, text = '', servedModel = null;
+      let total = 0, text = '', servedModel = null, streamEnded = false;
+      const deadline = Date.now() + streamModelTimeoutMs;
       try {
-        while (total <= 65536) {
-          const { done, value } = await reader.read();
-          if (done) break;
+        while (total <= 65536 && Date.now() < deadline) {
+          const { done, value } = await Promise.race([
+            reader.read(),
+            new Promise((_, rej) => setTimeout(() => rej(new Error('model-observation deadline')), Math.max(1, deadline - Date.now()))),
+          ]);
+          if (done) { streamEnded = true; break; }
           total += value.length;
           if (total > MAX_RESPONSE) { await reader.cancel().catch(() => {}); onEvent({ model, ok: false, stream: true, error: 'response too large' }); return deny(502, 'upstream response too large'); }
           buffered.push(value);
@@ -115,7 +121,13 @@ export function createBroker({
           const m = text.match(/"model"\s*:\s*"([^"]+)"/);
           if (m) { servedModel = m[1]; break; }
         }
-      } catch { await reader.cancel().catch(() => {}); onEvent({ model, ok: false, stream: true, error: 'upstream stream failed' }); return deny(502, 'upstream stream failed'); }
+      } catch { await reader.cancel().catch(() => {}); onEvent({ model, ok: false, stream: true, error: 'upstream stream failed or model-observation deadline' }); return deny(502, 'upstream stream failed or served model unobservable in time'); }
+      if (!servedModel) {
+        // Fail closed: stream ended / overran / timed out with no model field.
+        await reader.cancel().catch(() => {});
+        onEvent({ model, ok: false, stream: true, error: streamEnded ? 'stream ended with no model field' : 'no model field within bounds' });
+        return deny(502, 'served model unobservable - refusing to forward unverified stream');
+      }
       if (servedMismatch(servedModel)) {
         await reader.cancel().catch(() => {});
         onEvent({ model, ok: false, stream: true, served_model: servedModel });

@@ -21,6 +21,7 @@ export function validateStageRecord(r) {
   if (!/^[0-9a-f]{64}$/.test(r.log_sha256)) return 'log_sha256 must be 64-hex';
   if (!['ok', 'hold', 'failed'].includes(r.status)) return 'status must be ok|hold|failed';
   if ('served_models' in r && !(Array.isArray(r.served_models) && r.served_models.every(m => typeof m === 'string'))) return 'served_models must be an array of model id strings';
+  if ('resolve_ref' in r && !/^[0-9a-f]{64}$/.test(r.resolve_ref)) return 'resolve_ref must be the 64-hex sha256 of the :free listing';
   return null;
 }
 
@@ -60,6 +61,7 @@ export function verifyChain(dir, baseSha) {
   }
   if (seq.length) return { ok: false, reason: `missing stages: ${seq.join(', ')}` };
   let prev = baseSha;
+  let resolveRef = null; // every stage references the SAME resolve receipt (architect 0018 rule 3)
   const roleFamilies = {}; // role -> family seen (must be singular per role)
   for (const f of files) {
     let r; try { r = JSON.parse(readFileSync(path.join(dir, f), 'utf8')); }
@@ -83,6 +85,10 @@ export function verifyChain(dir, baseSha) {
         if (strip(sm) !== strip(r.model)) return { ok: false, breakAt: f, reason: `served model ${sm} != declared ${r.model}` };
       }
     }
+    if ('resolve_ref' in r) {
+      if (resolveRef === null) resolveRef = r.resolve_ref;
+      else if (r.resolve_ref !== resolveRef) return { ok: false, breakAt: f, reason: 'resolve_ref differs between stages (each stage must reference the same :free listing)' };
+    }
     const role = STAGE_ROLE[r.stage];
     if (role) {
       if (roleFamilies[role] && roleFamilies[role] !== r.model_family) return { ok: false, breakAt: f, reason: `role ${role} changed family mid-run (${roleFamilies[role]} -> ${r.model_family})` };
@@ -99,6 +105,15 @@ export function verifyChain(dir, baseSha) {
     for (const role of need) if (!roleFamilies[role]) return { ok: false, reason: `no ${role} stage family recorded` };
     const distinct = new Set(need.map(r => roleFamilies[r]));
     if (distinct.size !== 3) return { ok: false, reason: `builder/reviewer/judge families must be three distinct families, got ${need.map(r => roleFamilies[r]).join(', ')}` };
+    // Non-dry evidence MUST bind what the provider actually served: a record
+    // with no served_models means the stage's calls were never verified
+    // (bypassed broker or hand-written record). Fail closed.
+    for (const f of files) {
+      const r = JSON.parse(readFileSync(path.join(dir, f), 'utf8'));
+      if (!Array.isArray(r.served_models) || !r.served_models.length) {
+        return { ok: false, breakAt: f, reason: 'non-dry stage has no served_models - model calls were not observed and verified' };
+      }
+    }
   }
   return { ok: true, finalSha: prev, stages: files.length };
 }

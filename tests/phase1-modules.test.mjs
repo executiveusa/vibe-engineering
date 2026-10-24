@@ -4,7 +4,7 @@ import { mkdtempSync, writeFileSync, readFileSync, mkdirSync, unlinkSync } from 
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { familyOf, resolveModels, assertIndependent } from '../factory/model-resolve.mjs';
+import { familyOf, resolveModels, assertIndependent, loadPreferences, RESOLUTION_ORDER } from '../factory/model-resolve.mjs';
 import { validateStageRecord, writeStageRecord, verifyChain, writeIndex } from '../factory/evidence-chain.mjs';
 
 const LIST = ['google/gemma-4-31b-it:free', 'nvidia/nemotron-3-ultra-550b-a55b:free', 'recursive/flint-v1.0:free', 'liquid/lfm-2.5-2.6b:free', 'openai/gpt-5'];
@@ -40,6 +40,15 @@ test('non-free ids are never picked', () => {
   assert.equal(r.resolved.builder, null);
 });
 
+test('preferences ship as factory/model-preferences.json; resolution order is judge-first (0018)', () => {
+  const prefs = loadPreferences();
+  assert.deepEqual(RESOLUTION_ORDER, ['judge', 'reviewer', 'builder']);
+  for (const role of RESOLUTION_ORDER) assert.ok(Array.isArray(prefs[role]) && prefs[role].length, role);
+  const bad = path.join(mkdtempSync(path.join(tmpdir(), 'prefs-')), 'bad.json');
+  writeFileSync(bad, JSON.stringify({ judge: [], reviewer: ['x/'], builder: ['y/'] }));
+  assert.throws(() => loadPreferences(bad), /model-preferences/);
+});
+
 test('assertIndependent enforces three families', () => {
   assert.equal(assertIndependent('a/x:free', 'b/y:free', 'c/z:free'), true);
   assert.throws(() => assertIndependent('a/x:free', 'a/y:free', 'c/z:free'), /three families/);
@@ -51,7 +60,8 @@ const BASE = 'a'.repeat(40), S2 = 'b'.repeat(40), S3 = 'c'.repeat(40);
 const ROLE_FAMILY = { audit: 'fb', prd: 'fb', build: 'fb', 'build-fix': 'fb', review: 'fr', judge: 'fj' };
 const rec = (stage, input, output) => ({ stage, agent: stage, model: `${ROLE_FAMILY[stage]}/x:free`, model_family: ROLE_FAMILY[stage],
   input_sha: input, output_sha: output, started_at: '2026-10-24T00:00:00Z', finished_at: '2026-10-24T00:01:00Z',
-  status: 'ok', findings_count: 0, artifacts: [], log_sha256: '0'.repeat(64) });
+  status: 'ok', findings_count: 0, artifacts: [], log_sha256: '0'.repeat(64),
+  served_models: [`${ROLE_FAMILY[stage]}/x:free`] }); // non-dry evidence must bind the served model
 // put() writes the stage log first, then the record with the log's REAL hash:
 // the verifier rehashes logs, so fixtures must be honest about them.
 const put = (dir, nn, record, logContent = `log for ${record.stage} ${nn}\n`) => {
@@ -142,21 +152,47 @@ test('family independence is verified from the chain records themselves', () => 
   const dir = mkdtempSync(path.join(tmpdir(), 'ev-'));
   fullChain(dir);
   // collapse judge into the reviewer's family
-  put(dir, 5, { ...rec('judge', S5, S6), model: 'fr/x:free', model_family: 'fr' });
+  put(dir, 5, { ...rec('judge', S5, S6), model: 'fr/x:free', model_family: 'fr', served_models: ['fr/x:free'] });
   const v = verifyChain(dir, BASE);
   assert.equal(v.ok, false); assert.match(v.reason, /three distinct families/);
   // a mid-run family swap inside one role is a break
   const dir2 = mkdtempSync(path.join(tmpdir(), 'ev-'));
   fullChain(dir2);
-  put(dir2, 3, { ...rec('build', S3, S4), model: 'zz/x:free', model_family: 'zz' });
+  put(dir2, 3, { ...rec('build', S3, S4), model: 'zz/x:free', model_family: 'zz', served_models: ['zz/x:free'] });
   const v2 = verifyChain(dir2, BASE);
   assert.equal(v2.ok, false); assert.match(v2.reason, /changed family mid-run/);
   // the dry lane (all families 'dry') is exempt - no models exist there
   const dir3 = mkdtempSync(path.join(tmpdir(), 'ev-'));
-  const dryRec = (stage, i, o) => ({ ...rec(stage, i, o), model: 'dry-agent', model_family: 'dry' });
+  const dryRec = (stage, i, o) => ({ ...rec(stage, i, o), model: 'dry-agent', model_family: 'dry', served_models: [] });
   put(dir3, 1, dryRec('audit', BASE, S2)); put(dir3, 2, dryRec('prd', S2, S3));
   put(dir3, 3, dryRec('build', S3, S4)); put(dir3, 4, dryRec('review', S4, S5)); put(dir3, 5, dryRec('judge', S5, S6));
   assert.equal(verifyChain(dir3, BASE).ok, true);
+});
+
+test('resolve_ref: every stage references the same :free listing hash (0018 rule 3)', () => {
+  const L = '9'.repeat(64);
+  const dir = mkdtempSync(path.join(tmpdir(), 'ev-'));
+  fullChain(dir);
+  put(dir, 5, { ...rec('judge', S5, S6), resolve_ref: L });
+  assert.equal(verifyChain(dir, BASE).ok, true, 'single consistent resolve_ref passes');
+  // a second stage with a DIFFERENT listing hash breaks the chain
+  const dir2 = mkdtempSync(path.join(tmpdir(), 'ev-'));
+  fullChain(dir2);
+  put(dir2, 4, { ...rec('review', S4, S5), resolve_ref: L });
+  put(dir2, 5, { ...rec('judge', S5, S6), resolve_ref: '8'.repeat(64) });
+  const v = verifyChain(dir2, BASE);
+  assert.equal(v.ok, false); assert.match(v.reason, /resolve_ref differs/);
+  // malformed ref fails record validation
+  assert.match(validateStageRecord({ ...rec('judge', S5, S6), resolve_ref: 'zz' }), /resolve_ref/);
+});
+
+test('non-dry records WITHOUT served_models fail closed (unobserved calls)', () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'ev-'));
+  put(dir, 1, { ...rec('audit', BASE, S2), served_models: [] });
+  put(dir, 2, rec('prd', S2, S3)); put(dir, 3, rec('build', S3, S4));
+  put(dir, 4, rec('review', S4, S5)); put(dir, 5, rec('judge', S5, S6));
+  const v = verifyChain(dir, BASE);
+  assert.equal(v.ok, false); assert.match(v.reason, /no served_models/);
 });
 
 test('served-model binding: recorded served ids must equal the declared model', () => {

@@ -4,13 +4,22 @@
 // or the run HOLDs. No silent substitution, no paid fallback from free
 // unavailability - a failed resolution is a HOLD with a reason.
 
-export const FAMILY_PREFERENCES = {
-  // Qwen ids are not currently listed :free; preference order skips families
-  // already taken by an earlier stage at resolve time.
-  builder: ['qwen/', 'recursive/', 'xingchen-agi/', 'dots-studio/', 'liquid/', 'poolside/'],
-  reviewer: ['google/gemma-4-31b-it:free', 'google/'],
-  judge: ['nvidia/nemotron-3-ultra-550b-a55b:free', 'nvidia/', 'cohere/', 'thinkingmachines/'],
-};
+// Preference lists live in factory/model-preferences.json (architect 0018
+// rule 2); resolution order is judge, then reviewer, then builder, so the
+// judge gets its best pick first. loadPreferences reads the JSON shipped next
+// to this module (copied into the control runtime tree by the workflow).
+import { readFileSync } from 'node:fs';
+export const RESOLUTION_ORDER = ['judge', 'reviewer', 'builder'];
+export function loadPreferences(fileUrl = new URL('./model-preferences.json', import.meta.url)) {
+  const prefs = JSON.parse(readFileSync(fileUrl, 'utf8'));
+  for (const role of RESOLUTION_ORDER) {
+    if (!Array.isArray(prefs[role]) || !prefs[role].length || !prefs[role].every(x => typeof x === 'string' && x.length)) {
+      throw new Error(`model-preferences.json: ${role} must be a non-empty string list`);
+    }
+  }
+  return prefs;
+}
+export const FAMILY_PREFERENCES = loadPreferences();
 
 export function familyOf(modelId) {
   // The family is the provider namespace before '/'; pinned ids match exactly.
@@ -48,7 +57,7 @@ export function resolveModels(listing, preferences = FAMILY_PREFERENCES) {
   const taken = new Set();
   const resolved = {};
   const reasons = [];
-  for (const stage of ['builder', 'reviewer', 'judge']) {
+  for (const stage of RESOLUTION_ORDER) {
     let pick = null;
     for (const pref of preferences[stage]) {
       if (pref.endsWith(':free')) { // exact pinned id

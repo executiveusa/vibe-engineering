@@ -92,6 +92,46 @@ test('broker: streaming passes SSE through after the served model is verified', 
   await b.close();
 });
 
+test('broker: stream with NO observable model field is denied, nothing forwarded', async () => {
+  const noModelUpstream = () => ({
+    ok: true, status: 200,
+    headers: { get: () => 'text/event-stream' },
+    body: new ReadableStream({
+      start(c) {
+        c.enqueue(new TextEncoder().encode('data: {"id":"x","choices":[{"delta":{"content":"hi"}}]}\n\n'));
+        c.enqueue(new TextEncoder().encode('data: [DONE]\n\n'));
+        c.close();
+      },
+    }),
+  });
+  const fetchImpl = async (url) => String(url).endsWith('/models') ? { ok: true, json: async () => MODELS } : noModelUpstream();
+  const b = createBroker({ apiKey: 'K', allowedModels: ['google/gemma-4-31b-it:free'], fetchImpl });
+  const { port } = await b.listen(0, '127.0.0.1');
+  const r = await post(port, '/v1/chat/completions', { authorization: `Bearer ${b.runToken}` },
+    { model: 'google/gemma-4-31b-it:free', messages: [], stream: true });
+  assert.equal(r.status, 502);
+  assert.match(r.body, /unobservable/);
+  assert.ok(!r.body.includes('"delta"'), 'no upstream content leaked');
+  await b.close();
+});
+
+test('broker: model-observation deadline fails closed on a stalled stream', async () => {
+  const stalled = () => ({
+    ok: true, status: 200,
+    headers: { get: () => 'text/event-stream' },
+    body: new ReadableStream({ start() { /* never emits, never closes */ } }),
+  });
+  const fetchImpl = async (url) => String(url).endsWith('/models') ? { ok: true, json: async () => MODELS } : stalled();
+  const b = createBroker({ apiKey: 'K', allowedModels: ['google/gemma-4-31b-it:free'], fetchImpl, streamModelTimeoutMs: 60 });
+  const { port } = await b.listen(0, '127.0.0.1');
+  const t0 = Date.now();
+  const r = await post(port, '/v1/chat/completions', { authorization: `Bearer ${b.runToken}` },
+    { model: 'google/gemma-4-31b-it:free', messages: [], stream: true });
+  assert.equal(r.status, 502);
+  assert.ok(Date.now() - t0 < 10000, 'deadline actually bounded the wait');
+  await b.close();
+});
+
 test('broker: streamed model mismatch is denied BEFORE any byte reaches the client', async () => {
   const events = [];
   const fetchImpl = async (url) => String(url).endsWith('/models')
