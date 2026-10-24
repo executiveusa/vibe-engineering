@@ -277,9 +277,11 @@ test('the dry provider sandbox command is self-contained (no .vibe-factory depen
       const provider = dryAgent(stage);
       const print = provider.buildPrintCommand({ prompt: 'test prompt' });
       assert.ok(!print.command.includes('.vibe-factory/'), 'command must not depend on .vibe-factory copies');
+      // Provider env deliberately NOT passed: the command must be sufficient
+      // on its own (observed CI: provider env does not reach the sandbox).
       const r = spawnSync('sh', ['-c', print.command], {
         cwd: dir,
-        env: { ...process.env, ...provider.env },
+        env: { ...process.env, VIBE_DRY_STAGE: '' },
         input: print.stdin,
         encoding: 'utf8',
       });

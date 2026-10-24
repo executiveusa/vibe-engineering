@@ -8,8 +8,10 @@
 // module '/home/agent/workspace/.vibe-factory/dry-agent-run.mjs'"). So the two
 // dry sources are read from this directory on the runner at load time and
 // materialized inside the sandbox by the command itself, base64-encoded so the
-// command string stays shell-safe. The stage travels in the provider's env,
-// which the AgentProvider contract injects at launch.
+// command string stays shell-safe. The stage is inlined into the command:
+// observed CI behavior is that a provider's env does NOT reach the sandbox
+// process (second hosted run: "unknown VIBE_DRY_STAGE undefined"), so nothing
+// load-bearing travels outside the command string itself.
 import { readFileSync } from 'node:fs';
 
 const B64 = (name) => readFileSync(new URL(`./${name}`, import.meta.url)).toString('base64');
@@ -17,9 +19,12 @@ const RUN_SRC_B64 = B64('dry-agent-run.mjs');
 const RECEIPT_SRC_B64 = B64('dry-receipt.mjs');
 
 export function dryAgent(stage) {
+  // stage is one of the fixed identifiers below (auditor/prd/builder/judge),
+  // so inlining it into the shell command is safe.
+  if (!/^[a-z]+$/.test(stage)) throw new Error(`dryAgent: bad stage ${JSON.stringify(stage)}`);
   return {
     name: `dry-${stage}`,
-    env: { VIBE_DRY_STAGE: stage },
+    env: { VIBE_DRY_STAGE: stage }, // documentation only; the command is authoritative
     captureSessions: false,
     buildPrintCommand({ prompt }) {
       // Prompt goes to stdin so nothing depends on argv limits or shell quoting.
@@ -28,7 +33,7 @@ export function dryAgent(stage) {
           `mkdir -p .vibe-factory-dry && ` +
           `echo '${RUN_SRC_B64}' | base64 -d > .vibe-factory-dry/dry-agent-run.mjs && ` +
           `echo '${RECEIPT_SRC_B64}' | base64 -d > .vibe-factory-dry/dry-receipt.mjs && ` +
-          `node .vibe-factory-dry/dry-agent-run.mjs`,
+          `VIBE_DRY_STAGE='${stage}' node .vibe-factory-dry/dry-agent-run.mjs`,
         stdin: prompt,
       };
     },
