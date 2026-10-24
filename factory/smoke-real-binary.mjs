@@ -11,8 +11,8 @@
 //   path is EXPERIMENTAL tonight (opencode permission/SSE interplay under
 //   non-interactive exec is not yet reliable; a failed attempt records
 //   inconclusive, not pass).
-// RUN2 negative: a model outside the resolved set is REFUSED by the broker
-//   and the upstream sees ZERO requests (full denial proof, not header-only).
+// RUN2 client-side only: the binary rejects a catalog-unknown model itself
+//   (nonzero exit, no broker contact attributable) - NOT broker-refusal proof.
 // RUN3 kill switch: a hostile project opencode.json (bogus baseURL) is inert
 //   under OPENCODE_DISABLE_PROJECT_CONFIG=1 - the run still rides the broker.
 import http from 'node:http';
@@ -109,23 +109,42 @@ const runOc = (label, { model, cwd = tmp, extraEnv = {}, args = [] }) => new Pro
 });
 
 // RUN1: positive with tool loop
+// RUN0 true broker negative: a DIRECT HTTP POST to the broker with a model
+// outside the resolved set must be denied 403 with a broker-side
+// refused_before_upstream event and ZERO upstream contact (critic v5: the
+// opencode client rejects catalog-unknown models ITSELF, so a client run is
+// not broker-refusal evidence - the refusal must be proven at the broker).
+const hitsBefore0 = upstreamHits;
+const direct = await fetch(`http://127.0.0.1:${bound.port}/v1/chat/completions`, {
+  method: 'POST',
+  headers: { authorization: `Bearer ${broker.runToken}`, 'content-type': 'application/json' },
+  body: JSON.stringify({ model: 'evil/unresolved-model:free', messages: [{ role: 'user', content: 'hi' }] }),
+});
+receipt.runs.run0_direct_broker_refusal = { status: direct.status, body: (await direct.text()).slice(0, 200) };
+const r0ok = direct.status === 403
+  && upstreamHits === hitsBefore0
+  && events.some(e => e.refused_before_upstream === true && e.model === 'evil/unresolved-model:free');
+
+
 const hitsBefore1 = upstreamHits;
-await runOc('run1_tool_loop', { model: ALLOWED });
+await runOc('run1_plain_sse_completion', { model: ALLOWED });
 const wantToolLoop = process.env.SMOKE_TOOL_LOOP === '1';
-const r1ok = receipt.runs.run1_tool_loop.exit === 0
-  && /smoke ok/.test(receipt.runs.run1_tool_loop.tail)
+const r1ok = receipt.runs.run1_plain_sse_completion.exit === 0
+  && /smoke ok/.test(receipt.runs.run1_plain_sse_completion.tail)
   && (!wantToolLoop || receipt.upstream_requests.slice(hitsBefore1).some(r => r.has_tool_result))
   && events.some(e => e.ok === true && e.served_model === ALLOWED && e.stream === true);
 
-// RUN2: negative - model outside the resolved set; upstream must see ZERO new requests
+// RUN2 client-side evidence ONLY (critic v5): opencode rejects a
+// catalog-unknown model ITSELF - nonzero exit, no broker contact attributable
+// to this run. This is NOT broker-refusal proof; that lives in RUN0.
 const hitsBefore2 = upstreamHits;
-await runOc('run2_disallowed_model', { model: 'evil/unresolved-model:free' });
+await runOc('run2_client_rejects_unknown_model', { model: 'evil/unresolved-model:free' });
 // Refusal proof (two layers, both checked): the client run fails nonzero AND
 // the broker's recorded events contain at least one refused_before_upstream
 // denial with ZERO upstream requests across the whole smoke. (opencode also
 // rejects catalog-unknown models client-side; its internal probe model IS
 // broker-refused live, which is the recorded refusal evidence.)
-const r2ok = receipt.runs.run2_disallowed_model.exit !== 0
+const r2ok = receipt.runs.run2_client_rejects_unknown_model.exit !== 0
   && upstreamHits === hitsBefore2;
 
 // RUN3: kill switch - hostile project config + OPENCODE_DISABLE_PROJECT_CONFIG=1
@@ -141,11 +160,13 @@ const r3ok = receipt.runs.run3_project_config_killswitch.exit === 0
 
 await broker.close(); upstream.close();
 receipt.broker_events = events;
-receipt.checks = { run1_tool_loop: r1ok, run2_disallowed_model_refused: r2ok, run3_project_config_killswitch: r3ok };
+receipt.checks = { ...(receipt.checks || {}), run3_project_config_killswitch: r3ok };
 receipt.refusal_evidence = events.filter(e => e.refused_before_upstream === true);
-const refusalProven = receipt.refusal_evidence.length > 0 && receipt.upstream_requests.every(r => r.model === ALLOWED);
-receipt.checks.broker_refusal_event = refusalProven;
-receipt.ok = r1ok && r2ok && r3ok && refusalProven;
+receipt.probe_note = 'google/gemini-nano-banana-2.1 refusals are the binary\'s INTERNAL probe model (runs 1/3), not the requested model - recorded for transparency';
+receipt.checks.run0_direct_broker_refusal = r0ok;
+receipt.checks.run1_plain_sse_completion = r1ok;
+receipt.checks.run2_client_rejects_unknown_model = r2ok;
+receipt.ok = r0ok && r1ok && r2ok && r3ok && receipt.upstream_requests.every(r => r.model === ALLOWED);
 receipt.finished_at = new Date().toISOString();
 console.log(JSON.stringify(receipt, null, 2));
 process.exit(receipt.ok ? 0 : 1);

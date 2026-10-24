@@ -47,14 +47,18 @@ export function createBroker({
   let listing = null, listingAt = 0;
 
   async function zeroPricingOk() {
-    if (!listing || Date.now() - listingAt > listingRefreshMs) {
-      const res = await fetchImpl(MODELS_URL, { signal: AbortSignal.timeout(20000) });
-      const body = await res.json().catch(() => null);
-      if (!res.ok || !body || !Array.isArray(body.data)) return false; // fail closed
-      listing = body.data; listingAt = Date.now();
-    }
-    try { assertZeroPricing(listing, allowedModels); return true; }
-    catch { return false; }
+    // critic v5: a THROWING fetch (network down, DNS, abort) must not escape
+    // as an unhandled rejection in the request handler (client hang / process
+    // crash) - every failure mode degrades to a bounded 503.
+    try {
+      if (!listing || Date.now() - listingAt > listingRefreshMs) {
+        const res = await fetchImpl(MODELS_URL, { signal: AbortSignal.timeout(20000) });
+        const body = await res.json().catch(() => null);
+        if (!res.ok || !body || !Array.isArray(body.data)) return false; // fail closed
+        listing = body.data; listingAt = Date.now();
+      }
+      assertZeroPricing(listing, allowedModels); return true;
+    } catch { return false; }
   }
 
   const server = http.createServer(async (req, res) => {
@@ -133,6 +137,16 @@ export function createBroker({
         onEvent({ model, ok: false, stream: true, served_model: servedModel });
         return deny(502, `provider served ${servedModel}, not the resolved ${model}`);
       }
+      // critic v5: one read() can deliver MULTIPLE SSE chunks - the buffered
+      // prefix must be fully clean, not just its first model field. Scan every
+      // model field in the buffer before any byte is forwarded.
+      for (const m2 of text.matchAll(/"model"\s*:\s*"([^"]+)"/g)) {
+        if (servedMismatch(m2[1])) {
+          await reader.cancel().catch(() => {});
+          onEvent({ model, ok: false, stream: true, served_model: m2[1], error: 'served model changed mid-stream' });
+          return deny(502, `provider served ${m2[1]} mid-stream, not the resolved ${model}`);
+        }
+      }
       res.writeHead(up.status, { 'content-type': (up.headers && typeof up.headers.get === 'function' && up.headers.get('content-type')) || 'text/event-stream' });
       for (const c of buffered) res.write(c);
       let destroyed = false;
@@ -142,6 +156,16 @@ export function createBroker({
           if (done) break;
           total += value.length;
           if (total > MAX_RESPONSE) { destroyed = true; res.destroy(); onEvent({ model, ok: false, stream: true, served_model: servedModel, error: 'response too large mid-stream' }); return; }
+          // critic v5: a model observed in the first chunk is not a guarantee
+          // for the rest - re-check EVERY chunk. (JSON-escaped occurrences
+          // inside content strings carry \" and cannot match this pattern.)
+          const chunkText = dec.decode(value, { stream: true });
+          const mm = chunkText.match(/"model"\s*:\s*"([^"]+)"/);
+          if (mm && servedMismatch(mm[1])) {
+            destroyed = true; res.destroy();
+            onEvent({ model, ok: false, stream: true, served_model: mm[1], error: 'served model changed mid-stream' });
+            return;
+          }
           res.write(value);
         }
       } catch { destroyed = true; res.destroy(); onEvent({ model, ok: false, stream: true, served_model: servedModel, error: 'upstream stream failed mid-flight' }); return; }

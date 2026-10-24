@@ -172,3 +172,51 @@ test('revalidateListingHash: match / stale / unverifiable', async () => {
   const badFetch = async () => { throw new Error('network down'); };
   assert.equal((await revalidateListingHash(receipt, badFetch)).status, 'unverifiable');
 });
+
+// Critic v5 (yellow): zeroPricingOk fetch THROW must degrade to a bounded 503,
+// never an unhandled rejection that hangs the client or crashes the process.
+test('broker: throwing models fetch -> bounded 503, no hang, no crash', async () => {
+  const broker = createBroker({
+    apiKey: 'k', allowedModels: ['a/x:free'],
+    fetchImpl: async () => { throw new Error('network down'); },
+    listingRefreshMs: 0, // force a fresh fetch every call
+  });
+  const { port } = await broker.listen(0, '127.0.0.1');
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000); // bounded: a hang would abort -> test fails loudly
+  const res = await fetch(`http://127.0.0.1:${port}/v1/chat/completions`, {
+    method: 'POST', headers: { authorization: `Bearer ${broker.runToken}`, 'content-type': 'application/json' },
+    body: JSON.stringify({ model: 'a/x:free', messages: [] }), signal: controller.signal,
+  });
+  clearTimeout(timer);
+  assert.equal(res.status, 503);
+  assert.match(await res.text(), /zero-pricing unverifiable/);
+  await broker.close();
+});
+
+// Critic v5 (yellow): the served model is re-verified on EVERY stream chunk.
+test('broker: mid-stream model switch destroys the response and records the event', async () => {
+  const listing = { data: [{ id: 'a/x:free', pricing: { prompt: '0', completion: '0' } }] };
+  const events = [];
+  const ts = Math.floor(Date.now() / 1000);
+  const chunk = (model, content) => `data: {"id":"c","object":"chat.completion.chunk","created":${ts},"model":"${model}","choices":[{"index":0,"delta":{"content":"${content}"},"finish_reason":null}]}\n\n`;
+  // First chunk honest (passes the pre-forward verification), SECOND chunk switches.
+  const upstreamBody = chunk('a/x:free', 'he') + chunk('evil/swapped:free', 'llo') + 'data: [DONE]\n\n';
+  const broker = createBroker({
+    apiKey: 'k', allowedModels: ['a/x:free'], onEvent: e => events.push(e),
+    fetchImpl: async (url, init) => String(url).endsWith('/models')
+      ? { ok: true, json: async () => listing }
+      : new Response(upstreamBody, { status: 200, headers: { 'content-type': 'text/event-stream' } }),
+  });
+  const { port } = await broker.listen(0, '127.0.0.1');
+  const res = await fetch(`http://127.0.0.1:${port}/v1/chat/completions`, {
+    method: 'POST', headers: { authorization: `Bearer ${broker.runToken}`, 'content-type': 'application/json' },
+    body: JSON.stringify({ model: 'a/x:free', messages: [], stream: true }),
+  });
+  // The connection is destroyed mid-stream: the client reads the verified
+  // prefix, then the stream breaks - the swapped chunk never completes.
+  const text = await res.text().catch(e => String(e));
+  assert.doesNotMatch(text, /llo/); // the post-switch chunk's content never arrives whole
+  assert.ok(events.some(e => e.error === 'served model changed mid-stream' && e.served_model === 'evil/swapped:free'));
+  await broker.close();
+});
