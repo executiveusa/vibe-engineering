@@ -347,8 +347,10 @@ test('workflow ships automation OFF and keeps the dry lane off the target (workf
   // No active schedule cron (commented out only)
   const uncommented = wf.split('\n').filter((l) => !l.trimStart().startsWith('#') && l.includes('cron:'));
   assert.equal(uncommented.length, 0, 'schedule must be commented out');
-  // Dry lane never reaches the target push/PR step
-  assert.match(wf, /if: \$\{\{ vars\.VIBE_MODEL_LANE != 'dry' \}\}/);
+  // Phase 1: the job writes NOTHING to the target - no push, no PR step at all
+  assert.ok(!/gh pr create|git push --set-upstream/.test(wf), 'no target write step exists in any lane');
+  // Lane is per-run: dispatch input wins over the repo variable, then dry
+  assert.match(wf, /LANE: \$\{\{ inputs\.lane \|\| vars\.VIBE_MODEL_LANE \|\| 'dry' \}\}/);
   // Install hooks off for the target-side runtime install
   assert.match(wf, /npm install --no-save --ignore-scripts @ai-hero\/sandcastle/);
   // Clone-time flag-safety guard present
@@ -357,13 +359,13 @@ test('workflow ships automation OFF and keeps the dry lane off the target (workf
   // Dry lane gets NO model secrets: positive non-dry predicate only; the
   // inverse pattern (lane==dry && '' || secrets.X) must never appear.
   for (const key of ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY', 'OPENROUTER_API_KEY']) {
-    assert.match(wf, new RegExp(`${key}: \\$\\{\\{ vars\\.VIBE_MODEL_LANE != 'dry' && secrets\\.${key} \\|\\| '' \\}\\}`));
+    assert.match(wf, new RegExp(`${key}: \\$\\{\\{ env\\.LANE != 'dry' && secrets\\.${key} \\|\\| '' \\}\\}`));
   }
   assert.ok(!/VIBE_MODEL_LANE == 'dry' && ''/.test(wf), 'fallback-to-secret pattern must not exist');
   // Dry lane clones the public target ANONYMOUSLY: no credential materializes
   // at all. The anonymous step must not reference the fleet token.
   const anon = wf.split('Clone target repository (anonymous, dry lane)')[1].split('- name:')[0];
-  assert.match(anon, /if: \$\{\{ vars\.VIBE_MODEL_LANE == 'dry' \}\}/);
+  assert.match(anon, /if: \$\{\{ env\.LANE == 'dry' \}\}/);
   assert.ok(!/GH_TOKEN|secrets\./.test(anon), 'anonymous dry clone must carry no secret');
   assert.match(anon, /credential\.helper= /);
   // Tokenized clone + probe are non-dry only; probe fails closed on missing fields

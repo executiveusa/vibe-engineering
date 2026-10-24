@@ -16,6 +16,11 @@ on:
         description: "Optional: branch of target_repository (used with target_repository)"
         required: false
         type: string
+      lane:
+        description: "Model lane for this run (defaults to vars.VIBE_MODEL_LANE, then 'dry')"
+        required: false
+        type: choice
+        options: [dry, free]
 
 concurrency:
   group: nightly-production-readiness
@@ -54,6 +59,9 @@ jobs:
     permissions:
       contents: read
     env:
+      # Per-run lane: dispatch input wins, then the repo variable, then dry.
+      # No global state flips when an owner experiments with a lane.
+      LANE: ${{ inputs.lane || vars.VIBE_MODEL_LANE || 'dry' }}
       TARGET_REPOSITORY: ${{ matrix.repository }}
       TARGET_BRANCH: ${{ matrix.branch }}
       TARGET_PROJECT: ${{ matrix.project }}
@@ -75,10 +83,10 @@ jobs:
         # keys, and the control checkout persists no token. An anonymous clone
         # of the public target means no credential exists in the environment
         # for target-influenced code to reach, and nothing that could push.
-        if: ${{ vars.VIBE_MODEL_LANE == 'dry' }}
+        if: ${{ env.LANE == 'dry' }}
         run: git -c credential.helper= clone --branch "$TARGET_BRANCH" "https://github.com/$TARGET_REPOSITORY" target
       - name: Verify the fleet token is read-only on the target (non-dry lanes)
-        if: ${{ vars.VIBE_MODEL_LANE != 'dry' }}
+        if: ${{ env.LANE != 'dry' }}
         env:
           GH_TOKEN: ${{ secrets.FLEET_GITHUB_TOKEN }}
         run: |
@@ -92,7 +100,7 @@ jobs:
             echo "fleet token is not read-only on the target (push=$push admin=$admin maintain=$maintain triage=$triage)" >&2; exit 1
           fi
       - name: Clone target repository (fleet token, non-dry lanes)
-        if: ${{ vars.VIBE_MODEL_LANE != 'dry' }}
+        if: ${{ env.LANE != 'dry' }}
         env:
           GH_TOKEN: ${{ secrets.FLEET_GITHUB_TOKEN }}
         run: gh repo clone "$TARGET_REPOSITORY" target -- --branch "$TARGET_BRANCH"
@@ -127,30 +135,15 @@ jobs:
           # Dry lane runs with NO model secrets: positive non-dry predicate
           # (the inverse pattern 'lane==dry && '' || secrets.X' would fall back
           # to the secret). The runner also refuses to start dry with keys set.
-          OPENAI_API_KEY: ${{ vars.VIBE_MODEL_LANE != 'dry' && secrets.OPENAI_API_KEY || '' }}
-          ANTHROPIC_API_KEY: ${{ vars.VIBE_MODEL_LANE != 'dry' && secrets.ANTHROPIC_API_KEY || '' }}
-          OPENROUTER_API_KEY: ${{ vars.VIBE_MODEL_LANE != 'dry' && secrets.OPENROUTER_API_KEY || '' }}
-          VIBE_MODEL_LANE: ${{ vars.VIBE_MODEL_LANE }}
+          OPENAI_API_KEY: ${{ env.LANE != 'dry' && secrets.OPENAI_API_KEY || '' }}
+          ANTHROPIC_API_KEY: ${{ env.LANE != 'dry' && secrets.ANTHROPIC_API_KEY || '' }}
+          OPENROUTER_API_KEY: ${{ env.LANE != 'dry' && secrets.OPENROUTER_API_KEY || '' }}
+          VIBE_MODEL_LANE: ${{ env.LANE }}
           VIBE_RUN_BUDGET_MINUTES: "120"
           VIBE_MAX_BUILD_ITERATIONS: "4"
         run: npx tsx .vibe-factory/run-readiness-sandcastle.mts
-      - name: Open pull request from retained branch
-        # The dry lane is pipeline mechanics only: it must never write to the
-        # target repository, even when every stage succeeds.
-        if: ${{ vars.VIBE_MODEL_LANE != 'dry' }}
-        working-directory: target
-        env:
-          GH_TOKEN: ${{ secrets.FLEET_GITHUB_TOKEN }}
-          SANDCASTLE_BRANCH: ${{ steps.factory.outputs.branch }}
-          DECISION: ${{ steps.factory.outputs.decision }}
-        run: |
-          test -n "$SANDCASTLE_BRANCH"
-          case "$DECISION" in SHIP|HOLD) ;; *) echo "unknown decision: $DECISION" >&2; exit 1 ;; esac
-          if [ "$(git rev-list --count "origin/$TARGET_BRANCH..$SANDCASTLE_BRANCH")" = "0" ]; then
-            echo "No commits on $SANDCASTLE_BRANCH ($DECISION); nothing to open."
-            exit 0
-          fi
-          git push --set-upstream origin "$SANDCASTLE_BRANCH:$SANDCASTLE_BRANCH"
-          gh pr create --draft --base "$TARGET_BRANCH" --head "$SANDCASTLE_BRANCH" \
-            --title "[$DECISION] Production readiness: audit, PRD, and bounded execution" \
-            --body "Nightly Vibe Engineering run for $TARGET_PROJECT. Judge decision (re-checked by the runner): **$DECISION**. Includes the completion audit, production-readiness PRD, bounded implementation, a review by a Judge from a different model family, Judge evidence, and rollback notes. The Vibe merge gate blocks this PR unless the Judge receipt is SHIP, current, and every required check passes."
+      # Phase 1+: this job writes NOTHING to the target repository. The
+      # read-only fleet token guard above stays; results leave the run as
+      # workflow artifacts (evidence chain, logs) and the preview. Opening a PR
+      # on the target is a separate, later, owner-gated step with its own
+      # write-scoped token.
