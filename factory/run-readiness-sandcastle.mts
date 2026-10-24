@@ -21,15 +21,14 @@ const openrouterKey = process.env.OPENROUTER_API_KEY;
 // still differ). Owner decision 2026-09-26 (voice note): free lane for now, no paid
 // rail. The free lane authenticates with an OpenRouter key only - never a GitHub
 // token - so the agent sandbox still holds nothing that can push or merge.
-// Lane is explicit via VIBE_MODEL_LANE. Default is FREE (owner decision 2026-09-26:
-// free lane for now, no paid rail) - paid runs only when explicitly selected,
-// even if legacy paid secrets still exist on the repo.
+// Lane is explicit via VIBE_MODEL_LANE and fails closed when unset: an
+// implicit default can spend on a paid-capable key route without a conscious
+// choice (independent review 2026-10-24). An earlier comment here claimed a
+// 2026-09-26 owner decision defaulting to free; that claim lives only in this
+// repo's content and is unverified, so the code no longer relies on it.
 // Lane "dry" (Phase 0): a deterministic in-sandbox agent replaces every model
 // call so the whole pipeline can be exercised with zero keys, zero spend and
 // zero model output. Its receipt is always HOLD and can never pass the gate.
-// Fail closed: an unset lane used to default to free (owner decision 2026-09-26,
-// superseded 2026-10-24 by independent review): an implicit lane can spend on a
-// paid-capable key route without a conscious choice. Unset is now an error.
 const lane = process.env.VIBE_MODEL_LANE;
 
 const slug = repo.replace(/[^a-zA-Z0-9._-]/g, "-");
@@ -54,7 +53,17 @@ const validateConfig = () => {
   if (!/^[A-Za-z0-9_][A-Za-z0-9_.-]*\/[A-Za-z0-9_][A-Za-z0-9_.-]*$/.test(repo)) {
     throw new Error(`TARGET_REPOSITORY must be a plain owner/repo: ${JSON.stringify(repo)}`);
   }
-  if (lane === "dry") return; // dry lane: no credentials needed, no model runs
+  if (lane === "dry") {
+    // Hard condition from independent review: the dry lane must run with no
+    // model secrets in its environment at all, not merely ignore them.
+    const present = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY", "OPENROUTER_API_KEY"].filter(
+      (name) => !!process.env[name],
+    );
+    if (present.length) {
+      throw new Error(`dry lane must run with no model keys set; found: ${present.join(", ")}`);
+    }
+    return;
+  }
   if (lane === "paid") {
     if (!openaiKey) throw new Error("OPENAI_API_KEY is required for the builder");
     if (!anthropicKey) throw new Error("ANTHROPIC_API_KEY is required for the independent Judge");

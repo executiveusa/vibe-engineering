@@ -354,6 +354,21 @@ test('workflow ships automation OFF and keeps the dry lane off the target (workf
   // Clone-time flag-safety guard present
   assert.match(wf, /bad TARGET_REPOSITORY/);
   assert.match(wf, /bad TARGET_BRANCH/);
+  // Dry lane gets NO model secrets: positive non-dry predicate only; the
+  // inverse pattern (lane==dry && '' || secrets.X) must never appear.
+  for (const key of ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY', 'OPENROUTER_API_KEY']) {
+    assert.match(wf, new RegExp(`${key}: \\$\\{\\{ vars\\.VIBE_MODEL_LANE != 'dry' && secrets\\.${key} \\|\\| '' \\}\\}`));
+  }
+  assert.ok(!/VIBE_MODEL_LANE == 'dry' && ''/.test(wf), 'fallback-to-secret pattern must not exist');
+  // Fleet token read-only verification on the target runs before the clone
+  assert.match(wf, /Verify the fleet token is read-only on the target/);
+  assert.match(wf, /dry lane requires a read-only fleet token on the target/);
+});
+
+test('the dry lane refuses to start with any model key set (runner source pin)', () => {
+  const runner = readFileSync(path.join(repoRoot, 'factory', 'run-readiness-sandcastle.mts'), 'utf8');
+  assert.match(runner, /dry lane must run with no model keys set/);
+  assert.ok(!/Default is FREE/.test(runner), 'stale free-default comment removed');
 });
 
 test('the dry commit contract: staged normally, empty-with-evidence when the target ignores docs/', () => {
