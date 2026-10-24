@@ -182,6 +182,7 @@ const reviewer = () =>
 const brokerEvents: { model?: string; served_model?: string; ok?: boolean }[] = [];
 let broker: { close: () => Promise<void>; runToken: string } | null = null;
 let brokerEnv: Record<string, string> = {};
+let brokerBaseUrl = ""; // http://host:port/v1 the sandbox must talk to
 if (lane === "free") {
   const { createBroker } = await import("./free-broker.mjs");
   const strip = (m: string) => m.replace(/^openrouter\//, "");
@@ -191,6 +192,7 @@ if (lane === "free") {
     onEvent: (e: { model?: string; served_model?: string; ok?: boolean }) => brokerEvents.push(e),
   }) as unknown as { close: () => Promise<void>; runToken: string };
   const bound = await (broker as unknown as { listen: () => Promise<{ port: number; host: string }> }).listen();
+  brokerBaseUrl = `http://${bound.host}:${bound.port}/v1`;
   const cfgPath = path.join(process.cwd(), ".vibe-factory", "opencode.factory.json");
   fs.writeFileSync(cfgPath, JSON.stringify({
     $schema: "https://opencode.ai/config.json",
@@ -199,6 +201,24 @@ if (lane === "free") {
   brokerEnv = { OPENROUTER_API_KEY: broker.runToken, OPENCODE_CONFIG: cfgPath };
 } else if (lane === "paid") {
   brokerEnv = { OPENROUTER_API_KEY: openrouterKey as string }; // paid lane reviewer uses its own third-family key (no broker)
+}
+
+// Docker reachability preflight (critic r4): prove a container can actually
+// reach the broker BEFORE any agent runs - docker bridge assumptions are
+// verified, not hoped. A plain GET expects the broker's 404 (it only accepts
+// POST /v1/chat/completions with the run token); any other outcome = HOLD.
+if (lane === "free" && broker) {
+  const boundAddr = brokerBaseUrl.replace(/^http:\/\//, "").replace(/\/v1$/, "");
+  try {
+    execFileSync("docker", ["run", "--rm",
+      "node:22-alpine@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914",
+      "node", "-e",
+      `fetch('http://${boundAddr}/v1/chat/completions').then(r=>process.exit(r.status===404?0:1)).catch(()=>process.exit(1))`],
+      { stdio: "pipe", timeout: 60000 });
+  } catch (e) {
+    report("HOLD", { level: "broker-reachability", reasons: [`a container cannot reach the broker at ${boundAddr} - refusing to start agents`] });
+    throw new Error(`broker unreachable from a container at ${boundAddr}`);
+  }
 }
 
 const sandbox = await sandcastle.createSandbox({
@@ -220,6 +240,26 @@ const sandbox = await sandcastle.createSandbox({
 // records land in evidence/<base_sha>/ on the runner and are uploaded as the
 // factory-evidence-<run_id> artifact. Any chain break is a HOLD (fail closed).
 const wt = () => sandbox.worktreePath;
+// Project-config override guard (verified against the real opencode 1.19.4
+// binary tonight: a project opencode.json WINS over OPENCODE_CONFIG). A target
+// that points the openrouter provider anywhere but the broker would silently
+// un-broker the run; with only the worthless run token in the sandbox that
+// fails closed anyway, but we refuse LOUDLY instead of failing mysteriously.
+// Unparseable project config = unverifiable = same HOLD.
+if (lane === "free" && brokerEnv.OPENCODE_CONFIG) {
+  const brokerBase = brokerBaseUrl.replace(/\/v1$/, "");
+  for (const name of ["opencode.json", "opencode.jsonc"]) {
+    const pp = path.join(wt(), name);
+    if (!fs.existsSync(pp)) continue;
+    let override: unknown = "unparseable";
+    try { override = (JSON.parse(fs.readFileSync(pp, "utf8")) as { provider?: { openrouter?: { options?: { baseURL?: string } } } })?.provider?.openrouter?.options?.baseURL ?? null; }
+    catch { /* stays 'unparseable' */ }
+    if (override === "unparseable" || (typeof override === "string" && override && !override.startsWith(brokerBase))) {
+      report("HOLD", { level: "config-override", reasons: [`target ${name} ${override === "unparseable" ? "is unparseable (unverifiable)" : "overrides the openrouter baseURL away from the broker"} - refusing to run`] });
+      throw new Error(`target ${name} conflicts with the broker route`);
+    }
+  }
+}
 const headSha = () => execFileSync("git", ["-C", wt(), "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
 const baseSha = headSha();
 baseShaGlobal = baseSha;
