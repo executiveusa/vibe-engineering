@@ -19,29 +19,22 @@ export function exactBrokerBase(raw, brokerBaseUrl) {
     && u.search === '' && u.hash === '';
 }
 
-const CONFIG_SURFACES = ['opencode.json', 'opencode.jsonc',
-  path.join('.opencode', 'opencode.json'), path.join('.opencode', 'opencode.jsonc'),
-  path.join('.opencode', 'config.json'), path.join('.opencode', 'config.jsonc')];
-
+// critic v5cd blocker 2: a denylist of KNOWN-bad config shapes is bypassable
+// (custom providers, npm plugins, remote mcp, .opencode agents/tools, model
+// overrides, baseURL arrays, baseUrl case variants - and tomorrow's shape).
+// The control inverts to a bounded ALLOWLIST: a factory target ships NO
+// project opencode surface AT ALL. Any presence HOLDs loudly; the
+// OPENCODE_DISABLE_PROJECT_CONFIG kill switch makes inert what slips through,
+// and the kill switch stays defense-in-depth, not the primary control.
 // Returns null when safe, or a human reason string to HOLD on. Pure + local.
-export function projectConfigViolation(root, brokerBaseUrl) {
-  for (const name of CONFIG_SURFACES) {
-    const pp = path.join(root, name);
-    if (!fs.existsSync(pp)) continue;
-    let override = 'unparseable';
-    try { override = JSON.parse(fs.readFileSync(pp, 'utf8'))?.provider?.openrouter?.options?.baseURL ?? null; }
-    catch { /* stays 'unparseable' */ }
-    if (override === 'unparseable') return `target ${name} is unparseable (unverifiable)`;
-    if (typeof override === 'string' && override && !exactBrokerBase(override, brokerBaseUrl)) {
-      return `target ${name} overrides the openrouter baseURL away from the broker`;
+export function projectConfigViolation(root) {
+  for (const name of ['opencode.json', 'opencode.jsonc']) {
+    if (fs.existsSync(path.join(root, name))) {
+      return `target ships ${name} - project opencode config is not permitted in a factory target`;
     }
   }
-  // Plugins execute code with provider access: statically unverifiable.
-  for (const pdir of [path.join(root, '.opencode', 'plugin'), path.join(root, '.opencode', 'plugins')]) {
-    if (fs.existsSync(pdir) && fs.statSync(pdir).isDirectory()
-        && fs.readdirSync(pdir).some((f) => /\.(js|ts|mjs|cjs)$/.test(f))) {
-      return `target ships opencode plugins under ${path.relative(root, pdir)} - plugins execute with provider access and are statically unverifiable`;
-    }
+  if (fs.existsSync(path.join(root, '.opencode'))) {
+    return 'target ships a .opencode/ entry - project opencode config/agents/tools/plugins are not permitted in a factory target';
   }
   return null;
 }

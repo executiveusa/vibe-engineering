@@ -254,7 +254,7 @@ const wt = () => sandbox.worktreePath;
 // (critic v4 finding 1), per-stage + all surfaces + plugins (finding 2).
 const assertProjectConfigSafe = (when: string) => {
   if (lane !== "free" || !brokerEnv.OPENCODE_CONFIG) return;
-  const why = projectConfigViolation(wt(), brokerBaseUrl);
+  const why = projectConfigViolation(wt());
   if (why) {
     report("HOLD", { level: "config-override", reasons: [`${why} (${when}) - refusing to run`] });
     throw new Error(`${why} (${when})`);
@@ -368,7 +368,7 @@ try {
   }
 
   // Chain check BEFORE trusting any receipt: a broken chain is a HOLD.
-  const index = writeIndex(evidenceDir, baseSha, process.env.GITHUB_RUN_ID || "local");
+  const index = writeIndex(evidenceDir, baseSha, process.env.GITHUB_RUN_ID || "local", { lane });
   finalOutputSha = (index.finalSha as string) || "";
   if (!index.ok) {
     report("HOLD", { level: "evidence-chain", reasons: [index.reason as string] });

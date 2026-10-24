@@ -44,7 +44,14 @@ export const REQUIRED_STAGES = ['audit', 'prd', 'build', 'review', 'judge']; // 
 export const STAGE_ROLE = { audit: 'builder', prd: 'builder', build: 'builder', 'build-fix': 'builder', review: 'reviewer', judge: 'judge' };
 const DRY_FAMILY = 'dry'; // the dry lane uses one deterministic agent; no model families exist to be independent
 
-export function verifyChain(dir, baseSha) {
+export function verifyChain(dir, baseSha, opts = {}) {
+  // critic v5cd blocker 1: the dry exemption must be RUNNER-OWNED. Records
+  // used to exempt themselves by claiming model_family 'dry' - a forged chain
+  // of real-model records with dry families passed every non-dry check. Now
+  // the LANE comes from the runner (opts.lane), and the dry lane pins a fixed
+  // agent identity: only 'dry-agent' records may ride the exemption. An
+  // unknown lane gets the strictest (non-dry) reading.
+  const lane = opts.lane || null;
   if (!existsSync(dir)) return { ok: false, reason: `no evidence dir for ${dir}` };
   const files = readdirSync(dir).filter(f => /^\d+-[a-z-]+\.json$/.test(f) && f !== 'index.json').sort();
   if (!files.length) return { ok: false, reason: 'no stage records' };
@@ -100,7 +107,16 @@ export function verifyChain(dir, baseSha) {
   // checked from the RECORDS, so a config-side collapse cannot slip past.
   // The dry lane (all families 'dry') has no models and is exempt.
   const fams = Object.values(roleFamilies);
-  if (fams.length && !fams.every(f => f === DRY_FAMILY)) {
+  if (lane === 'dry') {
+    // Dry lane: fixed identity, nothing else. A single record claiming a real
+    // model or a non-dry family breaks the chain.
+    for (const f of files) {
+      const r = JSON.parse(readFileSync(path.join(dir, f), 'utf8'));
+      if (r.model !== 'dry-agent' || r.model_family !== DRY_FAMILY) {
+        return { ok: false, breakAt: f, reason: `dry lane pins the fixed dry-agent identity; record claims ${r.model}/${r.model_family}` };
+      }
+    }
+  } else if (fams.length) {
     const need = ['builder', 'reviewer', 'judge'];
     for (const role of need) if (!roleFamilies[role]) return { ok: false, reason: `no ${role} stage family recorded` };
     const distinct = new Set(need.map(r => roleFamilies[r]));
@@ -138,8 +154,8 @@ export function verifyChain(dir, baseSha) {
   return { ok: true, finalSha: prev, stages: files.length };
 }
 
-export function writeIndex(dir, baseSha, runId) {
-  const v = verifyChain(dir, baseSha);
+export function writeIndex(dir, baseSha, runId, opts = {}) {
+  const v = verifyChain(dir, baseSha, opts);
   const index = { base_sha: baseSha, run_id: String(runId), verified_at: new Date().toISOString(), ...v };
   mkdirSync(dir, { recursive: true });
   writeFileSync(path.join(dir, 'index.json'), JSON.stringify(index, null, 2) + '\n');

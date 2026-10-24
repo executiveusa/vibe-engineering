@@ -95,28 +95,28 @@ const fullChain = (dir) => {
 test('chain verifies a clean full run and fails closed on any break', () => {
   const dir = mkdtempSync(path.join(tmpdir(), 'ev-'));
   fullChain(dir);
-  const ok = verifyChain(dir, BASE);
+  const ok = verifyChain(dir, BASE, { lane: 'free' });
   assert.equal(ok.ok, true); assert.equal(ok.finalSha, S6); assert.equal(ok.stages, 5);
-  const idx = writeIndex(dir, BASE, 'run-1');
+  const idx = writeIndex(dir, BASE, 'run-1', { lane: 'free' });
   assert.equal(idx.ok, true);
   // break the link
   put(dir, 6, rec('build-fix', 'f'.repeat(40), '0'.repeat(40)));
-  assert.match(verifyChain(dir, BASE).reason, /build-fix out of position|chain break/);
+  assert.match(verifyChain(dir, BASE, { lane: 'free' }).reason, /build-fix out of position|chain break/);
   // non-ok stage fails closed
   const dir2 = mkdtempSync(path.join(tmpdir(), 'ev-'));
   fullChain(dir2);
   put(dir2, 4, { ...rec('review', S4, S5), status: 'failed' });
-  assert.equal(verifyChain(dir2, BASE).ok, false);
+  assert.equal(verifyChain(dir2, BASE, { lane: 'free' }).ok, false);
   // missing dir / empty dir
-  assert.equal(verifyChain(path.join(dir2, 'nope'), BASE).ok, false);
+  assert.equal(verifyChain(path.join(dir2, 'nope'), BASE, { lane: 'free' }).ok, false);
   const dir3 = mkdtempSync(path.join(tmpdir(), 'ev-'));
-  assert.equal(verifyChain(dir3, BASE).ok, false);
+  assert.equal(verifyChain(dir3, BASE, { lane: 'dry' }).ok, false);
 });
 
 test('a lone well-formed judge record is NOT a chain (fake-judge attack)', () => {
   const dir = mkdtempSync(path.join(tmpdir(), 'ev-'));
   put(dir, 1, rec('judge', BASE, S2));
-  const v = verifyChain(dir, BASE);
+  const v = verifyChain(dir, BASE, { lane: 'free' });
   assert.equal(v.ok, false); assert.match(v.reason, /stage sequence broken/);
 });
 
@@ -128,27 +128,27 @@ test('build-fix is legal between review and judge; missing stages fail', () => {
   put(dir, 4, rec('review', S4, S5));
   put(dir, 5, rec('build-fix', S5, S4)); // fix produces a new tree
   put(dir, 6, rec('judge', S4, S6));
-  assert.equal(verifyChain(dir, BASE).ok, true);
+  assert.equal(verifyChain(dir, BASE, { lane: 'free' }).ok, true);
   const dir2 = mkdtempSync(path.join(tmpdir(), 'ev-'));
   put(dir2, 1, rec('audit', BASE, S2));
   put(dir2, 2, rec('prd', S2, S3));
-  const v = verifyChain(dir2, BASE);
+  const v = verifyChain(dir2, BASE, { lane: 'free' });
   assert.equal(v.ok, false); assert.match(v.reason, /missing stages: build, review, judge/);
 });
 
 test('the verifier REHASHES stage logs: missing or tampered logs fail closed', () => {
   const dir = mkdtempSync(path.join(tmpdir(), 'ev-'));
   fullChain(dir);
-  assert.equal(verifyChain(dir, BASE).ok, true);
+  assert.equal(verifyChain(dir, BASE, { lane: 'free' }).ok, true);
   // tamper with one log after the records were written
   writeFileSync(path.join(dir, 'logs', '03-build.log'), 'attacker-edited log\n');
-  const v = verifyChain(dir, BASE);
+  const v = verifyChain(dir, BASE, { lane: 'free' });
   assert.equal(v.ok, false); assert.match(v.reason, /log_sha256 does not match/);
   // missing log
   const dir2 = mkdtempSync(path.join(tmpdir(), 'ev-'));
   fullChain(dir2);
   unlinkSync(path.join(dir2, 'logs', '04-review.log'));
-  const v2 = verifyChain(dir2, BASE);
+  const v2 = verifyChain(dir2, BASE, { lane: 'free' });
   assert.equal(v2.ok, false); assert.match(v2.reason, /stage log missing/);
 });
 
@@ -157,20 +157,20 @@ test('family independence is verified from the chain records themselves', () => 
   fullChain(dir);
   // collapse judge into the reviewer's family
   put(dir, 5, { ...rec('judge', S5, S6), model: 'fr/x:free', model_family: 'fr', served_models: ['fr/x:free'] });
-  const v = verifyChain(dir, BASE);
+  const v = verifyChain(dir, BASE, { lane: 'free' });
   assert.equal(v.ok, false); assert.match(v.reason, /three distinct families/);
   // a mid-run family swap inside one role is a break
   const dir2 = mkdtempSync(path.join(tmpdir(), 'ev-'));
   fullChain(dir2);
   put(dir2, 3, { ...rec('build', S3, S4), model: 'zz/x:free', model_family: 'zz', served_models: ['zz/x:free'] });
-  const v2 = verifyChain(dir2, BASE);
+  const v2 = verifyChain(dir2, BASE, { lane: 'free' });
   assert.equal(v2.ok, false); assert.match(v2.reason, /changed family mid-run/);
   // the dry lane (all families 'dry') is exempt - no models exist there
   const dir3 = mkdtempSync(path.join(tmpdir(), 'ev-'));
   const dryRec = (stage, i, o) => ({ ...rec(stage, i, o), model: 'dry-agent', model_family: 'dry', served_models: [] });
   put(dir3, 1, dryRec('audit', BASE, S2)); put(dir3, 2, dryRec('prd', S2, S3));
   put(dir3, 3, dryRec('build', S3, S4)); put(dir3, 4, dryRec('review', S4, S5)); put(dir3, 5, dryRec('judge', S5, S6));
-  assert.equal(verifyChain(dir3, BASE).ok, true);
+  assert.equal(verifyChain(dir3, BASE, { lane: 'dry' }).ok, true);
 });
 
 test('resolve_ref: every stage references the same :free listing hash (0018 rule 3)', () => {
@@ -185,13 +185,13 @@ test('resolve_ref: every stage references the same :free listing hash (0018 rule
   put(dir, 4, { ...rec('review', S4, S5), resolve_ref: L });
   put(dir, 5, { ...rec('judge', S5, S6), resolve_ref: L });
   writeFileSync(path.join(dir, 'resolve-receipt.json'), JSON.stringify({ listing_sha256: L, fetched_at: '2026-10-24T00:00:00Z', resolved: {} }) + '\n');
-  assert.equal(verifyChain(dir, BASE).ok, true, 'single consistent resolve_ref passes');
+  assert.equal(verifyChain(dir, BASE, { lane: 'free' }).ok, true, 'single consistent resolve_ref passes');
   // a second stage with a DIFFERENT listing hash breaks the chain
   const dir2 = mkdtempSync(path.join(tmpdir(), 'ev-'));
   fullChain(dir2);
   put(dir2, 4, { ...rec('review', S4, S5), resolve_ref: L });
   put(dir2, 5, { ...rec('judge', S5, S6), resolve_ref: '8'.repeat(64) });
-  const v = verifyChain(dir2, BASE);
+  const v = verifyChain(dir2, BASE, { lane: 'free' });
   assert.equal(v.ok, false); assert.match(v.reason, /resolve_ref differs/);
   // malformed ref fails record validation
   assert.match(validateStageRecord({ ...rec('judge', S5, S6), resolve_ref: 'zz' }), /resolve_ref/);
@@ -202,7 +202,7 @@ test('non-dry records WITHOUT served_models fail closed (unobserved calls)', () 
   put(dir, 1, { ...rec('audit', BASE, S2), served_models: [] });
   put(dir, 2, rec('prd', S2, S3)); put(dir, 3, rec('build', S3, S4));
   put(dir, 4, rec('review', S4, S5)); put(dir, 5, rec('judge', S5, S6));
-  const v = verifyChain(dir, BASE);
+  const v = verifyChain(dir, BASE, { lane: 'free' });
   assert.equal(v.ok, false); assert.match(v.reason, /no served_models/);
 });
 
@@ -210,10 +210,10 @@ test('served-model binding: recorded served ids must equal the declared model', 
   const dir = mkdtempSync(path.join(tmpdir(), 'ev-'));
   fullChain(dir);
   put(dir, 5, { ...rec('judge', S5, S6), served_models: ['fj/x:free'] });
-  assert.equal(verifyChain(dir, BASE).ok, true, 'matching served model passes');
+  assert.equal(verifyChain(dir, BASE, { lane: 'free' }).ok, true, 'matching served model passes');
   const dir2 = mkdtempSync(path.join(tmpdir(), 'ev-'));
   fullChain(dir2);
   put(dir2, 5, { ...rec('judge', S5, S6), served_models: ['openai/gpt-5'] });
-  const v = verifyChain(dir2, BASE);
+  const v = verifyChain(dir2, BASE, { lane: 'free' });
   assert.equal(v.ok, false); assert.match(v.reason, /served model openai\/gpt-5 != declared/);
 });
