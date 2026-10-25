@@ -1,3 +1,13 @@
+const HOUSE_GROWTH_CONTROLS = Object.freeze([
+  "Read and obey the canonical Vibe Engineering House Skill and project-local ICM/owner rules before performing any task.",
+  "Default to read-only inspection. Separate verified facts from assumptions and cite actual evidence; never invent results.",
+  "No spending, public publishing, client/partner contact, account changes, data collection, live-site changes or channel messages without explicit owner authorization for that exact action.",
+  "All automations start OFF; for Digital Home engagements never execute email actions, including drafts, sending, replies or sequences.",
+  "Use consented minimal data; maintain strict client separation, intellectual-property rights, safety, accessibility and local venue permissions.",
+  "Builder cannot self-approve. Require independent review, House Judge decision and tested rollback before any production/public release.",
+  "Do not claim live visibility, virality, conversion gains or revenue without exact-campaign, observed proof."
+]);
+
 export const CONTAGIOUS_SKILLS = Object.freeze([
   {
     "id": "contagious-campaign-director",
@@ -232,4 +242,4 @@ export const CONTAGIOUS_SKILLS = Object.freeze([
     ],
     "attribution": "Handcrafted Vibe Engineering adaptation of Jonah Berger's STEPPS framework (Contagious, 2013)."
   }
-].map(Object.freeze));
+].map((skill) => Object.freeze({ ...skill, steps: Object.freeze([...HOUSE_GROWTH_CONTROLS, ...skill.steps]) })));
