@@ -9,6 +9,7 @@ import {
   msUntilNextBeat,
 } from './music-timeline';
 import './studio.css';
+import { CONTAGIOUS_SKILLS } from './skills/contagious.mjs';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -499,6 +500,24 @@ function App() {
           <h2>Image.<br />Video.<br />SaaS.<br /><em>Design.</em></h2>
           <div className="make-copy"><p>The output changes. The discipline does not. Each workflow is designed to create a repeatable process that is easy to use with any capable agent or LLM you choose.</p><div className="mini-flow"><span>TELL IT</span><b>→</b><span>SET THE BAR</span><b>→</b><span>MAKE IT</span><b>→</b><span>PROVE IT</span></div></div>
           <OutputPosters />
+        </div>
+      </section>
+
+
+      <section className="handcrafted-growth" id="handcrafted-skills" aria-labelledby="handcrafted-title">
+        <div className="handcrafted-shell">
+          <p className="handcrafted-kicker">06 / HANDCRAFTED SKILLS</p>
+          <h2 id="handcrafted-title">Methods you can <em>inspect.</em></h2>
+          <p>Ten original Vibe Engineering growth procedures. Free to read, adapt and verify.</p>
+          <div className="handcrafted-grid">
+            {CONTAGIOUS_SKILLS.map((skill, index) => (
+              <a className="handcrafted-card" key={skill.id} href={`${REPO}/blob/main/skills/${skill.id}/SKILL.md`} target="_blank" rel="noreferrer">
+                <span>{String(index + 1).padStart(2, '0')} / GROWTH</span>
+                <h3>{skill.title}</h3><p>{skill.summary}</p><b>Read the skill ↗</b>
+              </a>
+            ))}
+          </div>
+          <a className="handcrafted-more" href="/api/v1/skills">Explore all skills ↗</a>
         </div>
       </section>
 
