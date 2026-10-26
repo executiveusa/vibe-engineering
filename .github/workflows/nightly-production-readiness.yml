@@ -28,20 +28,29 @@ jobs:
   select:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.batch.outputs.matrix }}
-      has_targets: ${{ steps.batch.outputs.has_targets }}
+      matrix: ${{ steps.batch.outputs.matrix || steps.starnet.outputs.matrix }}
+      has_targets: ${{ steps.batch.outputs.has_targets || steps.starnet.outputs.has_targets }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
       - id: batch
+        if: ${{ vars.VIBE_TARGET_SOURCE != 'starnet' }}
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
           TARGET_REPOSITORY_IN: ${{ inputs.target_repository }}
           TARGET_BRANCH_IN: ${{ inputs.target_branch }}
         run: node scripts/select-nightly-vercel-batch.mjs
+      # StarNet source (pauli-starnet starnet-v2/06): the day's repos come from the gateway's intake queue, which
+      # Instinct fills after the captain's grill. Queued rows only; assumed-answer rows wait for the captain.
+      - id: starnet
+        if: ${{ vars.VIBE_TARGET_SOURCE == 'starnet' }}
+        env:
+          STARNET_GATEWAY_URL: ${{ vars.STARNET_GATEWAY_URL }}
+          STARNET_GATEWAY_TOKEN: ${{ secrets.STARNET_GATEWAY_TOKEN }}
+        run: node scripts/select-starnet-intake.mjs
 
   audit-prd-build-review:
     needs: select

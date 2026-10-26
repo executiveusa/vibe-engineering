@@ -1,0 +1,124 @@
+name: Factory preview deploy (separate deploy step)
+
+# pauli-starnet PRD section 8, "safe VPS access": after the Judge says SHIP and the security district passed, THIS
+# workflow - not the build job, not any agent - deploys the exact judged commit to the private VPS preview area.
+# - Its own environment (vibe-preview) holds the deploy-only credential; the owner can require a reviewer on that
+#   environment, which makes every deploy the one-tap yellow approval.
+# - No model keys exist here and no agent runs here.
+# - The GitHub token is used read-only to clone, in a step that never sees the deploy credential.
+# Going live publicly is red and is never done here.
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_repository:
+        { description: 'owner/repo the factory built', required: true, type: string }
+      target_branch:
+        {
+          description: 'the factory branch holding the judged commit and receipts',
+          required: true,
+          type: string,
+        }
+      judged_commit:
+        { description: 'full 40-character sha the Judge reviewed', required: true, type: string }
+      security_runs:
+        {
+          description: 'comma list of the two security run receipts in the target, e.g. docs/evidence/<sha>/07-security-run-1.json,...',
+          required: true,
+          type: string,
+        }
+      intake_id:
+        {
+          description: 'StarNet intake id to report back to (optional)',
+          required: false,
+          type: string,
+        }
+
+concurrency:
+  group: factory-preview-deploy-${{ inputs.target_repository }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: vibe-preview
+    env:
+      TARGET_REPOSITORY: ${{ inputs.target_repository }}
+      TARGET_BRANCH: ${{ inputs.target_branch }}
+      JUDGED_COMMIT: ${{ inputs.judged_commit }}
+      SECURITY_RUNS: ${{ inputs.security_runs }}
+      INTAKE_ID: ${{ inputs.intake_id }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          path: control
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Guard inputs
+        run: |
+          case "$TARGET_REPOSITORY" in -*|*[!A-Za-z0-9_./-]*|*//*|/*|*/) echo "bad TARGET_REPOSITORY" >&2; exit 1 ;; esac
+          case "$TARGET_BRANCH" in -*|*[!A-Za-z0-9_./-]*|*..*) echo "bad TARGET_BRANCH" >&2; exit 1 ;; esac
+          echo "$JUDGED_COMMIT" | grep -Eq '^[0-9a-f]{40}$' || { echo "judged_commit must be a full sha" >&2; exit 1; }
+          echo "$SECURITY_RUNS" | grep -Eq '^docs/evidence/[0-9a-f]{40}/[A-Za-z0-9_.-]+\.json(,docs/evidence/[0-9a-f]{40}/[A-Za-z0-9_.-]+\.json)+$' || { echo "security_runs must list the receipts under docs/evidence/<sha>/" >&2; exit 1; }
+          case "$INTAKE_ID" in ""|intake-[0-9-]*) ;; *) echo "bad intake_id" >&2; exit 1 ;; esac
+      - name: Verify the fleet token is read-only, then clone the judged branch
+        env:
+          GH_TOKEN: ${{ secrets.FLEET_GITHUB_TOKEN }}
+        run: |
+          perms=$(gh api "repos/$TARGET_REPOSITORY" --jq '.permissions')
+          push=$(echo "$perms" | jq -r '.push'); admin=$(echo "$perms" | jq -r '.admin')
+          if [ "$push" != "false" ] || [ "$admin" != "false" ]; then echo "fleet token is not read-only (push=$push admin=$admin)" >&2; exit 1; fi
+          gh repo clone "$TARGET_REPOSITORY" target -- --branch "$TARGET_BRANCH"
+          head=$(git -C target rev-parse HEAD)
+          [ "$head" = "$JUDGED_COMMIT" ] || { echo "branch head $head is not the judged commit" >&2; exit 1; }
+          git -C target remote set-url origin "https://github.com/$TARGET_REPOSITORY"   # drop any stored credential
+      - id: deploy
+        name: Deploy the judged commit to the private preview (deploy-only credential)
+        working-directory: target
+        env:
+          VIBE_PREVIEW_DEPLOY_TOKEN: ${{ secrets.VIBE_PREVIEW_DEPLOY_TOKEN }}
+          VIBE_PREVIEW_ACCESS: ${{ secrets.VIBE_PREVIEW_ACCESS }}
+          VIBE_PREVIEW_COOLIFY_URL: ${{ vars.VIBE_PREVIEW_COOLIFY_URL }}
+          VIBE_PREVIEW_APP_UUID: ${{ vars.VIBE_PREVIEW_APP_UUID }}
+          VIBE_PREVIEW_URL: ${{ vars.VIBE_PREVIEW_URL }}
+          VIBE_PREVIEW_LIVE_PATHS: ${{ vars.VIBE_PREVIEW_LIVE_PATHS }}
+          VIBE_MODEL_LANE: ${{ vars.VIBE_MODEL_LANE }}
+          VIBE_BUILDER_MODEL: ${{ vars.VIBE_BUILDER_MODEL }}
+          VIBE_JUDGE_MODEL: ${{ vars.VIBE_JUDGE_MODEL }}
+          SECURITY_RUN_FILES: ${{ inputs.security_runs }}
+        run: node ../control/factory/deploy-preview.mjs
+      - id: verdict
+        name: Exit bar
+        if: ${{ always() }}
+        working-directory: target
+        env:
+          VIBE_MODEL_LANE: ${{ vars.VIBE_MODEL_LANE }}
+          VIBE_BUILDER_MODEL: ${{ vars.VIBE_BUILDER_MODEL }}
+          VIBE_JUDGE_MODEL: ${{ vars.VIBE_JUDGE_MODEL }}
+          SECURITY_RUN_FILES: ${{ inputs.security_runs }}
+          DEPLOY_RECEIPT_FILE: docs/evidence/${{ inputs.judged_commit }}/08-deploy.json
+        run: |
+          mkdir -p "docs/evidence/$JUDGED_COMMIT"
+          cp docs/evidence/production-readiness-judge.json "docs/evidence/$JUDGED_COMMIT/06-judge.json" 2>/dev/null || true
+          node ../control/scripts/exit-verdict.mjs
+      - name: Keep the receipts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: factory-exit-${{ inputs.judged_commit }}
+          path: target/docs/evidence/${{ inputs.judged_commit }}/
+          if-no-files-found: warn
+      - name: Report the verdict to the StarNet intake
+        if: ${{ always() && inputs.intake_id != '' }}
+        env:
+          STARNET_GATEWAY_URL: ${{ vars.STARNET_GATEWAY_URL }}
+          STARNET_GATEWAY_TOKEN: ${{ secrets.STARNET_GATEWAY_TOKEN }}
+          EXIT_DECISION: ${{ steps.verdict.outputs.decision }}
+        run: |
+          last=$(echo "$SECURITY_RUNS" | tr ',' '\n' | tail -1 | sed 's#^docs/##')
+          SECURITY_RECEIPT="$last" node control/scripts/report-starnet-intake.mjs
