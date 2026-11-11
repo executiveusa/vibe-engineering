@@ -1,5 +1,14 @@
 name: Vibe Code Review
 
+# Review execution policy:
+# - For same-repository PRs, invoke the reviewed, immutable OCR workflow below.
+# - Fork and Dependabot pull_request runs are not given repository secrets by
+#   GitHub; their review intentionally fails closed until a separate trusted,
+#   maintainer-approved review path is implemented. NEVER replace this event
+#   with pull_request_target while processing untrusted PR code.
+# - The pinned reusable workflow already defines a 30-minute job timeout and
+#   per-PR cancellation; the caller also prevents overlapping invocations.
+
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
@@ -8,6 +17,10 @@ permissions:
   contents: read
   pull-requests: write
   issues: write
+
+concurrency:
+  group: vibe-review-caller-${{ github.repository }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   review:
