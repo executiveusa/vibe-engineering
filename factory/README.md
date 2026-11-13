@@ -36,3 +36,24 @@ Use a trusted self-hosted Linux runner with Docker. Configure repository secrets
 - `FLEET_GITHUB_TOKEN`
 
 The GitHub token must have access to the target repositories and permission to create branches, issues, and pull requests. Secrets must never be written into audit artifacts, prompts, logs, commits, or PR bodies.
+
+## StarNet lane (exit bar + separate deploy step)
+
+Set repository variable `VIBE_TARGET_SOURCE=starnet` and the factory takes its repos from the StarNet gateway intake
+queue (`scripts/select-starnet-intake.mjs`; `STARNET_GATEWAY_URL` variable + `STARNET_GATEWAY_TOKEN` secret) instead of
+the Vercel batch. Queued rows only; a row relying on an assumed grill answer waits for the captain.
+
+A StarNet product leaves the factory only through `factory/exit-bar.mjs`, for one commit:
+
+1. the Judge receipt is SHIP and fills `commit` + `exit_bar` (backend features PASS with tests, UDEC >= 8.5, zero AI-slop findings);
+2. two security district attack runs on that commit, no HIGH/CRITICAL, every MEDIUM fixed or captain-accepted;
+3. builder, Judge and security auditor are three different model families (builder/Judge from the lane settings, `factory/lane-models.mjs`);
+4. the separate deploy step put that commit on the private VPS preview and the preview serves it.
+
+The deploy step is its own workflow, `.github/workflows/factory-preview-deploy.yml`, in the `vibe-preview` environment.
+It holds the only deploy credential (`VIBE_PREVIEW_DEPLOY_TOKEN`, a Coolify API token for the preview area) and no
+model keys, and no agent runs there. It refuses unless the Judge and security receipts pass for the exact commit. It
+pins the Coolify app to the commit, deploys it, and requires the preview to serve that sha at `/.well-known/build-sha`,
+to refuse anonymous requests, and to pass the live tests. Then it writes `docs/evidence/<sha>/08-deploy.json` (no token,
+no host) and reports the verdict to the StarNet intake. Requiring a reviewer on the `vibe-preview` environment makes
+each deploy a one-tap approval. Public go-live is never done here.
