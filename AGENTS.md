@@ -79,6 +79,8 @@ For brownfield work, Step 0 inventories reality before restructuring or migratio
 
 Read only what the task requires, starting with:
 
+Before a task, read `skills/workflows/INDEX.md` and load only the matching workflow.
+
 1. `ICMR.yaml` when working inside a governed workspace;
 2. `CONTEXT.md`;
 3. `skills/vibe-engineering/SKILL.md` when method behavior matters;
