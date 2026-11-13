@@ -179,3 +179,25 @@ The owner must be able to understand, export, move, replace providers/builders, 
 The builder may explain and repair findings but cannot be the only reviewer approving its own work. Council provides independent challenge. Judge returns only `SHIP` or `HOLD`. Production release remains separately authorized and requires live target-environment verification after release.
 
 For material work, finish with `DECISION`, `CHANGES`, `PROOF`, `STATUS`, `COMMERCIAL IMPACT`, `RISKS`, `ROLLBACK`, `NEXT`, and `HUMAN APPROVAL` when required.
+
+<!-- trail:start -->
+## Trail — optional repo context graph
+
+The canonical ICM files remain the source of truth. Trail is an optional
+local index that can reduce code discovery time; it is **not** installed,
+initialized or available on every agent machine. Never assume a populated
+`.trail/cache/` or a session-start hook exists.
+
+If `trail` is installed, refresh the local gitignored index with
+`trail build` before using it:
+
+- `trail map` — directory clusters and call graph
+- `trail ask "<question>" --source` — ranked code references
+- `trail grep "<literal>" --fixed` — literal search without regex expansion
+- `trail skeleton <file>` / `trail callers <symbol>` — API and impact
+
+Without Trail, use normal repository search and the ICM route in this file.
+The `.trail/learnings/` directory is optional; commit only concise, verified,
+non-sensitive lessons needed by future sessions. Never store tokens or secrets.
+Install guidance: `npm i -g @trailhq/trail-code`.
+<!-- trail:end -->
