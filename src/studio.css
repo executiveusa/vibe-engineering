@@ -31,3 +31,22 @@ footer{display:flex;justify-content:space-between;gap:20px;padding:24px clamp(20
 @media(max-width:600px){.entry-gate{place-items:end stretch;padding:0}.entry-card{width:100%;min-height:72svh;padding:38px 20px max(28px,env(safe-area-inset-bottom));border-left:0;border-right:0;border-bottom:0}.entry-card h1{font-size:clamp(3.6rem,17vw,5.5rem)}.entry-actions{display:grid;grid-template-columns:1fr}.entry-actions button{width:100%;min-height:52px}.journey-nav{padding:max(18px,env(safe-area-inset-top)) 16px 18px}.brand span{font-size:12px}.hero-lockup{padding-left:16px;padding-right:16px;padding-bottom:104px}.hero-lockup h1{font-size:clamp(3.8rem,18.5vw,5.7rem);line-height:.86}.hero-lockup .hero-copy{font-size:1.1rem}.hero-actions{align-items:flex-start;flex-direction:column}.primary-cta{min-height:48px}.scene-shell{padding-left:16px;padding-right:16px}.scene-copy h2{font-size:clamp(3.15rem,15vw,5rem)}.scene-visual{min-height:430px;width:calc(100% - 8px)}.comic-caption{left:12px;top:12px;max-width:calc(100% - 24px);font-size:9px;letter-spacing:.08em}.world-svg{width:108%}.bar-visual{width:92%}.reference-panel,.compare-card{padding:18px}.compare-stack{grid-template-columns:1fr}.icm-visual{width:120%;height:420px;transform:scale(.7)}.folder{width:230px}.proof-visual{width:116%;height:430px;transform:scale(.72)}.make-anything{padding:96px 0}.make-shell{padding-left:16px;padding-right:16px}.make-shell h2{font-size:clamp(3.9rem,16vw,5.8rem)}.output-posters{grid-template-columns:1fr;gap:18px}.output-poster{min-height:320px;box-shadow:5px 5px 0 var(--ink)}.poster-art{min-height:210px}.open-source-close{padding-left:16px;padding-right:16px}.open-source-close code{white-space:normal;overflow-wrap:anywhere}footer{flex-direction:column;padding-bottom:calc(82px + env(safe-area-inset-bottom))}}
 @media(max-width:390px){.hero-lockup h1,.scene-copy h2,.make-shell h2,.open-source-close h2{letter-spacing:-.06em}.icm-visual{transform:scale(.62)}.proof-visual{transform:scale(.65)}}
 @media(prefers-reduced-motion:reduce){.sound-bars i,.beat-line i,.beat-reactive,.world-svg g,.proof-ring{animation:none!important;transform:none!important}.beat-flash{display:none}.scene-visual{transform:none!important}}
+
+/* Handcrafted skills; intentionally isolated from the motion hero. */
+.handcrafted-growth{padding:clamp(72px,9vw,136px) clamp(20px,5vw,72px);background:var(--paper);color:var(--ink)}
+.handcrafted-shell{max-width:1380px;margin:auto}
+.handcrafted-kicker,.handcrafted-card>span{font-size:10px;letter-spacing:.14em;font-weight:800;text-transform:uppercase}
+.handcrafted-kicker{color:var(--oxide-dark)}
+.handcrafted-shell h2{font-size:clamp(3.2rem,7vw,7rem);line-height:.95;letter-spacing:-.065em;margin:16px 0}
+.handcrafted-shell h2 em{font-family:Georgia,serif;color:var(--oxide-dark);font-weight:400}
+.handcrafted-shell>p{font-family:Georgia,serif;max-width:680px;font-size:clamp(1rem,1.6vw,1.35rem);line-height:1.5;margin-bottom:36px}
+.handcrafted-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid var(--line-dark);border-left:1px solid var(--line-dark)}
+.handcrafted-card{border-right:1px solid var(--line-dark);border-bottom:1px solid var(--line-dark);padding:clamp(24px,3vw,42px);display:flex;flex-direction:column;gap:12px;min-height:220px;transition:background 160ms ease,color 160ms ease}
+.handcrafted-card h3{font-size:clamp(1.5rem,2.2vw,2.2rem);letter-spacing:-.04em;margin:0}
+.handcrafted-card p{max-width:440px;opacity:.76;line-height:1.5;font-size:13px;margin:0}
+.handcrafted-card b{font-size:11px;color:var(--oxide-dark);margin-top:auto;text-transform:uppercase;letter-spacing:.06em}
+.handcrafted-card:hover,.handcrafted-card:focus-visible{background:var(--ink);color:var(--paper)}
+.handcrafted-card:hover b,.handcrafted-card:focus-visible b{color:var(--paper)}
+.handcrafted-more{display:inline-block;margin-top:28px;text-decoration:underline;text-underline-offset:5px}
+@media(max-width:700px){.handcrafted-grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.handcrafted-card{transition:none}}

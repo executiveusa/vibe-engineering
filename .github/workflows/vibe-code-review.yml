@@ -8,21 +8,38 @@ permissions:
   contents: read
   pull-requests: write
   issues: write
-  models: read
 
 jobs:
   review:
     if: github.event.pull_request.draft == false
-    uses: executiveusa/open-code-review/.github/workflows/vibe-review-standard.yml@main
-    with:
-      model: openai/gpt-4.1
-      review_concurrency: "3"
-      route_severity_below: low
-      route_categories: style,documentation
-      # NOTE: prompt-injection findings are reviewed under the `security` category
-      # (the engine has no separate injection category) and are never routed away
-      # from inline comments. TODO: the referenced reusable workflow
-      # executiveusa/open-code-review/.github/workflows/vibe-review-standard.yml@main
-      # does not exist in that repo - this gate currently errors until a reusable
-      # workflow is published there. Tracked; do not silently retarget.
-      upload_artifacts: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Verify review credentials are configured
+        shell: bash
+        env:
+          OCR_LLM_URL: ${{ secrets.OCR_LLM_URL }}
+          OCR_LLM_AUTH_TOKEN: ${{ secrets.OCR_LLM_AUTH_TOKEN }}
+          OCR_LLM_MODEL: ${{ secrets.OCR_LLM_MODEL }}
+        run: |
+          for name in OCR_LLM_URL OCR_LLM_AUTH_TOKEN OCR_LLM_MODEL; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing required OpenCodeReview configuration: $name"
+              exit 1
+            fi
+          done
+      # Use the actual upstream composite action, pinned to a reviewed commit.
+      # Never execute PR-head code with reviewer credentials.
+      - name: Run independent OpenCodeReview
+        uses: executiveusa/open-code-review@152cc6d585043d40c3674d9637a7a06bbd950610
+        with:
+          llm_url: ${{ secrets.OCR_LLM_URL }}
+          llm_auth_token: ${{ secrets.OCR_LLM_AUTH_TOKEN }}
+          llm_model: ${{ secrets.OCR_LLM_MODEL }}
+          llm_use_anthropic: 'false'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          review_concurrency: '3'
+          route_severity_below: low
+          route_categories: style,documentation
+          llm_extra_body: '{"enable_thinking":false}'
+          upload_artifacts: 'true'

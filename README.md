@@ -234,6 +234,15 @@ npm run factory:new -- --name "My Project" --mode greenfield
 - [`docs/agent-context.md`](docs/agent-context.md) — current repository context for agents.
 - [`skills/vibe-engineering/SKILL.md`](skills/vibe-engineering/SKILL.md) — canonical House router.
 
+## Handcrafted marketing skills
+
+Our [Contagious Guerrilla Growth collection](docs/skills/CONTAGIOUS-GROWTH.md) contains ten original, inspectable, niche-adaptive skills inspired by Jonah Berger's STEPPS and governed by Vibe's existing verification and release law. [View the skills in the public site's gallery](https://vibe-engineering-lime.vercel.app/#handcrafted-skills) after production deployment is verified.
+
+```bash
+npx --yes --package=github:executiveusa/vibe-engineering vibe skills
+npx --yes --package=github:executiveusa/vibe-engineering vibe skill contagious-campaign-director
+```
+
 ## Callable procedures
 
 The House Skill chooses the smallest procedure required by the current ICM stage. Core procedures include:
