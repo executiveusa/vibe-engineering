@@ -55,6 +55,15 @@ Some libraries sell optional MCP servers. They are not required; the prompt rout
 - Look: enterprise, corporate, Microsoft/Outlook-like.
 - Best for: admin consoles, data-dense enterprise tools, big component coverage including charts.
 
+### Astryx
+
+- Site: https://astryx.atmeta.com. Code: https://github.com/meta/astryx.
+- Stack: React 19+. Styles are authored in StyleX but that is invisible to consumers: override with `className` using Tailwind, CSS modules, or plain CSS. Pre-built CSS imports plus typed React components; no build plugin, PostCSS, or Babel config needed. `swizzle` ejects a component's full source into your project to own.
+- Cost/license: MIT (project LICENSE), free.
+- Look: neutral, production-grade enterprise system. Grew inside Meta over 8 years and powers 13,000+ Meta apps. 150+ accessible components, brand-level theming via CSS custom properties, dark mode, seven ready-made themes, templates.
+- Agent route: built for agents as well as people. The `@astryxdesign/cli` gives a coding agent the same machine-readable component docs, templates and theming commands a person gets; a global CLI install makes any coding agent Astryx-aware. Currently in beta; long-term governance and maintenance sit with Meta.
+- Best for: React 19 projects that want a complete, themeable design system with agent-fluent docs and low styling lock-in.
+
 ### Motion Primitives
 
 - Site: https://motion-primitives.com/docs.
@@ -76,5 +85,5 @@ Some libraries sell optional MCP servers. They are not required; the prompt rout
 
 - If you use one, use at most one component library per surface, recorded in the brief or spec. Choosing none is a valid outcome. The animation add-ons (Motion Primitives, Animate UI) may accompany the chosen library; they do not replace one.
 - The "look" and "best for" notes draw on one creator's comparison video (https://www.youtube.com/watch?v=K8Fwli2qd9A) and the libraries' own sites. Treat taste notes as opinion.
-- License, stack, and cost notes were checked against the projects' own repos and pages on 2026-11-13 (sources: the linked sites and each project's GitHub license record). Licenses and pricing change; confirm the current terms in the library's repo before shipping a paid product on it.
+- License, stack, and cost notes were checked against the projects' own repos and pages on 2026-11-13, Astryx on 2026-11-14 (sources: the linked sites and each project's GitHub license record). Licenses and pricing change; confirm the current terms in the library's repo before shipping a paid product on it.
 - No secrets, no purchases, no paid tiers from this file. Skills are guidance, never authority.
