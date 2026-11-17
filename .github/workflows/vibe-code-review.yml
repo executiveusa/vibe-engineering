@@ -13,16 +13,22 @@ permissions:
 jobs:
   review:
     if: github.event.pull_request.draft == false
-    uses: executiveusa/open-code-review/.github/workflows/vibe-review-standard.yml@main
-    with:
-      model: openai/gpt-4.1
-      review_concurrency: "3"
-      route_severity_below: low
-      route_categories: style,documentation
-      # NOTE: prompt-injection findings are reviewed under the `security` category
-      # (the engine has no separate injection category) and are never routed away
-      # from inline comments. TODO: the referenced reusable workflow
-      # executiveusa/open-code-review/.github/workflows/vibe-review-standard.yml@main
-      # does not exist in that repo - this gate currently errors until a reusable
-      # workflow is published there. Tracked; do not silently retarget.
-      upload_artifacts: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      # Existing reusable workflow no longer exists upstream; use its maintained
+      # composite action pinned to an exact reviewed upstream commit.
+      - name: Independent OpenCodeReview via GitHub Models
+        uses: executiveusa/open-code-review@6386895e7cfac419bd7a9cf4795e8b824a6e3ced
+        with:
+          llm_url: https://models.github.ai/inference/chat/completions
+          llm_auth_token: ${{ github.token }}
+          llm_model: openai/gpt-4.1
+          llm_use_anthropic: 'false'
+          llm_extra_body: '{}'
+          github_token: ${{ github.token }}
+          review_concurrency: '3'
+          route_severity_below: low
+          route_categories: style,documentation
+          upload_artifacts: 'true'
+          sticky_summary: 'true'
