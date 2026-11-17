@@ -692,5 +692,223 @@
     "candidateCommand": "ocr review --from <base> --to <candidate>",
     "independence": "Different agent, different model family; no self approval.",
     "judge": "SHIP or HOLD only after evidence and owner authority"
+  },
+  "localSkills": [
+    {
+      "id": "cook",
+      "title": "Cook / comparison gauntlet",
+      "workflow": "w5-web-design",
+      "when": "Only when a named visual bar, permitted budget and independent critics are required",
+      "path": "skills/cook/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "deep-work",
+      "title": "Deep Work",
+      "workflow": "w2-build",
+      "when": "When large tasks need bounded proof and completion gates",
+      "path": "skills/deep-work/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "event-activation-rsvp",
+      "title": "Event activation and RSVP",
+      "workflow": "w1-intake-to-spec",
+      "when": "When a bounded event or registration workflow is specified",
+      "path": "skills/event-activation-rsvp/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "grill-me-meeting-adapter",
+      "title": "Grill-me meeting adapter",
+      "workflow": "w1-intake-to-spec",
+      "when": "When intake comes from an existing meeting conversation",
+      "path": "skills/grill-me-meeting-adapter/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "grill",
+      "title": "Grill interview",
+      "workflow": "w1-intake-to-spec",
+      "when": "When a decision-changing unknown remains",
+      "path": "skills/grill/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "human-voice",
+      "title": "Human Voice",
+      "workflow": "w6-copy-and-voice",
+      "when": "When written content must preserve a real voice and verified claims",
+      "path": "skills/human-voice/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "icm-awwwards-taste-gauntlet-audit",
+      "title": "Awwwards design gauntlet",
+      "workflow": "w5-web-design",
+      "when": "For the mandatory website design challenge at Council",
+      "path": "skills/icm-awwwards-taste-gauntlet-audit/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "icmr-universal-compiler",
+      "title": "ICMR Universal Compiler",
+      "workflow": "w1-intake-to-spec",
+      "when": "Step 0 for correct project topology and stage selection",
+      "path": "skills/icmr-universal-compiler/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "loop-engineering",
+      "title": "Loop Engineering",
+      "workflow": "w2-build",
+      "when": "For bounded long-running execution with persisted handoff",
+      "path": "skills/loop-engineering/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "mobile-first-site-proof",
+      "title": "Mobile First Site Proof",
+      "workflow": "w3-proof-and-review",
+      "when": "When a web product needs real responsive/behavioral release evidence",
+      "path": "skills/mobile-first-site-proof/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "multiverse-proof",
+      "title": "Multiverse Proof",
+      "workflow": "w3-proof-and-review",
+      "when": "When stateful behavior needs seeded fault and recovery tests",
+      "path": "skills/multiverse-proof/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "project-review",
+      "title": "Project Review",
+      "workflow": "w3-proof-and-review",
+      "when": "Independent final security, bug, injection and system review",
+      "path": "skills/project-review/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "proof",
+      "title": "Proof",
+      "workflow": "w3-proof-and-review",
+      "when": "Any consequential completion or release claim",
+      "path": "skills/proof/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "setup-vibe",
+      "title": "Setup Vibe",
+      "workflow": "w1-intake-to-spec",
+      "when": "Before first changes to an existing governed repository",
+      "path": "skills/setup-vibe/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "ship",
+      "title": "Ship",
+      "workflow": "w4-ship-and-operate",
+      "when": "Only after Judge, owner and rollback gates pass",
+      "path": "skills/ship/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "stop-slop",
+      "title": "Stop Slop",
+      "workflow": "w6-copy-and-voice",
+      "when": "When reviewing generic defaults or unsupported claims",
+      "path": "skills/stop-slop/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "third-party/refero-design",
+      "title": "Refero Design",
+      "workflow": "w5-web-design",
+      "when": "When targeted external design references materially improve the brief",
+      "path": "skills/third-party/refero-design/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "third-party/starnet-refero-research",
+      "title": "StarNet Refero Research",
+      "workflow": "w5-web-design",
+      "when": "For its scoped design research workflow, not universal authority",
+      "path": "skills/third-party/starnet-refero-research/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "vibe-engineering",
+      "title": "Vibe House Skill",
+      "workflow": "w1-intake-to-spec",
+      "when": "Canonical method router, always authoritative",
+      "path": "skills/vibe-engineering/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "vibe",
+      "title": "Vibe alias",
+      "workflow": "w1-intake-to-spec",
+      "when": "Legacy/compatibility entry; defer to the canonical House Skill",
+      "path": "skills/vibe/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "visual-independence-governor",
+      "title": "Visual Independence Governor",
+      "workflow": "w5-web-design",
+      "when": "When a design must stay distinctive and on-brand",
+      "path": "skills/visual-independence-governor/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    }
+  ],
+  "sourceCoverage": {
+    "inRepositorySkills": 21,
+    "externalReferences": 22,
+    "workflowFiles": 9,
+    "policy": "The registry stores pointers only; original full skills and workflow source remain canonical and are read when invoked."
   }
 }
