@@ -66,3 +66,7 @@ OWNER: repo maintainer; merges and production release remain approval-gated.
 ROLLBACK: revert the isolated PR. No schemas, secrets or stage contracts are removed.
 
 A passing build or a PR is not production proof.
+
+## Automatic PR reviewer configuration
+
+The old `.github/workflows/vibe-code-review.yml` referenced a missing reusable workflow in the owner's OpenCodeReview fork and failed during GitHub Actions planning. The candidate PR replaces it with Alibaba's documented, pinned composite action and pinned CLI version. PRs are reviewed only after leaving draft status. No paid review is authorized unless the owner explicitly enables repo variable `VIBE_OCR_REVIEW_ENABLED=true`, sets `OCR_LLM_MODEL` and `OCR_LLM_USE_ANTHROPIC` variables, and supplies secrets `OCR_LLM_URL` and `OCR_LLM_AUTH_TOKEN`. The job fails with HOLD when configuration is absent, forks are used, or the action cannot review. The action is capped at 12,000 tokens with concurrency one; budget exhaustion/partial coverage is never sufficient to bypass Council or Judge. The official action is an execution adapter for the existing OCR engine, not a new review governance system.
