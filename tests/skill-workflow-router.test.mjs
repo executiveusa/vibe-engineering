@@ -20,7 +20,10 @@ test('nine existing workflows are indexed without loading procedure text', () =>
 
 test('source registry retains optional and quarantined upstream references', () => {
   const sources = listSkillSources();
-  assert.ok(sources.length >= 22);
+  assert.equal(sources.length, 43);
+  const local = sources.filter((source) => source.kind === 'in-repository');
+  assert.equal(local.length, 21);
+  for (const item of local) assert.ok(existsSync(item.path), item.path);
   assert.equal(new Set(sources.map((source) => source.id)).size, sources.length);
   assert.equal(sources.find((source) => source.id === 'impeccable').status, 'quarantined');
   assert.equal(sources.find((source) => source.id === 'design-ui-ux').status, 'unavailable');
@@ -143,4 +146,14 @@ test('automated PR review uses a pinned upstream action and fails closed without
   assert.match(workflow, /VIBE_OCR_REVIEW_ENABLED/);
   assert.match(workflow, /OCR_LLM_AUTH_TOKEN/);
   assert.match(workflow, /max_tokens_budget: '12000'/);
+});
+
+test('relevant in-repo skill paths are exposed as metadata without loading their bodies', () => {
+  const design = routeWorkflow({ workflowId: 'w5-web-design' });
+  assert.ok(design.availableLocalSkills.some((skill) => skill.id === 'icm-awwwards-taste-gauntlet-audit'));
+  assert.ok(design.availableLocalSkills.some((skill) => skill.id === 'cook'));
+  assert.ok(design.availableLocalSkills.every((skill) => skill.load === 'on-demand'));
+  const proof = routeWorkflow({ workflowId: 'w3-proof-and-review' });
+  assert.ok(proof.availableLocalSkills.some((skill) => skill.id === 'multiverse-proof'));
+  assert.ok(proof.availableLocalSkills.some((skill) => skill.id === 'project-review'));
 });
