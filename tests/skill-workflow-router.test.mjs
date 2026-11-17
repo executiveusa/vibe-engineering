@@ -68,7 +68,7 @@ test('independent reviewer must be a different model family', () => {
 });
 
 test('subagent is never claimed as dispatched without an authorized adapter', async () => {
-  const ready = routeWorkflow({ request: 'Audit repository', builderModel: 'Codex', reviewerModel: 'Gemini' });
+  const ready = routeWorkflow({ request: 'Audit repository', builderModel: 'Codex', reviewerModel: 'Gemini', candidate: 'a'.repeat(40) });
   const pending = await dispatchIndependentReview(ready);
   assert.equal(pending.status, 'PENDING_ADAPTER');
   let calls = 0;
@@ -76,6 +76,9 @@ test('subagent is never claimed as dispatched without an authorized adapter', as
   assert.equal(dispatched.status, 'DISPATCH_REQUESTED');
   assert.equal(dispatched.verdict, 'HOLD');
   assert.equal(calls, 1);
+  const missingCandidate = await dispatchIndependentReview(routeWorkflow({ request: 'Review code', builderModel: 'Codex', reviewerModel: 'Gemini' }));
+  assert.equal(missingCandidate.status, 'HOLD');
+  assert.equal(missingCandidate.reason, 'EXACT_CANDIDATE_REQUIRED');
   const blocked = await dispatchIndependentReview(routeWorkflow({ builderModel: 'GPT-6', reviewerModel: 'Codex' }), async () => { calls++; });
   assert.equal(blocked.status, 'HOLD');
   assert.equal(calls, 1);
