@@ -1,28 +1,31 @@
 name: Vibe Code Review
 
+# Restore the immutable, working OpenCodeReview workflow used by the Hermes repository.
+# The former @main reference pointed to a non-existent reusable workflow.
+# If OPENROUTER_API_KEY is unavailable, this check fails closed: no approval is inferred.
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: vibe-code-review-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
   pull-requests: write
   issues: write
-  models: read
 
 jobs:
   review:
     if: github.event.pull_request.draft == false
-    uses: executiveusa/open-code-review/.github/workflows/vibe-review-standard.yml@main
+    uses: executiveusa/open-code-review/.github/workflows/vibe-code-review.yml@864933213372cc488b3f2f2b1deaab84ea91b855
     with:
-      model: openai/gpt-4.1
-      review_concurrency: "3"
+      ocr_version: "1.11.8"
+      llm_url: https://openrouter.ai/api/v1/chat/completions
+      model: nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
+      review_concurrency: "1"
       route_severity_below: low
       route_categories: style,documentation
-      # NOTE: prompt-injection findings are reviewed under the `security` category
-      # (the engine has no separate injection category) and are never routed away
-      # from inline comments. TODO: the referenced reusable workflow
-      # executiveusa/open-code-review/.github/workflows/vibe-review-standard.yml@main
-      # does not exist in that repo - this gate currently errors until a reusable
-      # workflow is published there. Tracked; do not silently retarget.
-      upload_artifacts: true
+    secrets:
+      llm_token: ${{ secrets.OPENROUTER_API_KEY }}
