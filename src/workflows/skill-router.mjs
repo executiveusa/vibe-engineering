@@ -44,7 +44,11 @@ export function getWorkflow(id) {
 }
 
 export function listSkillSources(workflowId = null) {
-  return registry.sources.filter((item) => !workflowId || item.workflow === workflowId);
+  const local = registry.localSkills.map((item) => ({
+    ...item, url: 'https://github.com/executiveusa/vibe-engineering/blob/main/' + item.path,
+    notes: item.when,
+  }));
+  return [...local, ...registry.sources].filter((item) => !workflowId || item.workflow === workflowId);
 }
 
 export function routeWorkflow({ request = '', icmStage = null, workflowId = null, builderModel = null, reviewerModel = null, base = null, candidate = null, changedFiles = [] } = {}) {
@@ -88,6 +92,9 @@ export function routeWorkflow({ request = '', icmStage = null, workflowId = null
       load: 'load only at this step',
     })),
     specialists,
+    availableLocalSkills: registry.localSkills.filter((item) => item.workflow === selected.id).map((item) => ({
+      id: item.id, source: item.path, when: item.when, load: 'on-demand',
+    })),
     review: {
       required: true,
       codeReview: { engine: registry.review.codeEngine, required: codeReviewRequired,
