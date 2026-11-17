@@ -38,7 +38,7 @@ test('CVE-2026-112366 crafted failing input completes in isolated deadline', () 
 });
 
 test('captures, escapes, alternatives and explicit safety opt-out preserve expected semantics', () => {
-  assert.equal(picomatch.isMatch('*a*a', '+(\\\\*a)'), true);
+  assert.equal(picomatch.isMatch('*a*a', '+(\\*a)'), true);
   assert.equal(picomatch.isMatch('foobar', '+(foo|bar)'), true);
   assert.deepEqual(picomatch.makeRe('+(*a)', { capture: true }).exec('aba').slice(1), ['aba', 'ab']);
   assert.equal(picomatch.makeRe('+(*a)', { maxExtglobRecursion: false }).source.includes(')+'), true);
