@@ -1,9 +1,8 @@
 name: Vibe Code Review
 
-# The former reusable OpenCodeReview workflow was unavailable upstream.
-# GitHub Models was retired in 2026. Until a credentialed OCR provider is
-# configured, do not claim review success from either of those routes.
-# This gate verifies the repository's existing independent Codex PR reviewer.
+# The upstream reusable OpenCodeReview workflow is absent, and GitHub Models
+# inference was retired. Fail closed on the installed independent Codex
+# reviewer's signed-in GitHub bot evidence until a working OCR route is restored.
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
@@ -11,6 +10,7 @@ on:
 permissions:
   contents: read
   pull-requests: read
+  issues: read
 
 jobs:
   review:
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Require independent exact-revision Codex receipt without open P1/P2
+      - name: Require completed independent Codex evidence for exact candidate
         uses: actions/github-script@v7
         with:
           github-token: ${{ github.token }}
@@ -26,27 +26,36 @@ jobs:
             const { owner, repo } = context.repo;
             const pr = context.payload.pull_request;
             const head = pr.head.sha;
-            const expectedBot = 'chatgpt-codex-connector[bot]';
-            const reviews = await github.paginate(github.rest.pulls.listReviews, {
-              owner, repo, pull_number: pr.number, per_page: 100
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number: pr.number, per_page: 100
             });
-            const current = reviews.filter(r => r.user?.login === expectedBot &&
-              r.body?.includes('codex-review-receipt:v1') &&
-              r.body?.includes('Reviewed commit:') &&
-              r.body.match(/Reviewed commit:\*\* \`([0-9a-f]{8,40})\`/)?.[1] === head.slice(0, 10));
-            if (!current.length) {
-              core.setFailed('HOLD: no independent Codex review receipt for exact PR head ' + head + '. Request @codex review and rerun this gate.');
+            const snapshots = comments.filter(c =>
+              c.user?.login === 'chatgpt-codex-connector[bot]' &&
+              c.body?.includes('<!-- codex-pull-request-review-summary -->')
+            );
+            const latest = snapshots.sort((a,b) => Date.parse(b.updated_at)-Date.parse(a.updated_at))[0];
+            const matched = latest?.body?.match(/<!-- codex-review-state:v1 (.+) -->/);
+            let state;
+            try { state = JSON.parse(matched?.[1] || 'null'); } catch {}
+            const code = state?.code_review;
+            if (!code || code.commit_sha !== head || code.status !== 'completed' ||
+                code.has_any_findings !== false || code.has_unresolved_findings !== false) {
+              core.setFailed('HOLD: independent Codex code review not completed cleanly on exact head ' + head);
               return;
             }
-            const comments = await github.paginate(github.rest.pulls.listReviewComments, {
+            const files = await github.paginate(github.rest.pulls.listFiles, {
               owner, repo, pull_number: pr.number, per_page: 100
             });
-            const material = comments.filter(c => c.user?.login === expectedBot &&
-              c.original_commit_id === head &&
-              /codex-code-review-finding:v1/.test(c.body || '') &&
-              /P[012] Badge/.test(c.body || ''));
-            if (material.length) {
-              core.setFailed('HOLD: independent review identifies ' + material.length + ' P0/P1/P2 finding(s) on exact PR head ' + head);
-              return;
+            const securitySensitive = files.some(f =>
+              f.filename.startsWith('vendor/picomatch/') ||
+              ['package.json','package-lock.json'].includes(f.filename)
+            );
+            if (securitySensitive) {
+              const security = state?.security_review;
+              if (!security || security.commit_sha !== head || security.status !== 'completed' ||
+                  security.has_any_findings !== false || security.has_unresolved_findings !== false) {
+                core.setFailed('HOLD: exact-head independent Codex security review required for dependency changes ' + head);
+                return;
+              }
             }
-            core.info('Independent Codex receipt on ' + head + '; no material findings on this revision.');
+            core.info('Exact candidate independently reviewed by Codex: '+head);
