@@ -57,6 +57,7 @@ Earlier repairs: OpenRouter secret, orphan submodule, Next.js lockfile/Nix, Type
 Earlier evidence: public Hermes bridge HTTP 502; absent `bars-hermes` container; intended loopback port 8642 closed; historical pinned image unavailable; API on 8643 not proven compatible. **Do not repoint ports or bypass production gate.** Ask Hermes whether issue #50 is already assigned, then restore only with verified image, authentication, baseline and rollback. Prove actual P1–P4 execution, rerun CI, obtain independent review, and merge only if authorized gates pass.
 
 **First safe Hermes test (read-only):**
+
 > Report your identity, host, runtime version, active mission, last completed mission, blockers, and whether BARS issue #50 is in progress. Inspect your own state and the canonical GitHub issue. Do not change code, containers, services, credentials, or deployments. Return timestamped evidence through the same verified channel.
 
 ## Mission contract
