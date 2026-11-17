@@ -47,6 +47,7 @@
   "overrides": {
     "nanoid": "3.3.18",
     "postcss": "8.5.23",
-    "source-map-js": "1.2.2"
+    "source-map-js": "1.2.2",
+    "picomatch": "github:micromatch/picomatch#c63a5bf4e61dbdb81bc41e97dc2616c30acce337"
   }
 }
