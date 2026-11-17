@@ -1,6 +1,6 @@
 # Sources and pins
 
-The unified source discovery registry is `skills/workflows/registry.json` (22 optional/canonical/reference/project-only/quarantined entries). These are links and invocation hints, not vendored implementations, verified licenses, or automatic permissions to execute. Before using an external capability, verify current upstream SHA, license/terms, security and distribution rights, then record the checked pin here or in `docs/governance/SOURCE-PROVENANCE-LEDGER.md`. Quarantined and unavailable entries must never auto-run.
+The unified source discovery registry is `skills/workflows/registry.json` (21 local SKILL.md entries plus 22 external reference entries). These are links and invocation hints, not vendored implementations, verified licenses, or automatic permissions to execute. Before using an external capability, verify current upstream SHA, license/terms, security and distribution rights, then record the checked pin here or in `docs/governance/SOURCE-PROVENANCE-LEDGER.md`. Quarantined and unavailable entries must never auto-run.
 
 - In-repo skills: `skills/<name>/SKILL.md` in this repository.
 - External: Matt Pocock skills, https://github.com/mattpocock/skills, tag v1.2.3, commit 6acc160e4e0cd062dbbbd7a1b26ae92855edf07e, MIT license. Reference only. Install separately if wanted; nothing here copies its text.
