@@ -42,7 +42,7 @@ jobs:
               owner, repo, pull_number: pr.number, per_page: 100
             });
             const material = comments.filter(c => c.user?.login === expectedBot &&
-              c.commit_id === head &&
+              c.original_commit_id === head &&
               /codex-code-review-finding:v1/.test(c.body || '') &&
               /P[012] Badge/.test(c.body || ''));
             if (material.length) {
