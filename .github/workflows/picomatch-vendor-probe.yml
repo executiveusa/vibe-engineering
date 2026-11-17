@@ -27,3 +27,4 @@ jobs:
           npm audit --audit-level=high
           npm test
           npm run build
+          npm run check
