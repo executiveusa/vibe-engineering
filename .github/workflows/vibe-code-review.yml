@@ -48,6 +48,8 @@ jobs:
         uses: alibaba/open-code-review@d30f93864e9c682d27c7fb2d03ae112dca966c32
         with:
           ocr_version: '1.13.11'
+          review_concurrency: '1'
+          max_tokens_budget: '12000'
           llm_url: ${{ secrets.OCR_LLM_URL }}
           llm_auth_token: ${{ secrets.OCR_LLM_AUTH_TOKEN }}
           llm_model: ${{ vars.OCR_LLM_MODEL }}
