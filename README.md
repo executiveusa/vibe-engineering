@@ -8,7 +8,7 @@ It gives Claude Code, Codex, Cursor, OpenCode, custom agents, and humans the sam
 
 ## Skill Dispatch Desk
 
-Use the [website workflow selector](https://vibe-engineering-lime.vercel.app/#skill-desk) to describe a job, select its ICM stage, see only the relevant skills and tools, and copy a handoff to your agent. Nine workflows and 22 canonical/optional/reference source entries are mapped in [the routing registry](skills/workflows/registry.json); their full instructions remain at their original sources and load only when needed.
+Use the [website workflow selector](https://vibe-engineering-lime.vercel.app/#skill-desk) to describe a job, select its ICM stage, see only the relevant skills and tools, and copy a handoff to your agent. Nine workflows, 21 in-repository skills and 22 external references are mapped in [the routing registry](skills/workflows/registry.json); their full instructions remain at their original sources and load only when needed.
 
 For agents: read [the workflow index](skills/workflows/INDEX.md), then the one matching workflow. For applications: `GET /api/v1/workflow-router` lists workflows, and `POST /api/v1/workflow-router` returns a structured, non-executing step plan. The separate [ICM dispatcher contract](docs/architecture/SKILL-DISPATCH-ICM.md) explains source security, existing OpenCodeReview execution, independent model delegation, receipts and HOLD/SHIP gates.
 
