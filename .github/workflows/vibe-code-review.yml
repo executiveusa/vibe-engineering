@@ -4,25 +4,48 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
 
+# This gate fails closed. A successful test/build is not a code-review receipt.
+# Model calls are disabled until the owner opts in and provides credentials.
 permissions:
   contents: read
   pull-requests: write
   issues: write
-  models: read
 
 jobs:
   review:
     if: github.event.pull_request.draft == false
-    uses: executiveusa/open-code-review/.github/workflows/vibe-review-standard.yml@main
-    with:
-      model: openai/gpt-4.1
-      review_concurrency: "3"
-      route_severity_below: low
-      route_categories: style,documentation
-      # NOTE: prompt-injection findings are reviewed under the `security` category
-      # (the engine has no separate injection category) and are never routed away
-      # from inline comments. TODO: the referenced reusable workflow
-      # executiveusa/open-code-review/.github/workflows/vibe-review-standard.yml@main
-      # does not exist in that repo - this gate currently errors until a reusable
-      # workflow is published there. Tracked; do not silently retarget.
-      upload_artifacts: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Require approved, authorized review configuration
+        env:
+          SAME_REPO: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+          APPROVED: ${{ vars.VIBE_OCR_REVIEW_ENABLED }}
+          LLM_URL: ${{ secrets.OCR_LLM_URL }}
+          LLM_TOKEN: ${{ secrets.OCR_LLM_AUTH_TOKEN }}
+          LLM_MODEL: ${{ vars.OCR_LLM_MODEL }}
+        run: |
+          if [ "$SAME_REPO" != "true" ]; then
+            echo "::error::Fork PR requires separate owner-approved review; no credentials are exposed."
+            exit 1
+          fi
+          if [ "$APPROVED" != "true" ]; then
+            echo "::error::OCR review HOLD. Owner must explicitly set VIBE_OCR_REVIEW_ENABLED=true before paid model calls."
+            exit 1
+          fi
+          if [ -z "$LLM_URL" ] || [ -z "$LLM_TOKEN" ] || [ -z "$LLM_MODEL" ]; then
+            echo "::error::OCR review HOLD. Configure OCR_LLM_URL and OCR_LLM_AUTH_TOKEN secrets and OCR_LLM_MODEL variable."
+            exit 1
+          fi
+      # Official upstream composite action (pinned commit, reviewed on 2026-11-17).
+      # Replaces the former invalid reusable-workflow reference.
+      - name: Automatic code review and PR findings
+        uses: alibaba/open-code-review@d30f93864e9c682d27c7fb2d03ae112dca966c32
+        with:
+          ocr_version: '1.13.11'
+          llm_url: ${{ secrets.OCR_LLM_URL }}
+          llm_auth_token: ${{ secrets.OCR_LLM_AUTH_TOKEN }}
+          llm_model: ${{ vars.OCR_LLM_MODEL }}
+          llm_use_anthropic: ${{ vars.OCR_LLM_USE_ANTHROPIC }}
+          upload_artifacts: 'true'
+          sticky_summary: 'true'
