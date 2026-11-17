@@ -35,7 +35,7 @@ The router takes task, current stage, optional explicit workflow, changed files,
 
 W3 remains a mandatory cross-cutting review gate for material work; W5/W6/W8/W9 supply specialist steps within the single canonical lifecycle.
 
-The registry retains original upstream URLs (22 sources). It marks them canonical, optional, reference, project-only, unavailable or quarantined. Existing full source capability remains available at the original location when needed and authorized. Impeccable is quarantined pending risk review, design-ui-ux is inaccessible pending verification, and GSAP/cinematic components are project-scoped libraries. Lauren Tan verification repo is an example, not a runnable driver.
+The registry preserves all 21 in-repository SKILL.md sources and 22 external reference URLs. Nothing is flattened or removed. It marks them canonical, optional, reference, project-only, unavailable or quarantined. Existing full source capability remains available at the original location when needed and authorized. Impeccable is quarantined pending risk review, design-ui-ux is inaccessible pending verification, and GSAP/cinematic components are project-scoped libraries. Lauren Tan verification repo is an example, not a runnable driver.
 
 ## Entry points
 
