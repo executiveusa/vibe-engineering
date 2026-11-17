@@ -24,6 +24,7 @@ jobs:
           LLM_URL: ${{ secrets.OCR_LLM_URL }}
           LLM_TOKEN: ${{ secrets.OCR_LLM_AUTH_TOKEN }}
           LLM_MODEL: ${{ vars.OCR_LLM_MODEL }}
+          LLM_USE_ANTHROPIC: ${{ vars.OCR_LLM_USE_ANTHROPIC }}
         run: |
           if [ "$SAME_REPO" != "true" ]; then
             echo "::error::Fork PR requires separate owner-approved review; no credentials are exposed."
@@ -35,6 +36,10 @@ jobs:
           fi
           if [ -z "$LLM_URL" ] || [ -z "$LLM_TOKEN" ] || [ -z "$LLM_MODEL" ]; then
             echo "::error::OCR review HOLD. Configure OCR_LLM_URL and OCR_LLM_AUTH_TOKEN secrets and OCR_LLM_MODEL variable."
+            exit 1
+          fi
+          if [ "$LLM_USE_ANTHROPIC" != "true" ] && [ "$LLM_USE_ANTHROPIC" != "false" ]; then
+            echo "::error::OCR review HOLD. Set OCR_LLM_USE_ANTHROPIC to true or false for the approved provider."
             exit 1
           fi
       # Official upstream composite action (pinned commit, reviewed on 2026-11-17).
