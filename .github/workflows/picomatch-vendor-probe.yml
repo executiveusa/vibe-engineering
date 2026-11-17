@@ -1,0 +1,29 @@
+name: Temporary local-picomatch patch probe
+on:
+  push:
+    branches:
+      - security/picomatch-vendor-probe-20261117
+permissions:
+  contents: read
+jobs:
+  isolated-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Regenerate lockfile using local patched source
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Capture new lockfile
+        run: node -e "console.log('LOCK_BASE64=' + require('fs').readFileSync('package-lock.json').toString('base64'))"
+      - name: Reproduce clean install from the lockfile
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Run security and regression suite
+        run: |
+          npm audit --audit-level=high
+          npm test
+          npm run build
