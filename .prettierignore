@@ -6,3 +6,5 @@ build
 .factory/evidence
 # Vendored third-party skills kept verbatim for clean re-vendoring
 skills/cook
+# Vendored upstream MIT source: preserve patch provenance and upstream formatting
+vendor/picomatch
