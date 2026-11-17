@@ -1,0 +1,696 @@
+{
+  "version": "1.0",
+  "authority": "skills/vibe-engineering/SKILL.md",
+  "icm": [
+    "AGENTS.md",
+    "ICMR.yaml",
+    "CONTEXT.md"
+  ],
+  "stages": {
+    "INTENT": "w1-intake-to-spec",
+    "SPEC": "w1-intake-to-spec",
+    "PLAN": "w2-build",
+    "BUILD": "w2-build",
+    "PROOF": "w3-proof-and-review",
+    "COUNCIL": "w3-proof-and-review",
+    "JUDGE": "w3-proof-and-review",
+    "SHIP": "w4-ship-and-operate",
+    "OPERATE": "w4-ship-and-operate"
+  },
+  "workflows": [
+    {
+      "id": "w1-intake-to-spec",
+      "title": "Intake to spec",
+      "stages": [
+        "INTENT",
+        "SPEC"
+      ],
+      "terms": [
+        "idea",
+        "business",
+        "offer",
+        "interview",
+        "grill",
+        "brief",
+        "spec",
+        "prd",
+        "requirement",
+        "plan"
+      ],
+      "entry": "skills/workflows/w1-intake-to-spec/WORKFLOW.md",
+      "steps": [
+        {
+          "name": "Inspect ICM state",
+          "skill": "setup-vibe",
+          "source": "skills/setup-vibe/SKILL.md",
+          "tool": "Git + ICM"
+        },
+        {
+          "name": "Resolve decisions",
+          "skill": "grill",
+          "source": "skills/grill/SKILL.md",
+          "tool": "Focused interview"
+        },
+        {
+          "name": "Write acceptance criteria",
+          "skill": "spec",
+          "source": "src/skills/index.mjs",
+          "tool": "Specification"
+        },
+        {
+          "name": "Split measurable slices",
+          "skill": "tickets",
+          "source": "src/skills/index.mjs",
+          "tool": "ICM tasks"
+        }
+      ],
+      "specialists": [
+        "adhd"
+      ]
+    },
+    {
+      "id": "w2-build",
+      "title": "Plan and build",
+      "stages": [
+        "PLAN",
+        "BUILD"
+      ],
+      "terms": [
+        "build",
+        "code",
+        "implement",
+        "bug",
+        "feature",
+        "refactor",
+        "development",
+        "migration",
+        "app"
+      ],
+      "entry": "skills/workflows/w2-build/WORKFLOW.md",
+      "steps": [
+        {
+          "name": "Inspect repo and tests",
+          "skill": "setup-vibe",
+          "source": "skills/setup-vibe/SKILL.md",
+          "tool": "Git, CI"
+        },
+        {
+          "name": "Select a bounded slice",
+          "skill": "deep-work",
+          "source": "skills/deep-work/SKILL.md",
+          "tool": "Impact analysis"
+        },
+        {
+          "name": "Build test-first",
+          "skill": "build",
+          "source": "src/skills/index.mjs",
+          "tool": "Code editor and tests"
+        },
+        {
+          "name": "Verify the actual path",
+          "skill": "proof",
+          "source": "skills/proof/SKILL.md",
+          "tool": "Browser + integration tests"
+        }
+      ],
+      "specialists": [
+        "pauli-engineering",
+        "lauren-verify"
+      ]
+    },
+    {
+      "id": "w3-proof-and-review",
+      "title": "Proof and independent review",
+      "stages": [
+        "PROOF",
+        "COUNCIL",
+        "JUDGE"
+      ],
+      "terms": [
+        "review",
+        "audit",
+        "verify",
+        "test",
+        "quality",
+        "code review",
+        "security",
+        "ux",
+        "user journey",
+        "accessibility",
+        "usability",
+        "regression"
+      ],
+      "entry": "skills/workflows/w3-proof-and-review/WORKFLOW.md",
+      "steps": [
+        {
+          "name": "Automatic code review against exact revision",
+          "skill": "review",
+          "source": "src/skills/index.mjs",
+          "tool": "OpenCodeReview"
+        },
+        {
+          "name": "Walk success and failure paths",
+          "skill": "proof",
+          "source": "skills/proof/SKILL.md",
+          "tool": "Browser agent or Playwright"
+        },
+        {
+          "name": "Evaluate accessibility and usability",
+          "skill": "mobile-first-site-proof",
+          "source": "skills/mobile-first-site-proof/SKILL.md",
+          "tool": "UX audits"
+        },
+        {
+          "name": "Independent architecture, security and product review",
+          "skill": "project-review",
+          "source": "skills/project-review/SKILL.md",
+          "tool": "Different-model Council"
+        },
+        {
+          "name": "Judge receipts; never self-approve",
+          "skill": "ship",
+          "source": "skills/ship/SKILL.md",
+          "tool": "Judge HOLD/SHIP"
+        }
+      ],
+      "specialists": [
+        "open-code-review",
+        "wondel-ux",
+        "gotalab-uxaudit",
+        "lauren-verify",
+        "ponytail"
+      ]
+    },
+    {
+      "id": "w4-ship-and-operate",
+      "title": "Ship and operate",
+      "stages": [
+        "SHIP",
+        "OPERATE"
+      ],
+      "terms": [
+        "release",
+        "ship",
+        "deploy",
+        "launch",
+        "production",
+        "monitor",
+        "incident",
+        "rollback"
+      ],
+      "entry": "skills/workflows/w4-ship-and-operate/WORKFLOW.md",
+      "steps": [
+        {
+          "name": "Confirm evidence and authority",
+          "skill": "ship",
+          "source": "skills/ship/SKILL.md",
+          "tool": "ICM Judge"
+        },
+        {
+          "name": "Deploy pinned SHA with rollback",
+          "skill": "ship",
+          "source": "skills/ship/SKILL.md",
+          "tool": "Existing CI"
+        },
+        {
+          "name": "Verify the live site",
+          "skill": "proof",
+          "source": "skills/proof/SKILL.md",
+          "tool": "Browser smoke test"
+        },
+        {
+          "name": "Preserve operational evidence",
+          "skill": "handoff",
+          "source": "src/skills/index.mjs",
+          "tool": "ICM operations"
+        }
+      ],
+      "specialists": []
+    },
+    {
+      "id": "w5-web-design",
+      "title": "Web and product design",
+      "stages": [
+        "SPEC",
+        "BUILD",
+        "PROOF",
+        "COUNCIL"
+      ],
+      "terms": [
+        "design",
+        "website",
+        "ui",
+        "ux design",
+        "hero",
+        "landing",
+        "frontend",
+        "motion",
+        "animation",
+        "layout",
+        "figma",
+        "visual",
+        "dashboard"
+      ],
+      "entry": "skills/workflows/w5-web-design/WORKFLOW.md",
+      "steps": [
+        {
+          "name": "Research comparable design references",
+          "skill": "research",
+          "source": "skills/workflows/w5-web-design/design-references.md",
+          "tool": "Inspo MCP / Refero"
+        },
+        {
+          "name": "Define style and success bar",
+          "skill": "taste",
+          "source": "src/skills/index.mjs",
+          "tool": "Design brief"
+        },
+        {
+          "name": "Create the bounded interface",
+          "skill": "build",
+          "source": "src/skills/index.mjs",
+          "tool": "Existing UI stack"
+        },
+        {
+          "name": "Run mobile, accessibility and journey proof",
+          "skill": "mobile-first-site-proof",
+          "source": "skills/mobile-first-site-proof/SKILL.md",
+          "tool": "Browser + screenshots"
+        },
+        {
+          "name": "Obtain independent taste review",
+          "skill": "project-review",
+          "source": "skills/project-review/SKILL.md",
+          "tool": "Separate model critic"
+        }
+      ],
+      "specialists": [
+        "inspo",
+        "designspells",
+        "refero",
+        "details",
+        "emil",
+        "uncodixfy",
+        "taste",
+        "impeccable",
+        "native-feel",
+        "stageshow",
+        "wondel-ux"
+      ]
+    },
+    {
+      "id": "w6-copy-and-voice",
+      "title": "Copy and voice",
+      "stages": [
+        "SPEC",
+        "BUILD",
+        "PROOF"
+      ],
+      "terms": [
+        "write",
+        "copy",
+        "rewrite",
+        "marketing",
+        "voice",
+        "story",
+        "email",
+        "content",
+        "prose"
+      ],
+      "entry": "skills/workflows/w6-copy-and-voice/WORKFLOW.md",
+      "steps": [
+        {
+          "name": "Validate facts and audience",
+          "skill": "research",
+          "source": "src/skills/index.mjs",
+          "tool": "Source materials"
+        },
+        {
+          "name": "Rewrite in intended voice",
+          "skill": "human-voice",
+          "source": "skills/human-voice/SKILL.md",
+          "tool": "Human Voice"
+        },
+        {
+          "name": "Remove slop and invented claims",
+          "skill": "stop-slop",
+          "source": "skills/stop-slop/SKILL.md",
+          "tool": "Editorial review"
+        },
+        {
+          "name": "Confirm result with owner",
+          "skill": "proof",
+          "source": "skills/proof/SKILL.md",
+          "tool": "Human proof"
+        }
+      ],
+      "specialists": [
+        "no-ai-slop"
+      ]
+    },
+    {
+      "id": "w7-research-and-skill-making",
+      "title": "Research and skill sourcing",
+      "stages": [
+        "INTENT",
+        "SPEC",
+        "PLAN"
+      ],
+      "terms": [
+        "research",
+        "source",
+        "github",
+        "skills",
+        "repository",
+        "find",
+        "study",
+        "compare",
+        "license",
+        "skill"
+      ],
+      "entry": "skills/workflows/w7-research-and-skill-making/WORKFLOW.md",
+      "steps": [
+        {
+          "name": "Identify factual decision",
+          "skill": "research",
+          "source": "src/skills/index.mjs",
+          "tool": "Primary sources"
+        },
+        {
+          "name": "Verify source/version/license/security",
+          "skill": "project-review",
+          "source": "skills/project-review/SKILL.md",
+          "tool": "Source audit"
+        },
+        {
+          "name": "Link capability without cloning its instructions",
+          "skill": "agent-docs",
+          "source": "src/skills/index.mjs",
+          "tool": "Source registry"
+        },
+        {
+          "name": "Propose reviewed promotion",
+          "skill": "spec",
+          "source": "src/skills/index.mjs",
+          "tool": "ICM source ledger"
+        }
+      ],
+      "specialists": []
+    },
+    {
+      "id": "w8-media-gen",
+      "title": "Media generation",
+      "stages": [
+        "SPEC",
+        "BUILD",
+        "PROOF"
+      ],
+      "terms": [
+        "image",
+        "video",
+        "audio",
+        "render",
+        "creative",
+        "generate media",
+        "music"
+      ],
+      "entry": "skills/workflows/w8-media-gen/WORKFLOW.md",
+      "steps": [
+        {
+          "name": "Set budget and rights",
+          "skill": "spec",
+          "source": "src/skills/index.mjs",
+          "tool": "Creative brief"
+        },
+        {
+          "name": "Choose available generation engine",
+          "skill": "research",
+          "source": "src/skills/index.mjs",
+          "tool": "Media connector"
+        },
+        {
+          "name": "Generate with provenance",
+          "skill": "build",
+          "source": "src/skills/index.mjs",
+          "tool": "Media pipeline"
+        },
+        {
+          "name": "Inspect output and distribution rights",
+          "skill": "proof",
+          "source": "skills/proof/SKILL.md",
+          "tool": "Asset preview"
+        }
+      ],
+      "specialists": []
+    },
+    {
+      "id": "w9-decks-docs",
+      "title": "Decks and documents",
+      "stages": [
+        "SPEC",
+        "BUILD",
+        "PROOF"
+      ],
+      "terms": [
+        "pdf",
+        "presentation",
+        "slide",
+        "deck",
+        "doc",
+        "document",
+        "report",
+        "spreadsheet",
+        "diagram"
+      ],
+      "entry": "skills/workflows/w9-decks-docs/WORKFLOW.md",
+      "steps": [
+        {
+          "name": "Set audience and evidence bar",
+          "skill": "spec",
+          "source": "src/skills/index.mjs",
+          "tool": "Source brief"
+        },
+        {
+          "name": "Build requested format",
+          "skill": "build",
+          "source": "src/skills/index.mjs",
+          "tool": "Format engine"
+        },
+        {
+          "name": "Inspect rendered artifact",
+          "skill": "proof",
+          "source": "skills/proof/SKILL.md",
+          "tool": "Document preview"
+        }
+      ],
+      "specialists": []
+    }
+  ],
+  "sources": [
+    {
+      "id": "inspo",
+      "title": "Inspo MCP",
+      "url": "https://inspomcp.dev/api/mcp",
+      "workflow": "w5-web-design",
+      "kind": "mcp",
+      "status": "optional",
+      "warning": "Hosted service receives queries; inspect privacy and permissions"
+    },
+    {
+      "id": "designspells",
+      "title": "Design Spells",
+      "url": "https://designspells.com/",
+      "workflow": "w5-web-design",
+      "kind": "inspiration",
+      "status": "reference",
+      "warning": null
+    },
+    {
+      "id": "refero",
+      "title": "Refero",
+      "url": "https://refero.design/",
+      "workflow": "w5-web-design",
+      "kind": "inspiration",
+      "status": "Respect paid reference service licensing",
+      "warning": null
+    },
+    {
+      "id": "details",
+      "title": "Details inspiration",
+      "url": "https://www.details.so/inspo",
+      "workflow": "w5-web-design",
+      "kind": "inspiration",
+      "status": "reference",
+      "warning": null
+    },
+    {
+      "id": "emil",
+      "title": "Emil Kowalski skills",
+      "url": "https://github.com/emilkowalski/skills",
+      "workflow": "w5-web-design",
+      "kind": "skill",
+      "status": "reference",
+      "warning": null
+    },
+    {
+      "id": "uncodixfy",
+      "title": "Uncodixfy",
+      "url": "https://github.com/executiveusa/pauli-Uncodixfy",
+      "workflow": "w5-web-design",
+      "kind": "skill",
+      "status": "reference",
+      "warning": null
+    },
+    {
+      "id": "taste",
+      "title": "Pauli Taste",
+      "url": "https://github.com/executiveusa/pauli-taste-skill",
+      "workflow": "w5-web-design",
+      "kind": "skill",
+      "status": "reference",
+      "warning": null
+    },
+    {
+      "id": "impeccable",
+      "title": "Impeccable",
+      "url": "https://github.com/pbakaus/impeccable",
+      "workflow": "w5-web-design",
+      "kind": "skill",
+      "status": "quarantined",
+      "warning": "Previous installation scan reported Critical Risk: do not execute before independent audit"
+    },
+    {
+      "id": "adhd",
+      "title": "I Have ADHD",
+      "url": "https://github.com/ayghri/i-have-adhd",
+      "workflow": "w1-intake-to-spec",
+      "kind": "skill",
+      "status": "reference",
+      "warning": null
+    },
+    {
+      "id": "gsap",
+      "title": "GSAP",
+      "url": "https://github.com/greensock/GSAP",
+      "workflow": "w5-web-design",
+      "kind": "library",
+      "status": "project-only",
+      "warning": null
+    },
+    {
+      "id": "design-skills",
+      "title": "Design skills",
+      "url": "https://github.com/ihlamury/design-skills",
+      "workflow": "w5-web-design",
+      "kind": "skill",
+      "status": "reference",
+      "warning": null
+    },
+    {
+      "id": "design-ui-ux",
+      "title": "Design UI UX",
+      "url": "https://github.com/ytx-readings/design-ui-ux",
+      "workflow": "w5-web-design",
+      "kind": "skill",
+      "status": "unavailable",
+      "warning": "Repository access previously failed"
+    },
+    {
+      "id": "no-ai-slop",
+      "title": "No AI Slop",
+      "url": "https://github.com/realrossmanngroup/no_ai_slop_writing_rules",
+      "workflow": "w6-copy-and-voice",
+      "kind": "skill",
+      "status": "reference",
+      "warning": null
+    },
+    {
+      "id": "native-feel",
+      "title": "Native Feel",
+      "url": "https://github.com/yetone/native-feel-skill",
+      "workflow": "w5-web-design",
+      "kind": "skill",
+      "status": "reference",
+      "warning": null
+    },
+    {
+      "id": "ponytail",
+      "title": "Ponytail",
+      "url": "https://github.com/DietrichGebert/ponytail",
+      "workflow": "w3-proof-and-review",
+      "kind": "skill",
+      "status": "reference",
+      "warning": null
+    },
+    {
+      "id": "cinematic",
+      "title": "Cinematic site components",
+      "url": "https://github.com/robonuggets/cinematic-site-components",
+      "workflow": "w5-web-design",
+      "kind": "library",
+      "status": "project-only",
+      "warning": null
+    },
+    {
+      "id": "stageshow",
+      "title": "StageShow",
+      "url": "https://github.com/benjitaylor/skills/tree/main/stageshow",
+      "workflow": "w5-web-design",
+      "kind": "skill",
+      "status": "reference",
+      "warning": null
+    },
+    {
+      "id": "wondel-ux",
+      "title": "Wondel UX heuristics",
+      "url": "https://github.com/wondelai/skills/blob/main/ux-heuristics/SKILL.md",
+      "workflow": "w3-proof-and-review",
+      "kind": "skill",
+      "status": "reference",
+      "warning": null
+    },
+    {
+      "id": "gotalab-uxaudit",
+      "title": "Gotalab UXAudit",
+      "url": "https://github.com/gotalab/uxaudit/blob/main/skills/uxaudit/SKILL.md",
+      "workflow": "w3-proof-and-review",
+      "kind": "skill",
+      "status": "reference",
+      "warning": null
+    },
+    {
+      "id": "lauren-verify",
+      "title": "Lauren Tan verification example",
+      "url": "https://github.com/poteto/verification-skill-example",
+      "workflow": "w3-proof-and-review",
+      "kind": "example",
+      "status": "reference",
+      "warning": "Example lacks runnable browser driver; adapt as pattern"
+    },
+    {
+      "id": "pauli-engineering",
+      "title": "Pauli engineering skills",
+      "url": "https://github.com/executiveusa/pauli-agent-skills-2026",
+      "workflow": "w2-build",
+      "kind": "skill-pack",
+      "status": "canonical",
+      "warning": null
+    },
+    {
+      "id": "open-code-review",
+      "title": "OpenCodeReview",
+      "url": "https://github.com/executiveusa/open-code-review",
+      "workflow": "w3-proof-and-review",
+      "kind": "review-engine",
+      "status": "canonical",
+      "warning": null
+    }
+  ],
+  "review": {
+    "codeEngine": "open-code-review",
+    "automaticGate": "src/journey/automatic-gates.mjs",
+    "candidateCommand": "ocr review --from <base> --to <candidate>",
+    "independence": "Different agent, different model family; no self approval.",
+    "judge": "SHIP or HOLD only after evidence and owner authority"
+  }
+}
