@@ -15,7 +15,7 @@ test('CVE-2026-112366: repeated wildcard extglobs do not produce nested unbounde
   ]) {
     for (const input of yes) assert.equal(picomatch.isMatch(input,pattern),true,pattern + ': ' + input);
     for (const input of no) assert.equal(picomatch.isMatch(input,pattern),false,pattern + ': ' + input);
-    assert.doesNotMatch(picomatch.makeRe(pattern).source,/\\)[+*]/,pattern);
+    assert.doesNotMatch(picomatch.makeRe(pattern).source,/\)[+*]/,pattern);
   }
 });
 
@@ -27,8 +27,8 @@ test('CVE-2026-112366: hostile non-matches complete inside 2 second isolated dea
 });
 
 test('preserve alternation, escapes, captures and opt-out', () => {
-  assert.equal(picomatch.isMatch('*a*a','+(\\\\*a)'),true);
+  assert.equal(picomatch.isMatch('*a*a','+(\\*a)'),true);
   assert.equal(picomatch.isMatch('foobar','+(foo|bar)'),true);
   assert.deepEqual(picomatch.makeRe('+(*a)',{capture:true}).exec('aba').slice(1),['aba','ab']);
-  assert.match(picomatch.makeRe('+(*a)',{maxExtglobRecursion:false}).source,/\\)\\+/);
+  assert.match(picomatch.makeRe('+(*a)',{maxExtglobRecursion:false}).source,/\)\+/);
 });
