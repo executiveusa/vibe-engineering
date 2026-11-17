@@ -1,5 +1,6 @@
 import registry from '../../skills/workflows/registry.json' with { type: 'json' };
 import { getSkill } from '../skills/index.mjs';
+import { runAutomaticGateChecks } from '../journey/automatic-gates.mjs';
 
 const ALIASES = {
   '00_intake': 'INTENT', '01_vision': 'SPEC', '02_blueprint': 'PLAN',
@@ -124,4 +125,39 @@ export async function dispatchIndependentReview(packet, adapter) {
     codeReview: packet.review.codeReview,
   });
   return { status: 'DISPATCH_REQUESTED', result, verdict: 'HOLD', note: 'A reviewer receipt tied to the candidate is still required.' };
+}
+
+
+/**
+ * Authorized local/orchestrator entry: actually run the repository's existing
+ * OCR gate, then request independent review. Never call from a public route.
+ * Dispatch/CI success is not a Council receipt or Judge verdict.
+ */
+export async function runCompletionReview({
+  root = process.cwd(), candidate = null, builderModel = null,
+  reviewerModel = null, dispatchAdapter = null, commandRunner = undefined,
+} = {}) {
+  if (typeof candidate !== 'string' || !/^[0-9a-f]{40}$/i.test(candidate)) {
+    return { status: 'HOLD', reason: 'EXACT_CANDIDATE_REQUIRED' };
+  }
+  const packet = routeWorkflow({
+    workflowId: 'w3-proof-and-review', request: 'Review exact completed code candidate',
+    candidate, builderModel, reviewerModel,
+  });
+  const automatic = await runAutomaticGateChecks({
+    root, stageId: '05-review', candidate, ...(commandRunner ? { commandRunner } : {}),
+  });
+  if (!automatic.gateResults['open-code-review-pass']) {
+    return { status: 'HOLD', reason: 'OPEN_CODE_REVIEW_FAILED',
+      codeReview: automatic.diagnostics['open-code-review-pass'], evidence: automatic.evidence };
+  }
+  const delegated = await dispatchIndependentReview(packet, dispatchAdapter);
+  return {
+    status: delegated.status === 'DISPATCH_REQUESTED' ? 'PENDING_INDEPENDENT_RECEIPT' : 'HOLD',
+    codeReview: automatic.diagnostics['open-code-review-pass'],
+    evidence: automatic.evidence,
+    delegated,
+    judge: 'HOLD',
+    note: 'ICM Council evidence, final project-review and owner/Judge decision remain required.',
+  };
 }
