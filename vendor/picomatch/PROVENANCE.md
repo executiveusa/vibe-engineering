@@ -10,3 +10,5 @@ This is a scoped, temporary, **local** replacement for the single picomatch tran
 - Additional regressions are in `tests/security-picomatch.test.mjs`. Must pass `npm ci`, `npm audit --audit-level=high`, `npm test`, `npm run build`, and independent review before merge.
 - Release/rollback: remove the local dependency and override, re-resolve `package-lock.json`, and delete this vendor directory once an upstream published patched version is verified. Do not downgrade to a vulnerable upstream build.
 - This is a supply-chain exception requiring independent security review of the patch and its compatibility with Vite; the version string itself is not proof of safety.
+
+- Independent Codex P2 review found incorrect flattening for slash-consuming bracket patterns and regex quantifiers; this local copy excludes those cases and adds regressions. The original upstream PR #254 alone is not asserted fully safe.

@@ -32,3 +32,10 @@ test('preserve alternation, escapes, captures and opt-out', () => {
   assert.deepEqual(picomatch.makeRe('+(*a)',{capture:true}).exec('aba').slice(1),['aba','ab']);
   assert.match(picomatch.makeRe('+(*a)',{maxExtglobRecursion:false}).source,/\)\+/);
 });
+
+test('CVE patch preserves repeated slash-consuming bracket semantics (Codex P2)', () => {
+  assert.equal(picomatch.isMatch('a/b', '+([ab/]*)'), true);
+  assert.equal(picomatch.isMatch('aba', '+(a[bc]*)', { regex: true }), true);
+  assert.equal(picomatch.isMatch('ab', '+(a[bc]*)', { regex: true }), true);
+  assert.equal(picomatch.isMatch('aba', '+(a[bc]*)'), true);
+});

@@ -566,14 +566,16 @@ const parse = (input, options) => {
     }
 
     // SECURITY: CVE-2026-112366. Flatten single-branch wildcard repetition.
-    // Based on micromatch/picomatch PR #254, reviewed against upstream 4.0.7.
+    // Based on micromatch/picomatch PR #254; restrict slash-consuming bracket
+    // branches and regex mode to preserve repeated-branch matching semantics.
     const bodyTokens = tokens.slice(token.tokensIndex + 2);
-    const singleWildcard = opts.maxExtglobRecursion !== false &&
+    const singleWildcard = opts.maxExtglobRecursion !== false && !opts.regex &&
       (token.type === 'plus' || token.type === 'star') &&
       splitTopLevel(body).length === 1 &&
       bodyTokens.some(part => part.type === 'star' && !part.extglob) &&
       bodyTokens.every(part => !part.extglob && !part.suffix &&
-        (part.type === 'text' || part.type === 'star' || part.type === 'qmark' || part.type === 'bracket'));
+        (part.type === 'text' || part.type === 'star' || part.type === 'qmark' ||
+         (part.type === 'bracket' && !String(part.value ?? '').includes('/') && !String(part.output ?? '').includes('/'))));
     let output = (singleWildcard ? (token.type === 'star' ? ')?' : ')') : token.close) + (opts.capture ? ')' : '');
     let rest;
 
