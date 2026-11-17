@@ -23,8 +23,9 @@ jobs:
         with:
           llm_url: https://models.github.ai/inference/chat/completions
           llm_auth_token: ${{ github.token }}
-          llm_model: openai/gpt-4.1
+          llm_model: openai/gpt-4o
           llm_use_anthropic: 'false'
+          llm_protocol: openai
           llm_extra_body: '{}'
           github_token: ${{ github.token }}
           review_concurrency: '3'
