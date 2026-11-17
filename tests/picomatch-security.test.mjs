@@ -41,7 +41,7 @@ test('captures, escapes, alternatives and explicit safety opt-out preserve expec
   assert.equal(picomatch.isMatch('*a*a', '+(\\\\*a)'), true);
   assert.equal(picomatch.isMatch('foobar', '+(foo|bar)'), true);
   assert.deepEqual(picomatch.makeRe('+(*a)', { capture: true }).exec('aba').slice(1), ['aba', 'ab']);
-  assert.match(picomatch.makeRe('+(*a)', { maxExtglobRecursion: false }).source, /\\)\\+/);
+  assert.equal(picomatch.makeRe('+(*a)', { maxExtglobRecursion: false }).source.includes(')+'), true);
 });
 
 test('patched picomatch is the sole lockfile resolution, not a hidden vulnerable duplicate', () => {
