@@ -1,7 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
-import { getWorkflow, listWorkflows, listSkillSources, routeWorkflow, dispatchIndependentReview } from '../src/workflows/skill-router.mjs';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { getWorkflow, listWorkflows, listSkillSources, routeWorkflow, dispatchIndependentReview, runCompletionReview } from '../src/workflows/skill-router.mjs';
 import handler from '../api/v1/workflow-router.mjs';
 
 test('nine existing workflows are indexed without loading procedure text', () => {
@@ -101,4 +104,34 @@ test('public API returns metadata, rejects invalid mutations and never executes 
   const rejected = mockResponse();
   await handler({ method: 'POST', body: { request: 'go', executeShell: 'rm -rf /' } }, rejected);
   assert.equal(rejected.statusCode, 400);
+});
+
+
+test('authorized completion invokes existing OpenCodeReview gate and leaves Judge on HOLD', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'vibe-skill-review-'));
+  try {
+    let executed = 0;
+    const result = await runCompletionReview({
+      root, candidate: 'a'.repeat(40), builderModel: 'Codex', reviewerModel: 'Gemini',
+      commandRunner: async (executable, args) => {
+        executed++;
+        assert.match(executable, /ocr/);
+        assert.deepEqual(args, ['review', '--commit', 'a'.repeat(40)]);
+        return { ok: true, exitCode: 0, stdout: 'mock OCR clean', stderr: '' };
+      },
+      dispatchAdapter: async (job) => ({ queued: true, model: job.reviewerModel }),
+    });
+    assert.equal(executed, 1);
+    assert.equal(result.status, 'PENDING_INDEPENDENT_RECEIPT');
+    assert.equal(result.judge, 'HOLD');
+    assert.ok(result.evidence.some((file) => file.includes('open-code-review-pass')));
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('completion never launches OCR without an exact candidate hash', async () => {
+  assert.deepEqual(await runCompletionReview({ candidate: 'main' }), {
+    status: 'HOLD', reason: 'EXACT_CANDIDATE_REQUIRED',
+  });
 });
