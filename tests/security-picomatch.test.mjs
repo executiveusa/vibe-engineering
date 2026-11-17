@@ -1,0 +1,34 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import picomatch from '../vendor/picomatch/index.js';
+
+test('CVE-2026-112366: repeated wildcard extglobs do not produce nested unbounded quantifiers', () => {
+  for (const [pattern, yes, no] of [
+    ['+(*)c', ['abc', 'c'], ['ab!']],
+    ['+(*a)', ['a', 'aba', 'aaa'], ['b', 'aaa!']],
+    ['+(a*)', ['a', 'aba'], ['b']],
+    ['+(a*b)', ['ab', 'abab', 'acbab'], ['a', 'aba']],
+    ['+(a*b*c)', ['abc', 'abcabc', 'axbyc'], ['ab', 'abc!']],
+    ['*(a*b)c', ['c', 'abc', 'ababc'], ['abb']],
+    ['x+(*a)y', ['xay', 'xabaay'], ['xby']]
+  ]) {
+    for (const input of yes) assert.equal(picomatch.isMatch(input,pattern),true,pattern + ': ' + input);
+    for (const input of no) assert.equal(picomatch.isMatch(input,pattern),false,pattern + ': ' + input);
+    assert.doesNotMatch(picomatch.makeRe(pattern).source,/\\)[+*]/,pattern);
+  }
+});
+
+test('CVE-2026-112366: hostile non-matches complete inside 2 second isolated deadline', () => {
+  const script = "const p=require('./vendor/picomatch');for(const pattern of ['+(*)a','+(*a)','*(a*)b','+(a*b)c']) p.isMatch('a'.repeat(10000)+'!',pattern)";
+  const result=spawnSync(process.execPath,['-e',script],{timeout:2000,encoding:'utf8'});
+  assert.equal(result.error,undefined,String(result.error));
+  assert.equal(result.status,0,result.stderr);
+});
+
+test('preserve alternation, escapes, captures and opt-out', () => {
+  assert.equal(picomatch.isMatch('*a*a','+(\\\\*a)'),true);
+  assert.equal(picomatch.isMatch('foobar','+(foo|bar)'),true);
+  assert.deepEqual(picomatch.makeRe('+(*a)',{capture:true}).exec('aba').slice(1),['aba','ab']);
+  assert.match(picomatch.makeRe('+(*a)',{maxExtglobRecursion:false}).source,/\\)\\+/);
+});
