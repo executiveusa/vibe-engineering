@@ -1,7 +1,7 @@
 {
   "name": "picomatch",
   "description": "Blazing fast and accurate glob matcher written in JavaScript, with no dependencies and full support for standard and extended Bash glob features, including braces, extglobs, POSIX brackets, and regular expressions.",
-  "version": "4.0.8-patched.1",
+  "version": "4.0.8",
   "homepage": "https://github.com/micromatch/picomatch",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "funding": "https://github.com/sponsors/jonschlinkert",
@@ -87,6 +87,6 @@
     "patchSource": "https://github.com/micromatch/picomatch/pull/254",
     "patchHead": "c63a5bf4e61dbdb81bc41e97dc2616c30acce337",
     "advisory": "GHSA-fc5q-39xc-vjpf",
-    "status": "LOCAL_UNPUBLISHED_PATCH; replace with official patched release following review"
+    "status": "PRIVATE_LOCAL_4.0.8_FORK_NOT_UPSTREAM_RELEASE"
   }
 }
