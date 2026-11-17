@@ -11,10 +11,12 @@ test('patched picomatch keeps legitimate single-branch extglob matching', () => 
     ['+(*)c', ['abc', 'c'], ['ab!']],
     ['+(*a)', ['a', 'aba', 'aaa'], ['b', 'aaa!']],
     ['+(a*b)', ['ab', 'abab', 'acbab'], ['a', 'aba']],
-    ['*(a*b)c', ['c', 'abc', 'ababc'], ['abb']]
+    ['*(a*b)c', ['c', 'abc', 'ababc'], ['abb']],
   ]) {
-    for (const input of accepted) assert.equal(picomatch.isMatch(input, pattern), true, pattern + ': ' + input);
-    for (const input of rejected) assert.equal(picomatch.isMatch(input, pattern), false, pattern + ': ' + input);
+    for (const input of accepted)
+      assert.equal(picomatch.isMatch(input, pattern), true, pattern + ': ' + input);
+    for (const input of rejected)
+      assert.equal(picomatch.isMatch(input, pattern), false, pattern + ': ' + input);
     const expression = picomatch.makeRe(pattern).source;
     assert.equal(expression.includes(')+') || expression.includes(')*'), false, pattern);
   }
