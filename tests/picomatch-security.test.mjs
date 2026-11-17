@@ -15,7 +15,8 @@ test('patched picomatch keeps legitimate single-branch extglob matching', () => 
   ]) {
     for (const input of accepted) assert.equal(picomatch.isMatch(input, pattern), true, pattern + ': ' + input);
     for (const input of rejected) assert.equal(picomatch.isMatch(input, pattern), false, pattern + ': ' + input);
-    assert.equal(/\\)[+*]/.test(picomatch.makeRe(pattern).source), false, pattern);
+    const expression = picomatch.makeRe(pattern).source;
+    assert.equal(expression.includes(')+') || expression.includes(')*'), false, pattern);
   }
 });
 
