@@ -75,6 +75,7 @@ export function routeWorkflow({ request = '', icmStage = null, workflowId = null
   const reviewerStatus = !reviewerModel ? 'PICK_REVIEW_MODEL' :
     builderFamily && reviewerFamily && builderFamily !== reviewerFamily ? 'READY_FOR_DISPATCH' : 'INDEPENDENCE_UNVERIFIED';
   const safeRef = (input, fallbackRef) => typeof input === 'string' && /^[A-Za-z0-9._/-]{1,120}$/.test(input) ? input : fallbackRef;
+  const candidateSha = typeof candidate === 'string' && /^[0-9a-f]{40}$/i.test(candidate) ? candidate : null;
   const command = 'ocr review --from ' + safeRef(base, '<base>') + ' --to ' + safeRef(candidate, '<candidate>');
 
   return {
@@ -89,7 +90,7 @@ export function routeWorkflow({ request = '', icmStage = null, workflowId = null
     review: {
       required: true,
       codeReview: { engine: registry.review.codeEngine, required: codeReviewRequired,
-        automaticGate: registry.review.automaticGate, command, status: 'NOT_EXECUTED' },
+        automaticGate: registry.review.automaticGate, candidateSha, command, status: 'NOT_EXECUTED' },
       independent: {
         builderModel: builderModel || null, reviewerModel: reviewerModel || null,
         state: reviewerStatus, reviewPrompt:
@@ -103,8 +104,14 @@ export function routeWorkflow({ request = '', icmStage = null, workflowId = null
 
 export async function dispatchIndependentReview(packet, adapter) {
   if (!packet?.review?.independent) throw new TypeError('review packet required');
-  if (packet.review.independent.state !== 'READY_FOR_DISPATCH') {
-    return { status: 'HOLD', reason: packet.review.independent.state };
+  if (packet.review.independent.state !== 'READY_FOR_DISPATCH' ||
+      !modelFamily(packet.review.independent.builderModel) ||
+      !modelFamily(packet.review.independent.reviewerModel) ||
+      modelFamily(packet.review.independent.builderModel) === modelFamily(packet.review.independent.reviewerModel)) {
+    return { status: 'HOLD', reason: 'REVIEWER_INDEPENDENCE_REQUIRED' };
+  }
+  if (packet.review.codeReview.required && !packet.review.codeReview.candidateSha) {
+    return { status: 'HOLD', reason: 'EXACT_CANDIDATE_REQUIRED' };
   }
   if (typeof adapter !== 'function') {
     return { status: 'PENDING_ADAPTER', reason: 'Connect an authorized Hermes/agent runtime. No subagent was contacted.' };
