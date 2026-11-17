@@ -1,0 +1,40 @@
+name: Temporary pinned-picomatch security probe
+on:
+  push:
+    branches:
+      - security/picomatch-pinned-probe-20261117
+permissions:
+  contents: read
+jobs:
+  isolated-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Resolve pinned GitHub dependency and regenerate lockfile
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Capture reproducible lockfile
+        run: node -e "console.log('LOCK_BASE64=' + require('fs').readFileSync('package-lock.json').toString('base64'))"
+      - name: Verify clean installation
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Test hostile repeated extglob patterns against pinned package
+        run: |
+          timeout 4s node --input-type=module -e "
+            import picomatch from 'picomatch';
+            const patterns = ['+(*)a', '+(*a)', '*(a*)b', '+(a*b)c'];
+            for (const pattern of patterns) {
+              picomatch.isMatch('a'.repeat(10000)+'!', pattern);
+            }
+            console.log('Hostile-pattern test completed within 4s');
+          "
+      - name: Security audit (no bypass)
+        run: npm audit --audit-level=high
+      - name: Full project tests and build
+        run: |
+          npm test
+          npm run build
