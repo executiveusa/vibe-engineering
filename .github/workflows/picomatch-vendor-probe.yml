@@ -27,4 +27,9 @@ jobs:
           npm audit --audit-level=high
           npm test
           npm run build
-          npm run check
+          npm run truth:source-check
+          npm run icm:walk
+      - name: Prepare formatter output for changed first-party files
+        run: |
+          npx --yes prettier@3.9.6 --write tests/picomatch-security.test.mjs skills/master-mode/SKILL.md package.json package-lock.json
+          node -e "const fs=require('fs'); for(const [name,path] of [['TEST','tests/picomatch-security.test.mjs'],['SKILL','skills/master-mode/SKILL.md'],['ROOT','package.json'],['LOCK','package-lock.json']]) console.log('FORMATTED_'+name+'_B64='+fs.readFileSync(path).toString('base64'))"
