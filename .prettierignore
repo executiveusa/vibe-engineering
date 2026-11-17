@@ -4,3 +4,5 @@ dist
 build
 .vercel
 .factory/evidence
+# Vendored third-party skills kept verbatim for clean re-vendoring
+skills/cook
