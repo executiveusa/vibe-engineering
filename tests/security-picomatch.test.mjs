@@ -53,6 +53,10 @@ test('CVE-2026-112366: explicitly reject unsupported ReDoS-prone repeated branch
     ['+(a|a[a])b', {}],
     ['+((a|aa))b', {}],
     ['+(a[bc]|ab)b', {}],
+    ['+("a"|aa)b', {}],
+    ['+(a|\\x61a)b', {}],
+    ['+(a\\+)b', { unescape: true }],
+    ['+(a\\*)b', { unescape: true, regex: true }],
   ]) {
     assert.throws(() => picomatch.isMatch('aba', pattern, options),
       /Unsafe repeated extglob/, pattern);
@@ -66,7 +70,7 @@ test('CVE-2026-112366: previously excluded nested-quantifier attacks have bounde
     ['+([ab/]*)c',{}], ['+(a*)b',{regex:true}],
     ['+([ab/]*)',{}], ['+(a[bc]*)',{regex:true}],
     ['+(*a|b)c',{}], ['+(a+)',{regex:true}],
-    ['+(*a)',{maxExtglobRecursion:false}], ['+(a|aa)b',{maxExtglobRecursion:false}], ['+((a+))b',{}], ['+(ab|abab)c',{}], ['+(a|a[a])b',{}], ['+((a|aa))b',{}]
+    ['+(*a)',{maxExtglobRecursion:false}], ['+(a|aa)b',{maxExtglobRecursion:false}], ['+((a+))b',{}], ['+(ab|abab)c',{}], ['+(a|a[a])b',{}], ['+((a|aa))b',{}], ['+("a"|aa)b',{}], ['+(a|\\x61a)b',{}], ['+(a\\+)b',{unescape:true}]
   ]) assert.throws(()=>p.isMatch('a'.repeat(10000)+'!',pattern,opts),/Unsafe repeated extglob/);`;
   const result = spawnSync(process.execPath, ['-e', script],
     { timeout: 2000, encoding: 'utf8' });
