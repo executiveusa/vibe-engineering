@@ -576,6 +576,20 @@ const parse = (input, options) => {
       bodyTokens.every(part => !part.extglob && !part.suffix &&
         (part.type === 'text' || part.type === 'star' || part.type === 'qmark' ||
          (part.type === 'bracket' && !String(part.value ?? '').includes('/') && !String(part.output ?? '').includes('/'))));
+    // SECURITY: A repeated extglob containing an inner unbounded wildcard is
+    // unsafe when it cannot be flattened without changing matching semantics.
+    // This includes slash-consuming bracket branches and regex:true quantifiers.
+    // Fail explicitly rather than leaving an exponential regex or silently
+    // matching the original glob as a literal. Do not permit recursion opt-outs
+    // to re-enable the vulnerable expression.
+    const hasInnerUnboundedWildcard = bodyTokens.some(part =>
+      part.type === 'star' || part.type === 'globstar' ||
+      (opts.regex && part.type === 'text' && /[*+]/.test(part.output || '')));
+    if ((token.type === 'plus' || token.type === 'star') &&
+        !analysis.risky && !singleWildcard && hasInnerUnboundedWildcard) {
+      throw new SyntaxError('Unsafe repeated extglob: nested wildcard cannot be compiled without ReDoS risk');
+    }
+
     let output = (singleWildcard ? (token.type === 'star' ? ')?' : ')') : token.close) + (opts.capture ? ')' : '');
     let rest;
 
