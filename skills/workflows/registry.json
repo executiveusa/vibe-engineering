@@ -295,7 +295,8 @@
         "impeccable",
         "native-feel",
         "stageshow",
-        "wondel-ux"
+        "wondel-ux",
+        "awwwards-mcp"
       ]
     },
     {
@@ -684,6 +685,15 @@
       "kind": "review-engine",
       "status": "canonical",
       "warning": null
+    },
+    {
+      "id": "awwwards-mcp",
+      "title": "Awwwards MCP + nine companion design skills",
+      "url": "https://github.com/INSANE0777/Awwwards-mcp",
+      "workflow": "w5-web-design",
+      "kind": "mcp",
+      "status": "optional",
+      "warning": "Source commit 0560b94e646db37edcdba5249beeabf8c58ba6c7 (v1.20.0); companion nine skills at https://github.com/INSANE0777/awwwards-skills tag skills-v2026.11.16. Source code MIT; Awwwards content personal/non-commercial inspiration only. No auto-execution, crawling, captures, installation or copying; use one relevant upstream skill on demand."
     }
   ],
   "review": {
@@ -907,7 +917,7 @@
   ],
   "sourceCoverage": {
     "inRepositorySkills": 21,
-    "externalReferences": 22,
+    "externalReferences": 23,
     "workflowFiles": 9,
     "policy": "The registry stores pointers only; original full skills and workflow source remain canonical and are read when invoked."
   }
