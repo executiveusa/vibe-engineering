@@ -565,6 +565,13 @@ const parse = (input, options) => {
   const extglobClose = token => {
     const literal = input.slice(token.startIndex, state.index + 1);
     const body = input.slice(token.startIndex + 2, state.index);
+    // Reject ambiguous alternatives before the analyzer can silently treat
+    // the entire glob as a literal. Example: (ab|abab)+ has exponentially
+    // many backtracking paths, and a literal fallback changes its meaning.
+    if ((token.type === 'plus' || token.type === 'star') &&
+        hasRepeatedCharPrefixOverlap(splitTopLevel(body))) {
+      throw new SyntaxError('Unsafe repeated extglob: overlapping literal alternatives');
+    }
     const analysis = analyzeRepeatedExtglob(body, opts);
 
     if ((token.type === 'plus' || token.type === 'star') && analysis.risky) {
