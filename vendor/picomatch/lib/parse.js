@@ -146,18 +146,44 @@ const hasRepeatedCharPrefixOverlap = branches => {
     for (let j = i + 1; j < values.length; j++) {
       const a = values[i];
       const b = values[j];
-      const char = a[0];
-
-      if (!char || a !== char.repeat(a.length) || b !== char.repeat(b.length)) {
-        continue;
-      }
-
+      // Prefix ambiguity is not confined to one repeated character:
+      // (ab|abab)+ is also exponentially ambiguous under backtracking.
       if (a === b || a.startsWith(b) || b.startsWith(a)) {
         return true;
       }
     }
   }
 
+  return false;
+};
+
+// Detect real source quantifiers while respecting escapes and bracket classes.
+// This is necessary even with default glob options: nested "(a+)" may reach
+// the generated regex without { regex: true }.
+const hasUnescapedBodyQuantifier = body => {
+  let escaped = false;
+  let inClass = false;
+  for (const ch of body) {
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (ch === '\\') {
+      escaped = true;
+      continue;
+    }
+    if (ch === '[' && !inClass) {
+      inClass = true;
+      continue;
+    }
+    if (ch === ']' && inClass) {
+      inClass = false;
+      continue;
+    }
+    if (!inClass && (ch === '+' || ch === '*')) {
+      return true;
+    }
+  }
   return false;
 };
 
@@ -582,17 +608,18 @@ const parse = (input, options) => {
     // Fail explicitly rather than leaving an exponential regex or silently
     // matching the original glob as a literal. Do not permit recursion opt-outs
     // to re-enable the vulnerable expression.
-    const hasRegexQuantifier = opts.regex && /(^|[^\\])[*+]/.test(body);
+    const hasRegexQuantifier = hasUnescapedBodyQuantifier(body);
     const hasInnerUnboundedWildcard = hasRegexQuantifier || bodyTokens.some(part =>
-      part.type === 'star' || part.type === 'globstar' ||
-      (opts.regex && part.type === 'text' && /[*+]/.test(part.output || '')));
+      part.type === 'star' || part.type === 'globstar');
     // Disabling maxExtglobRecursion must not resurrect overlapping repeated
     // literal branches that the normal analyzer already blocks.
     const recursionOverrideUnsafe = opts.maxExtglobRecursion === false &&
       (splitTopLevel(body).some(branch => branch === '' || /^[*?]+$/.test(branch)) ||
        hasRepeatedCharPrefixOverlap(splitTopLevel(body)));
+    const ambiguousRepeatedAlternatives = hasRepeatedCharPrefixOverlap(splitTopLevel(body));
     if ((token.type === 'plus' || token.type === 'star') &&
-        (recursionOverrideUnsafe ||
+        (ambiguousRepeatedAlternatives ||
+         recursionOverrideUnsafe ||
          (!analysis.risky && !singleWildcard && hasInnerUnboundedWildcard))) {
       throw new SyntaxError('Unsafe repeated extglob: nested wildcard cannot be compiled without ReDoS risk');
     }
