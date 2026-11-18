@@ -41,3 +41,10 @@ A separate Codex review of `e29f0d0ac19055b2a21f84f82695c4d82691d5e5` found two 
 
 The updated parser scans the extglob body while respecting escapes and character classes and guards repeated literal alternatives for any prefix ambiguity, not just repeated single-character literals. Unsafe ambiguity raises an explicit SyntaxError. Tests cover both new attacks in subprocess deadlines and check literal-plus matching. An independent code and security review of the latest exact head is still required; passing tests and a private vendor override alone do not prove complete ReDoS closure.
 
+## Conservative repetition guard (2026-11-18)
+
+An independent reviewer reproduced new P1 ReDoS patterns on `5a2f32146fbb558d23e9d47aa2af71e0ba04ff65`:
+`+(a|a[a])b` (literal versus character class) and `+((a|aa))b` (nested alternation). The earlier token scan cannot prove these patterns safe.
+
+The current candidate therefore rejects repeated extglobs unless the body is a single fixed-width token sequence without regex/glob quantifiers, a prefix-free set of **plain literal** alternatives, or a previously validated equivalent wildcard/character-class flattening. This is deliberately stricter than upstream picomatch and can reject advanced patterns that may be harmless. Users of such patterns must rewrite them or obtain an official fixed upstream implementation; do not disable the guard or fall back to unsafe regexes. Tests include positive safe forms and isolated deadline-based regressions for the reviewed bypasses. This remains an unreviewed downstream security patch until exact-head independent code and security receipts pass.
+
