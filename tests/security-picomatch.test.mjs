@@ -26,16 +26,36 @@ test('CVE-2026-112366: hostile non-matches complete inside 2 second isolated dea
   assert.equal(result.status,0,result.stderr);
 });
 
-test('preserve alternation, escapes, captures and opt-out', () => {
+test('preserve safe alternation, escapes, captures and bracket matching', () => {
   assert.equal(picomatch.isMatch('*a*a','+(\\*a)'),true);
   assert.equal(picomatch.isMatch('foobar','+(foo|bar)'),true);
   assert.deepEqual(picomatch.makeRe('+(*a)',{capture:true}).exec('aba').slice(1),['aba','ab']);
-  assert.match(picomatch.makeRe('+(*a)',{maxExtglobRecursion:false}).source,/\)\+/);
+  assert.equal(picomatch.isMatch('aba', '+(a[bc]*)'), true);
 });
 
-test('CVE patch preserves repeated slash-consuming bracket semantics (Codex P2)', () => {
-  assert.equal(picomatch.isMatch('a/b', '+([ab/]*)'), true);
-  assert.equal(picomatch.isMatch('aba', '+(a[bc]*)', { regex: true }), true);
-  assert.equal(picomatch.isMatch('ab', '+(a[bc]*)', { regex: true }), true);
-  assert.equal(picomatch.isMatch('aba', '+(a[bc]*)'), true);
+test('CVE-2026-112366: explicitly reject unsupported ReDoS-prone repeated branches', () => {
+  for (const [pattern, options] of [
+    ['+([ab/]*)c', {}],
+    ['+([ab/]*)', {}],
+    ['+(a*)b', { regex: true }],
+    ['+(a[bc]*)', { regex: true }],
+    ['+(*a)', { maxExtglobRecursion: false }],
+  ]) {
+    assert.throws(() => picomatch.isMatch('aba', pattern, options),
+      /Unsafe repeated extglob/, pattern);
+  }
+});
+
+test('CVE-2026-112366: previously excluded nested-quantifier attacks have bounded subprocess runtime', () => {
+  const script = String.raw`const assert=require('node:assert/strict');
+  const p=require('./vendor/picomatch');
+  for(const [pattern, opts] of [
+    ['+([ab/]*)c',{}], ['+(a*)b',{regex:true}],
+    ['+([ab/]*)',{}], ['+(a[bc]*)',{regex:true}],
+    ['+(*a)',{maxExtglobRecursion:false}]
+  ]) assert.throws(()=>p.isMatch('a'.repeat(10000)+'!',pattern,opts),/Unsafe repeated extglob/);`;
+  const result = spawnSync(process.execPath, ['-e', script],
+    { timeout: 2000, encoding: 'utf8' });
+  assert.equal(result.error, undefined, String(result.error));
+  assert.equal(result.status, 0, result.stderr);
 });
