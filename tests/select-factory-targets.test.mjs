@@ -65,8 +65,12 @@ test('branch 2: VERCEL_TOKEN keeps the existing Vercel batch selection', () => {
   const { include, hasTargets } = parseOutput(r.output);
   assert.equal(hasTargets, 'true');
   assert.ok(include.length >= 1);
-  // ERROR state ranks ahead of READY.
-  assert.equal(include[0].repository, 'executiveusa/alpha');
+  // The nightly selector rotates prioritized candidates daily to avoid starving
+  // healthy repos. Both candidates must be present; priority metadata survives rotation.
+  assert.equal(include.length, 2);
+  assert.deepEqual(new Set(include.map(({ repository }) => repository)), new Set(['executiveusa/alpha', 'executiveusa/beta']));
+  assert.equal(include.find(({ repository }) => repository === 'executiveusa/alpha').priority, 0);
+  assert.equal(include.find(({ repository }) => repository === 'executiveusa/beta').priority, 2);
 });
 
 test('branch 3: without a Vercel token, factory/targets.json drives selection', () => {
