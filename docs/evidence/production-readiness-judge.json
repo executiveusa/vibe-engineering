@@ -1,0 +1,41 @@
+{
+  "decision": "SHIP",
+  "score": 90,
+  "consequence_level": "MEDIUM",
+  "p0_remaining": 0,
+  "p1_remaining": 0,
+  "subject": "PR #68: .github/workflows/merge-gate-caller.yml (caller for the reusable vibe-merge-gate), head cceaaad",
+  "judge": "Claude Code architect session (independent of the PR's builder; did not author this change)",
+  "judged_at": "2026-10-24",
+  "owner_direction": "Owner, in his own conversation 2026-10-24: item 4 'yes do whatever you need to do to make it work. merge it and proceed.'",
+  "checks": {
+    "specification": "PASS",
+    "build": "PASS",
+    "tests": "PASS",
+    "security": "PASS",
+    "user_journey": "PASS",
+    "deployment_config": "PASS",
+    "ownership": "PASS",
+    "rollback": "PASS",
+    "evidence": "PASS",
+    "prompt_injection": "PASS",
+    "motion_audit": "N/A",
+    "system_impact": "PASS"
+  },
+  "findings": {
+    "specification": "Issue #63 / PR #62 probe: the reusable gate had no caller and never ran on PRs. This file adds exactly that caller (pull_request + pull_request_review triggers).",
+    "build": "YAML parses; GitHub accepted it: check 'vibe / vibe-merge-gate' appeared on this PR (job 115636810310).",
+    "tests": "End to end on this PR: the gate ran and HELD for 'no Judge receipt' (job 115636810310), which is the gate working. Repo suite 'verify' passed (job 115636810103).",
+    "security": "permissions contents:read + pull-requests:read only; no secrets; reusable workflow and vibe-ref pinned to full SHA 9e7fea18 (an ancestor of main).",
+    "user_journey": "Contributor opens a PR -> gate runs -> HOLD without a current SHIP receipt; review submit/dismiss re-runs it so approvals are recounted.",
+    "deployment_config": "Single workflow file; runner default ubuntu-latest from the reusable workflow.",
+    "ownership": "Owner directed the merge (owner_direction above).",
+    "rollback": "Revert this one file; no state, data or secrets involved.",
+    "evidence": "Check-run ids above; this receipt is committed after the code, so the gate's freshness rule applies.",
+    "prompt_injection": "No model or LLM input anywhere in this change; untrusted PR text is never interpolated into a prompt or a shell command.",
+    "system_impact": "Every future PR to this repo needs a current SHIP receipt (or a HIGH-level approval) to pass this check; it becomes blocking only once scripts/protect-main.sh makes it required."
+  },
+  "non_blocking": [
+    "P2: the pin 9e7fea18 predates 693de03 (dry-lane receipts refused). Bounded impact: a forged non-dry SHIP receipt passes either version, so honesty of receipts is the real control. Follow-up: repin uses: and vibe-ref to current main in a separate judged PR."
+  ]
+}
