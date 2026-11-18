@@ -1,5 +1,7 @@
 # Consumers: how to mount this
 
+The shared machine-readable registry is `skills/workflows/registry.json`. The read-only `src/workflows/skill-router.mjs` helper returns a focused plan for one ICM stage. HTTP: GET or POST `/api/v1/workflow-router`. The website's Skill Dispatch Desk offers a copyable handoff, not remote execution. Real agent delegation requires an explicitly connected adapter, independent model family, exact-candidate receipts, Council and Judge. See `docs/architecture/SKILL-DISPATCH-ICM.md`.
+
 ## Any coding agent (Claude Code, Codex, similar)
 
 Point the agent at `skills/workflows/INDEX.md` as the entry. Add one line to the project's agent instructions: "Before a task, read skills/workflows/INDEX.md and AGENTS.md; load only the matching workflow."

@@ -55,6 +55,7 @@ This repository is the Client Zero implementation of Vibe Engineering: public st
 | Read the machine-readable method | `truth/sources/vibe-engineering-v2.json` |
 | Use the HTTP Truth API | `api/v1/`, `src/truth/`, `packages/truth-sdk/` |
 | Use MCP | `api/mcp.mjs`, `src/mcp/core.mjs`, `npm run mcp` |
+| Route only relevant skills for current job | `skills/workflows/INDEX.md`, `skills/workflows/registry.json`, `docs/architecture/SKILL-DISPATCH-ICM.md` |
 | Use the portable skill/plugin | `skills/vibe-engineering/SKILL.md`, `.claude-plugin/` |
 | Inspect current project/commercial status | `PROJECT.yaml` and active GitHub issue/spec |
 
