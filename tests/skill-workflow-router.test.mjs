@@ -20,7 +20,7 @@ test('nine existing workflows are indexed without loading procedure text', () =>
 
 test('source registry retains optional and quarantined upstream references', () => {
   const sources = listSkillSources();
-  assert.equal(sources.length, 43);
+  assert.equal(sources.length, 44);
   const local = sources.filter((source) => source.kind === 'in-repository');
   assert.equal(local.length, 21);
   for (const item of local) assert.ok(existsSync(item.path), item.path);
@@ -28,6 +28,7 @@ test('source registry retains optional and quarantined upstream references', () 
   assert.equal(sources.find((source) => source.id === 'impeccable').status, 'quarantined');
   assert.equal(sources.find((source) => source.id === 'design-ui-ux').status, 'unavailable');
   assert.ok(sources.some((source) => source.id === 'lauren-verify'));
+  assert.ok(sources.some((source) => source.id === 'awwwards-mcp'));
 });
 
 test('stage selection defaults to canonical ICM mapping, including physical folder names', () => {
