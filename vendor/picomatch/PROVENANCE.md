@@ -33,3 +33,11 @@ review, regression evidence, and independent security approval remain required.
 The provenance reference to upstream PR #254 is inspiration only, not an
 upstream endorsement or a published fix. Remove the vendor override after an
 official fixed release is independently verified.
+
+## Second independent-review closure (2026-11-18)
+
+A separate Codex review of `e29f0d0ac19055b2a21f84f82695c4d82691d5e5` found two additional P1 ReDoS cases:
+`+((a+))b` under default options, and `+(ab|abab)c` with overlapping multi-character literal alternatives. It also identified a P2 compatibility regression for escaped and bracketed literal plus characters in regex mode.
+
+The updated parser scans the extglob body while respecting escapes and character classes and guards repeated literal alternatives for any prefix ambiguity, not just repeated single-character literals. Unsafe ambiguity raises an explicit SyntaxError. Tests cover both new attacks in subprocess deadlines and check literal-plus matching. An independent code and security review of the latest exact head is still required; passing tests and a private vendor override alone do not prove complete ReDoS closure.
+
