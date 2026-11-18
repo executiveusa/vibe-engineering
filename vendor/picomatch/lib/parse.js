@@ -132,11 +132,13 @@ const normalizeSimpleBranch = branch => {
     }
   }
 
-  if (!isPlainBranch(value)) {
+  // Escape and quote syntax may compile to different literal values than
+  // the raw source: do not claim prefix freedom without compiler equivalence.
+  if (!isPlainBranch(value) || /[\\"]/.test(value)) {
     return;
   }
 
-  return value.replace(/\\(.)/g, '$1');
+  return value;
 };
 
 const hasRepeatedCharPrefixOverlap = branches => {
@@ -191,7 +193,7 @@ const hasUnescapedBodyQuantifier = body => {
 // without regex/glob repetition is unambiguous; plain literal alternatives are
 // safe only when prefix-free. Everything more complex must be safely flattened
 // or rejected: checking known bad regex fragments cannot prove ReDoS safety.
-const isSafeFixedWidthBranch = branch => {
+const isSafeFixedWidthBranch = (branch, options = {}) => {
   if (!branch) return false;
   let escaped = false;
   let inClass = false;
@@ -199,6 +201,9 @@ const isSafeFixedWidthBranch = branch => {
   for (const ch of branch) {
     if (escaped) {
       escaped = false;
+      // In unescape mode these can become live regex operators. In normal
+      // mode accept only known escaped metacharacters as literal tokens.
+      if (options.unescape || !/[+*?()[\]{}|!@.\\]/.test(ch)) return false;
       if (inClass) classLength++;
       continue;
     }
@@ -220,16 +225,16 @@ const isSafeFixedWidthBranch = branch => {
       classLength = 0;
       continue;
     }
-    if (/[?*+@!()[\]{}|]/.test(ch)) return false;
+    if (ch === '"' || /[?*+@!()[\]{}|]/.test(ch)) return false;
   }
   return !escaped && !inClass;
 };
 
-const isProvablySafeRepeatedBody = body => {
+const isProvablySafeRepeatedBody = (body, options = {}) => {
   const branches = splitTopLevel(body);
   if (!branches.length) return false;
   if (branches.length === 1) {
-    return isSafeFixedWidthBranch(branches[0]);
+    return isSafeFixedWidthBranch(branches[0], options);
   }
   // Alternate character classes, nested grouping or wildcard expressions
   // can overlap even when neither branch is a literal prefix of another.
@@ -692,7 +697,7 @@ const parse = (input, options) => {
     // In every other repeated extglob, require a provably unambiguous body.
     // This rejects nested alternations and literal/character-class overlaps
     // that can cause exponential regex backtracking without '+' or '*' tokens.
-    const unsafeBody = !singleWildcard && !isProvablySafeRepeatedBody(body);
+    const unsafeBody = !singleWildcard && !isProvablySafeRepeatedBody(body, opts);
     const ambiguousRepeatedAlternatives = hasRepeatedCharPrefixOverlap(splitTopLevel(body));
     if ((token.type === 'plus' || token.type === 'star') &&
         (unsafeBody ||
