@@ -31,7 +31,7 @@ test('preserve safe alternation, escapes, captures and bracket matching', () => 
   assert.equal(picomatch.isMatch('foobar','+(foo|bar)'),true);
   assert.deepEqual(picomatch.makeRe('+(*a)',{capture:true}).exec('aba').slice(1),['aba','ab']);
   assert.equal(picomatch.isMatch('aba', '+(a[bc]*)'), true);
-  assert.equal(picomatch.isMatch('a+a+', '+(a\\\\+)', { regex: true }), true);
+  assert.equal(picomatch.isMatch('a+a+', '+(a\\+)', { regex: true }), true);
   assert.equal(picomatch.isMatch('a+a+', '+(a[+])', { regex: true }), true);
 });
 
