@@ -12,3 +12,24 @@ This is a scoped, temporary, **local** replacement for the single picomatch tran
 - This is a supply-chain exception requiring independent security review of the patch and its compatibility with Vite; the version string itself is not proof of safety.
 
 - Independent Codex P2 review found incorrect flattening for slash-consuming bracket patterns and regex quantifiers; this local copy excludes those cases and adds regressions. The original upstream PR #254 alone is not asserted fully safe.
+
+## Local safety closure for excluded branches (2026-11-17)
+
+Independent Codex security review found that the previous attempt preserved
+ReDoS for unflattenable repeated extglobs, including `+([ab/]*)c` and
+`+(a*)b` with `{regex:true}`. The guarded parser now **throws SyntaxError**
+on these unsupported dangerous shapes rather than emitting a catastrophic
+backtracking expression or quietly literalizing the glob. It also rejects
+mixed unflattenable wildcard branches and overlapping repeated branches when
+`maxExtglobRecursion:false` would bypass the normal analysis. Safer flattenable
+patterns, ordinary globs, and safe alternations retain their existing behavior.
+
+This is an explicit compatibility trade-off: workloads intentionally using the
+rejected shapes must rewrite those glob patterns, not disable the safety gate.
+Security regression tests use isolated child-process deadlines and positive
+matching assertions. `npm audit` passing against a privately versioned
+vendored package does **not** prove the patch is secure; human-readable source
+review, regression evidence, and independent security approval remain required.
+The provenance reference to upstream PR #254 is inspiration only, not an
+upstream endorsement or a published fix. Remove the vendor override after an
+official fixed release is independently verified.
