@@ -582,11 +582,18 @@ const parse = (input, options) => {
     // Fail explicitly rather than leaving an exponential regex or silently
     // matching the original glob as a literal. Do not permit recursion opt-outs
     // to re-enable the vulnerable expression.
-    const hasInnerUnboundedWildcard = bodyTokens.some(part =>
+    const hasRegexQuantifier = opts.regex && /(^|[^\\])[*+]/.test(body);
+    const hasInnerUnboundedWildcard = hasRegexQuantifier || bodyTokens.some(part =>
       part.type === 'star' || part.type === 'globstar' ||
       (opts.regex && part.type === 'text' && /[*+]/.test(part.output || '')));
+    // Disabling maxExtglobRecursion must not resurrect overlapping repeated
+    // literal branches that the normal analyzer already blocks.
+    const recursionOverrideUnsafe = opts.maxExtglobRecursion === false &&
+      (splitTopLevel(body).some(branch => branch === '' || /^[*?]+$/.test(branch)) ||
+       hasRepeatedCharPrefixOverlap(splitTopLevel(body)));
     if ((token.type === 'plus' || token.type === 'star') &&
-        !analysis.risky && !singleWildcard && hasInnerUnboundedWildcard) {
+        (recursionOverrideUnsafe ||
+         (!analysis.risky && !singleWildcard && hasInnerUnboundedWildcard))) {
       throw new SyntaxError('Unsafe repeated extglob: nested wildcard cannot be compiled without ReDoS risk');
     }
 
