@@ -87,6 +87,11 @@ const judgeModel = process.env.VIBE_JUDGE_MODEL || (lane === "paid" ? "opus" : "
 if (lane !== "dry") {
   assertIndependentJudge(modelFamily(builderModel), modelFamily(judgeModel));
 }
+// The models the runner ACTUALLY launched, for the exit bar's three-voices check (factory/exit-bar.mjs).
+// A receipt an agent wrote never decides which families ran.
+if (process.env.GITHUB_OUTPUT) {
+  fs.appendFileSync(process.env.GITHUB_OUTPUT, `builder_model=${builderModel}\njudge_model=${judgeModel}\n`, "utf8");
+}
 
 // Budgets: every loop stops. An exhausted budget is HOLD, never a pass.
 const positiveInt = (name: string, fallback: number) => {
