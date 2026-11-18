@@ -187,6 +187,66 @@ const hasUnescapedBodyQuantifier = body => {
   return false;
 };
 
+// Conservative repeated-extglob safety proof. A single fixed-width branch
+// without regex/glob repetition is unambiguous; plain literal alternatives are
+// safe only when prefix-free. Everything more complex must be safely flattened
+// or rejected: checking known bad regex fragments cannot prove ReDoS safety.
+const isSafeFixedWidthBranch = branch => {
+  if (!branch) return false;
+  let escaped = false;
+  let inClass = false;
+  let classLength = 0;
+  for (const ch of branch) {
+    if (escaped) {
+      escaped = false;
+      if (inClass) classLength++;
+      continue;
+    }
+    if (ch === '\\') {
+      escaped = true;
+      continue;
+    }
+    if (inClass) {
+      if (ch === ']') {
+        if (!classLength) return false;
+        inClass = false;
+      } else {
+        classLength++;
+      }
+      continue;
+    }
+    if (ch === '[') {
+      inClass = true;
+      classLength = 0;
+      continue;
+    }
+    if (/[?*+@!()[\]{}|]/.test(ch)) return false;
+  }
+  return !escaped && !inClass;
+};
+
+const isProvablySafeRepeatedBody = body => {
+  const branches = splitTopLevel(body);
+  if (!branches.length) return false;
+  if (branches.length === 1) {
+    return isSafeFixedWidthBranch(branches[0]);
+  }
+  // Alternate character classes, nested grouping or wildcard expressions
+  // can overlap even when neither branch is a literal prefix of another.
+  // Only known literal codewords are allowed and they must be prefix-free.
+  const literals = branches.map(normalizeSimpleBranch);
+  if (literals.some(value => !value)) return false;
+  for (let i = 0; i < literals.length; i++) {
+    for (let j = i + 1; j < literals.length; j++) {
+      if (literals[i].startsWith(literals[j]) ||
+          literals[j].startsWith(literals[i])) {
+        return false;
+      }
+    }
+  }
+  return true;
+};
+
 const parseRepeatedExtglob = (pattern, requireEnd = true) => {
   if ((pattern[0] !== '+' && pattern[0] !== '*') || pattern[1] !== '(') {
     return;
@@ -574,6 +634,11 @@ const parse = (input, options) => {
     }
     const analysis = analyzeRepeatedExtglob(body, opts);
 
+    if ((token.type === 'plus' || token.type === 'star') &&
+        analysis.risky && !analysis.safeOutput) {
+      throw new SyntaxError('Unsafe repeated extglob: cannot safely compile ambiguous repetition');
+    }
+
     if ((token.type === 'plus' || token.type === 'star') && analysis.risky) {
       const safeOutput = analysis.safeOutput
         ? (token.output ? '' : ONE_CHAR) + (opts.capture ? `(${analysis.safeOutput})` : analysis.safeOutput)
@@ -623,9 +688,15 @@ const parse = (input, options) => {
     const recursionOverrideUnsafe = opts.maxExtglobRecursion === false &&
       (splitTopLevel(body).some(branch => branch === '' || /^[*?]+$/.test(branch)) ||
        hasRepeatedCharPrefixOverlap(splitTopLevel(body)));
+    // The safe wildcard flattening branch above has established equivalence.
+    // In every other repeated extglob, require a provably unambiguous body.
+    // This rejects nested alternations and literal/character-class overlaps
+    // that can cause exponential regex backtracking without '+' or '*' tokens.
+    const unsafeBody = !singleWildcard && !isProvablySafeRepeatedBody(body);
     const ambiguousRepeatedAlternatives = hasRepeatedCharPrefixOverlap(splitTopLevel(body));
     if ((token.type === 'plus' || token.type === 'star') &&
-        (ambiguousRepeatedAlternatives ||
+        (unsafeBody ||
+         ambiguousRepeatedAlternatives ||
          recursionOverrideUnsafe ||
          (!analysis.risky && !singleWildcard && hasInnerUnboundedWildcard))) {
       throw new SyntaxError('Unsafe repeated extglob: nested wildcard cannot be compiled without ReDoS risk');
