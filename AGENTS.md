@@ -179,3 +179,7 @@ The owner must be able to understand, export, move, replace providers/builders, 
 The builder may explain and repair findings but cannot be the only reviewer approving its own work. Council provides independent challenge. Judge returns only `SHIP` or `HOLD`. Production release remains separately authorized and requires live target-environment verification after release.
 
 For material work, finish with `DECISION`, `CHANGES`, `PROOF`, `STATUS`, `COMMERCIAL IMPACT`, `RISKS`, `ROLLBACK`, `NEXT`, and `HUMAN APPROVAL` when required.
+
+## Optional local context graph
+
+Agents may use `.trail/README.md` for an opt-in, local-only Trail code map. It is a discovery aid, not authority, not a required install, and not a substitute for `AGENTS.md → ICMR.yaml → CONTEXT.md` and the current stage contract. No graph cache is committed or automatically refreshed.

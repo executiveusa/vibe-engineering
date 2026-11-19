@@ -164,3 +164,5 @@ Its governing rules are:
 - reuse engineering systems, not unrelated brand appearance.
 
 When this skill detects convergence, return the work to design before BUILD or release review.
+
+For the detailed brand-separation preflight, see `skills/preserve-standards-forget-style/SKILL.md` in the canonical Vibe repository. This is an optional specialist procedure under the existing Visual Independence Governor, not a new competing design authority.
