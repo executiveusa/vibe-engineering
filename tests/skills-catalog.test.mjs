@@ -41,3 +41,14 @@ test('proof and ship are terminal until an approved workflow or authority choose
   assert.equal(runSkill('proof').execution.next, null);
   assert.equal(runSkill('ship').execution.next, null);
 });
+
+test('MASTER MODE routes CLI and MCP invocations to the canonical House adapter', () => {
+  for (const command of ['master-mode', 'control-tower', 'master mode', 'activate-master-mode']) {
+    assert.equal(getSkill(command)?.id, 'master-mode', command);
+  }
+  const result = runSkill('master-mode', { mission: 'read-only-agent-status' });
+  assert.equal(result.input.mission, 'read-only-agent-status');
+  assert.match(result.execution.instructions.join(' '), /skills\/master-mode\/SKILL\.md/);
+  assert.match(result.execution.instructions.join(' '), /independent exact-revision review/);
+  assert.equal(result.execution.next, null);
+});
