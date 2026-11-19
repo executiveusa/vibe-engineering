@@ -23,6 +23,8 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Test release logic
         run: npm test
+      - name: Run VIBE FORGE Python routing regression tests
+        run: python3 -m unittest discover -s tests -p test_forge_factory.py -v
       - name: Build production site
         run: npm run build
       - name: Audit dependencies

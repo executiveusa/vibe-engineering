@@ -6,6 +6,7 @@ Pick one row by its trigger, open that WORKFLOW.md, follow it. Do not load other
 
 | Workflow                                                              | Load when                                               |
 | --------------------------------------------------------------------- | ------------------------------------------------------- |
+| [VIBE FORGE factory](../forge-factory/WORKFLOW.md) | an idea, existing product or service needs evidence-based inception-to-market routing and commercial validation |
 | [Intake to spec](w1-intake-to-spec/WORKFLOW.md)                       | a request is fuzzy, new, or big; before any build       |
 | [Build](w2-build/WORKFLOW.md)                                         | a spec exists and work should start                     |
 | [Proof and review](w3-proof-and-review/WORKFLOW.md)                   | anything is about to be called done, merged, or shipped |
