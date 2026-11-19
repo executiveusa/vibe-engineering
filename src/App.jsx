@@ -9,6 +9,7 @@ import {
   msUntilNextBeat,
 } from './music-timeline';
 import './studio.css';
+import WorkflowNavigator from './WorkflowNavigator.jsx';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -501,6 +502,8 @@ function App() {
           <OutputPosters />
         </div>
       </section>
+
+      <WorkflowNavigator />
 
       <section className="open-source-close">
         <div className="close-mark"><Mark /></div>
