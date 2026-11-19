@@ -1,5 +1,7 @@
 # Skills index (load this first, nothing else yet)
 
+Machine-readable routing and source provenance: [registry.json](registry.json). The canonical House Skill and current ICM stage take precedence. Agents should select **one** workflow, open its WORKFLOW.md, and read only the current step's skill source. The public website and `/api/v1/workflow-router` consume this same registry; they cannot execute review or approve a release.
+
 Pick one row by its trigger, open that WORKFLOW.md, follow it. Do not load other workflows or any step source ahead of need.
 
 | Workflow                                                              | Load when                                               |
