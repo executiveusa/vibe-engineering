@@ -18,7 +18,7 @@ class FactoryTests(unittest.TestCase):
         self.assertEqual(r["skills"],["yc-startup-fundamentals"])
         self.assertEqual(r["optional_references"],["jona:b2b-ai-startup-levie"])
     def test_installed_specialist_names(self):
-        expectations={2:"proven-better-new",3:"pm-skills-navigator",4:"thinking-expert",5:"yc-startup-fundamentals",6:"pricing-strategist"}
+        expectations={2:"proven-better-new",3:"pm-skills-navigator",4:"thinking-expert",5:"yc-startup-fundamentals",6:"finance"}
         for stage, skill in expectations.items():
             with self.subTest(stage=stage):
                 r=factory.route({"product":"Offer","passed_stages":factory.NAMES[:stage]})
