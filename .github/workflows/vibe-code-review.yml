@@ -1,28 +1,61 @@
 name: Vibe Code Review
 
+# The upstream reusable OpenCodeReview workflow is absent, and GitHub Models
+# inference was retired. Fail closed on the installed independent Codex
+# reviewer's signed-in GitHub bot evidence until a working OCR route is restored.
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: read
-  pull-requests: write
-  issues: write
-  models: read
+  pull-requests: read
+  issues: read
 
 jobs:
   review:
     if: github.event.pull_request.draft == false
-    uses: executiveusa/open-code-review/.github/workflows/vibe-review-standard.yml@main
-    with:
-      model: openai/gpt-4.1
-      review_concurrency: "3"
-      route_severity_below: low
-      route_categories: style,documentation
-      # NOTE: prompt-injection findings are reviewed under the `security` category
-      # (the engine has no separate injection category) and are never routed away
-      # from inline comments. TODO: the referenced reusable workflow
-      # executiveusa/open-code-review/.github/workflows/vibe-review-standard.yml@main
-      # does not exist in that repo - this gate currently errors until a reusable
-      # workflow is published there. Tracked; do not silently retarget.
-      upload_artifacts: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require completed independent Codex evidence for exact candidate
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+            const head = pr.head.sha;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number: pr.number, per_page: 100
+            });
+            const snapshots = comments.filter(c =>
+              c.user?.login === 'chatgpt-codex-connector[bot]' &&
+              c.body?.includes('<!-- codex-pull-request-review-summary -->')
+            );
+            const latest = snapshots.sort((a,b) => Date.parse(b.updated_at)-Date.parse(a.updated_at))[0];
+            const matched = latest?.body?.match(/<!-- codex-review-state:v1 (.+) -->/);
+            let state;
+            try { state = JSON.parse(matched?.[1] || 'null'); } catch {}
+            const code = state?.code_review;
+            if (!code || code.commit_sha !== head || code.status !== 'completed' ||
+                code.has_any_findings !== false || code.has_unresolved_findings !== false) {
+              core.setFailed('HOLD: independent Codex code review not completed cleanly on exact head ' + head);
+              return;
+            }
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner, repo, pull_number: pr.number, per_page: 100
+            });
+            const securitySensitive = files.some(f =>
+              f.filename.startsWith('vendor/picomatch/') ||
+              ['package.json','package-lock.json'].includes(f.filename)
+            );
+            if (securitySensitive) {
+              const security = state?.security_review;
+              if (!security || security.commit_sha !== head || security.status !== 'completed' ||
+                  security.has_any_findings !== false || security.has_unresolved_findings !== false) {
+                core.setFailed('HOLD: exact-head independent Codex security review required for dependency changes ' + head);
+                return;
+              }
+            }
+            core.info('Exact candidate independently reviewed by Codex: '+head);

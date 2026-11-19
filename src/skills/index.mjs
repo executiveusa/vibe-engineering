@@ -79,9 +79,27 @@ const LOOP_ENGINEERING = Object.freeze({
   attribution: 'Owner-provided Loop Engineering v1.0.0 skill package; canonical SKILL.md preserved verbatim under skills/loop-engineering/SKILL.md.',
 });
 
+const MASTER_MODE = Object.freeze({
+  id: 'master-mode',
+  title: 'MASTER MODE — Control Tower',
+  summary: 'Discover active connected agents, tools, missions and projects; coordinate bounded delivery and independent verification without adding a parallel House.',
+  invocation: 'both',
+  category: 'governance',
+  aliases: ['control-tower', 'master mode', 'activate-master-mode'],
+  outputs: ['verified control-tower dashboard', 'mission receipts', 'next safe action'],
+  steps: [
+    'Read skills/master-mode/SKILL.md and the current Vibe House entry points; do not create new governance, orchestration or privileges.',
+    'Discover actual usable tools, MCPs, agents, repositories, work queues and connected systems; distinguish live evidence from historical context.',
+    'Resume existing owner-approved missions, deduplicate work, and prioritize one revenue offer, one platform and one bounded experiment.',
+    'Propose bounded reversible slices and request assignment through Instinct; do not directly delegate fleet work or grant authority. Require independent exact-revision review and rollback.',
+    'Report status, proof, commercial impact, blockers, decisions and next owner action; never claim runtime or production success without live verification.',
+  ],
+  attribution: 'Owner-provided MASTER MODE control tower adapter; canonical instructions under skills/master-mode/SKILL.md, governed by the Vibe Engineering House.',
+});
+
 const ORDERED_CORE_SKILLS = CORE_SKILLS.map((item) => item.id === 'review' ? DOMINANT_REVIEW : item);
 
-export const SKILLS = Object.freeze([SETUP_VIBE, PROJECT_REVIEW, LOOP_ENGINEERING, ...ORDERED_CORE_SKILLS]);
+export const SKILLS = Object.freeze([SETUP_VIBE, PROJECT_REVIEW, LOOP_ENGINEERING, MASTER_MODE, ...ORDERED_CORE_SKILLS]);
 
 const BY_ID = new Map(SKILLS.map((item) => [item.id, item]));
 for (const item of SKILLS) for (const alias of item.aliases ?? []) BY_ID.set(alias, item);

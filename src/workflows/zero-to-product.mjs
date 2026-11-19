@@ -28,7 +28,7 @@ export const ZERO_TO_PRODUCT_WORKFLOW = Object.freeze({
     note: 'OpenCodeReview owns deterministic code-review execution. Vibe adds product intent, system impact, taste, proof, sovereignty, and human release authority around it.',
   }),
   phases: Object.freeze([
-    phase('00-start', 'Start', 'Get the project walkable and understand what Vibe is doing.', ['setup-vibe', 'ask-vibe'], ['explain', 'teach', 'loop-engineering']),
+    phase('00-start', 'Start', 'Get the project walkable and understand what Vibe is doing.', ['setup-vibe', 'ask-vibe'], ['explain', 'teach', 'loop-engineering', 'master-mode']),
     phase('01-discover', 'Discover the idea', 'Turn feelings, goals, and assumptions into explicit decisions.', ['grill-idea', 'grill'], ['interview', 'ask-human', 'research', 'language']),
     phase('02-define', 'Define the target', 'Name the outcome, standard, boundaries, and proof before building.', ['map', 'spec'], ['prototype']),
     phase('03-plan', 'Plan the build', 'Turn the approved target into small, ordered, verifiable work.', ['tickets'], ['architecture-check', 'module-design', 'triage']),
