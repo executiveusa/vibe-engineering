@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "authority": "skills/vibe-engineering/SKILL.md",
   "icm": [
     "AGENTS.md",
@@ -705,6 +705,16 @@
   },
   "localSkills": [
     {
+      "id": "contagious-campaign-director",
+      "title": "Contagious Campaign Director",
+      "workflow": "w1-intake-to-spec",
+      "when": "Optional ethical growth research and bounded experiments; no autonomous publishing",
+      "path": "skills/contagious-campaign-director/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
       "id": "cook",
       "title": "Cook / comparison gauntlet",
       "workflow": "w5-web-design",
@@ -725,11 +735,31 @@
       "activation": "at-step"
     },
     {
+      "id": "emotion-design",
+      "title": "Emotion Design",
+      "workflow": "w6-copy-and-voice",
+      "when": "Optional ethical growth research and bounded experiments; no autonomous publishing",
+      "path": "skills/emotion-design/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
       "id": "event-activation-rsvp",
       "title": "Event activation and RSVP",
       "workflow": "w1-intake-to-spec",
       "when": "When a bounded event or registration workflow is specified",
       "path": "skills/event-activation-rsvp/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "grill",
+      "title": "Grill interview",
+      "workflow": "w1-intake-to-spec",
+      "when": "When a decision-changing unknown remains",
+      "path": "skills/grill/SKILL.md",
       "kind": "in-repository",
       "status": "canonical",
       "activation": "at-step"
@@ -745,11 +775,11 @@
       "activation": "at-step"
     },
     {
-      "id": "grill",
-      "title": "Grill interview",
-      "workflow": "w1-intake-to-spec",
-      "when": "When a decision-changing unknown remains",
-      "path": "skills/grill/SKILL.md",
+      "id": "guerrilla-field-activations",
+      "title": "Guerrilla Field Activations",
+      "workflow": "w7-research-and-skill-making",
+      "when": "Optional ethical growth research and bounded experiments; no autonomous publishing",
+      "path": "skills/guerrilla-field-activations/SKILL.md",
       "kind": "in-repository",
       "status": "canonical",
       "activation": "at-step"
@@ -795,6 +825,16 @@
       "activation": "at-step"
     },
     {
+      "id": "master-mode",
+      "title": "Master Mode",
+      "workflow": "w1-intake-to-spec",
+      "when": "Owner-authorized control tower; request assignment through Instinct only",
+      "path": "skills/master-mode/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
       "id": "mobile-first-site-proof",
       "title": "Mobile First Site Proof",
       "workflow": "w3-proof-and-review",
@@ -810,6 +850,26 @@
       "workflow": "w3-proof-and-review",
       "when": "When stateful behavior needs seeded fault and recovery tests",
       "path": "skills/multiverse-proof/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "practical-value-engine",
+      "title": "Practical Value Engine",
+      "workflow": "w6-copy-and-voice",
+      "when": "Optional ethical growth research and bounded experiments; no autonomous publishing",
+      "path": "skills/practical-value-engine/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "preserve-standards-forget-style",
+      "title": "Preserve Standards Forget Style",
+      "workflow": "w5-web-design",
+      "when": "Before design, preserve standards without copying another brand",
+      "path": "skills/preserve-standards-forget-style/SKILL.md",
       "kind": "in-repository",
       "status": "canonical",
       "activation": "at-step"
@@ -835,6 +895,16 @@
       "activation": "at-step"
     },
     {
+      "id": "public-proof",
+      "title": "Public Proof",
+      "workflow": "w6-copy-and-voice",
+      "when": "Optional ethical growth research and bounded experiments; no autonomous publishing",
+      "path": "skills/public-proof/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
       "id": "setup-vibe",
       "title": "Setup Vibe",
       "workflow": "w1-intake-to-spec",
@@ -855,11 +925,31 @@
       "activation": "at-step"
     },
     {
+      "id": "social-currency-lab",
+      "title": "Social Currency Lab",
+      "workflow": "w6-copy-and-voice",
+      "when": "Optional ethical growth research and bounded experiments; no autonomous publishing",
+      "path": "skills/social-currency-lab/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
       "id": "stop-slop",
       "title": "Stop Slop",
       "workflow": "w6-copy-and-voice",
       "when": "When reviewing generic defaults or unsupported claims",
       "path": "skills/stop-slop/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "story-carrier",
+      "title": "Story Carrier",
+      "workflow": "w6-copy-and-voice",
+      "when": "Optional ethical growth research and bounded experiments; no autonomous publishing",
+      "path": "skills/story-carrier/SKILL.md",
       "kind": "in-repository",
       "status": "canonical",
       "activation": "at-step"
@@ -885,11 +975,11 @@
       "activation": "at-step"
     },
     {
-      "id": "vibe-engineering",
-      "title": "Vibe House Skill",
-      "workflow": "w1-intake-to-spec",
-      "when": "Canonical method router, always authoritative",
-      "path": "skills/vibe-engineering/SKILL.md",
+      "id": "trigger-design",
+      "title": "Trigger Design",
+      "workflow": "w6-copy-and-voice",
+      "when": "Optional ethical growth research and bounded experiments; no autonomous publishing",
+      "path": "skills/trigger-design/SKILL.md",
       "kind": "in-repository",
       "status": "canonical",
       "activation": "at-step"
@@ -905,6 +995,16 @@
       "activation": "at-step"
     },
     {
+      "id": "vibe-engineering",
+      "title": "Vibe House Skill",
+      "workflow": "w1-intake-to-spec",
+      "when": "Canonical method router, always authoritative",
+      "path": "skills/vibe-engineering/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
       "id": "visual-independence-governor",
       "title": "Visual Independence Governor",
       "workflow": "w5-web-design",
@@ -913,10 +1013,30 @@
       "kind": "in-repository",
       "status": "canonical",
       "activation": "at-step"
+    },
+    {
+      "id": "word-of-mouth-experiment-loop",
+      "title": "Word Of Mouth Experiment Loop",
+      "workflow": "w7-research-and-skill-making",
+      "when": "Optional ethical growth research and bounded experiments; no autonomous publishing",
+      "path": "skills/word-of-mouth-experiment-loop/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
+    },
+    {
+      "id": "word-of-mouth-site-audit",
+      "title": "Word Of Mouth Site Audit",
+      "workflow": "w7-research-and-skill-making",
+      "when": "Optional ethical growth research and bounded experiments; no autonomous publishing",
+      "path": "skills/word-of-mouth-site-audit/SKILL.md",
+      "kind": "in-repository",
+      "status": "canonical",
+      "activation": "at-step"
     }
   ],
   "sourceCoverage": {
-    "inRepositorySkills": 21,
+    "inRepositorySkills": 33,
     "externalReferences": 23,
     "workflowFiles": 9,
     "policy": "The registry stores pointers only; original full skills and workflow source remain canonical and are read when invoked."
