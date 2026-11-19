@@ -140,13 +140,21 @@ test('completion never launches OCR without an exact candidate hash', async () =
   });
 });
 
-test('automated PR review uses a pinned upstream action and fails closed without model authorization', () => {
+test('automated PR review requires exact-head independent code and security receipts', () => {
   const workflow = readFileSync('.github/workflows/vibe-code-review.yml', 'utf8');
-  assert.doesNotMatch(workflow, /executiveusa\/open-code-review\/\.github\/workflows\/vibe-review-standard/);
-  assert.match(workflow, /uses: alibaba\/open-code-review@[0-9a-f]{40}/);
-  assert.match(workflow, /VIBE_OCR_REVIEW_ENABLED/);
-  assert.match(workflow, /OCR_LLM_AUTH_TOKEN/);
-  assert.match(workflow, /max_tokens_budget: '12000'/);
+  assert.match(workflow, /chatgpt-codex-connector\\[bot\\]/);
+  assert.match(workflow, /codex-pull-request-review-summary/);
+  assert.match(workflow, /codex-review-state:v1/);
+  assert.match(workflow, /code\\.commit_sha !== head/);
+  assert.match(workflow, /code\\.status !== 'completed'/);
+  assert.match(workflow, /code\\.has_any_findings !== false/);
+  assert.match(workflow, /code\\.has_unresolved_findings !== false/);
+  assert.match(workflow, /security\\.commit_sha !== head/);
+  assert.match(workflow, /security\\.status !== 'completed'/);
+  assert.match(workflow, /security\\.has_unresolved_findings !== false/);
+  assert.match(workflow, /vendor\\/picomatch\\//);
+  assert.match(workflow, /core\\.setFailed\\('HOLD:/);
+  assert.doesNotMatch(workflow, /continue-on-error:\\s*true/);
 });
 
 test('relevant in-repo skill paths are exposed as metadata without loading their bodies', () => {
