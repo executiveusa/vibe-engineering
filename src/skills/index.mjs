@@ -91,7 +91,7 @@ const MASTER_MODE = Object.freeze({
     'Read skills/master-mode/SKILL.md and the current Vibe House entry points; do not create new governance, orchestration or privileges.',
     'Discover actual usable tools, MCPs, agents, repositories, work queues and connected systems; distinguish live evidence from historical context.',
     'Resume existing owner-approved missions, deduplicate work, and prioritize one revenue offer, one platform and one bounded experiment.',
-    'Delegate approved reversible slices to connected agents with appropriate rights and require independent exact-revision review and rollback.',
+    'Propose bounded reversible slices and request assignment through Instinct; do not directly delegate fleet work or grant authority. Require independent exact-revision review and rollback.',
     'Report status, proof, commercial impact, blockers, decisions and next owner action; never claim runtime or production success without live verification.',
   ],
   attribution: 'Owner-provided MASTER MODE control tower adapter; canonical instructions under skills/master-mode/SKILL.md, governed by the Vibe Engineering House.',
