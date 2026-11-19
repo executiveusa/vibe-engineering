@@ -1,4 +1,5 @@
 import { SKILLS as CORE_SKILLS } from './catalog.mjs';
+import { CONTAGIOUS_SKILLS } from './contagious.mjs';
 
 const SETUP_VIBE = Object.freeze({
   id: 'setup-vibe',
@@ -99,7 +100,7 @@ const MASTER_MODE = Object.freeze({
 
 const ORDERED_CORE_SKILLS = CORE_SKILLS.map((item) => item.id === 'review' ? DOMINANT_REVIEW : item);
 
-export const SKILLS = Object.freeze([SETUP_VIBE, PROJECT_REVIEW, LOOP_ENGINEERING, MASTER_MODE, ...ORDERED_CORE_SKILLS]);
+export const SKILLS = Object.freeze([SETUP_VIBE, PROJECT_REVIEW, LOOP_ENGINEERING, MASTER_MODE, ...ORDERED_CORE_SKILLS, ...CONTAGIOUS_SKILLS]);
 
 const BY_ID = new Map(SKILLS.map((item) => [item.id, item]));
 for (const item of SKILLS) for (const alias of item.aliases ?? []) BY_ID.set(alias, item);
