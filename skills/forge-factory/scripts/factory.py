@@ -11,7 +11,7 @@ STAGES = [
  ("03","discovery",["pm-skills-navigator"]),
  ("04","challenge",["thinking-expert"]),
  ("05","yc_market",["yc-startup-fundamentals"]),
- ("06","commercial",["pricing-strategist"]),
+ ("06","commercial",["finance"]),
  ("07","presell",["vibe:w6-copy-and-voice"]),
  ("08","spec",["vibe:w1-intake-to-spec"]),
  ("09","build",["vibe:w2-build"]),
@@ -47,7 +47,7 @@ def route(data):
     elif name=="challenge" and domain in ("devtools","infrastructure"):
         optional_references=["felixgeelhaar:engineering-expert"]
     elif name=="commercial":
-        optional_references=["alirezarezvani:financial-analyst","alirezarezvani:commercial-forecaster"]
+        optional_references=["alirezarezvani:finance","alirezarezvani:commercial","alirezarezvani:c-level-advisor"]
     hold=None
     if not str(data.get("product","")).strip(): hold="missing product/idea"
     elif name=="intake" and data.get("owner_verified") is not True: hold="ownership/authority not verified"
