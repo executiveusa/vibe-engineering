@@ -5,7 +5,7 @@ description: Evidence-first, numbered idea-to-market factory for any product, se
 
 # VIBE FORGE — Idea-to-Market Factory
 
-**One canonical factory, not another agent framework.** Hermes coordinates; Vibe's existing W1–W9 govern research, construction, independent proof and launch. Read `WORKFLOW.md` and `sources/SOURCES.md`. Use `python scripts/factory.py --input <run.json>` to propose a stage; this script takes no side effects.
+**One canonical factory, not another agent framework.** Paperclip/Heisenberg coordinate authorized missions; Hermes/Cosmos prepares specifications and CodeDen-ready handoffs for assigned missions. Vibe's existing W1–W9 govern research, construction, independent proof and launch. Read `WORKFLOW.md` and `sources/SOURCES.md`. Use `python scripts/factory.py --input <run.json>` to propose a stage; this script takes no side effects.
 
 Record mode (GREENFIELD, BROWNFIELD, RESCUE), measurable outcome, actual owner, customer, constraints, permission, evidence quality, commercial purpose, and rollback. Classify projects SELL, USE, MERGE, PARK, ARCHIVE at Stage 06; SELL needs a credible 30-day revenue path. Maintain at most one revenue offer, one shared platform and one bounded experiment; any replacement must be named.
 
