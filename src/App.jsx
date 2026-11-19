@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { CONTAGIOUS_SKILLS } from './skills/contagious.mjs';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
@@ -504,6 +505,23 @@ function App() {
       </section>
 
       <WorkflowNavigator />
+
+      <section className="handcrafted-growth" id="handcrafted-skills" aria-labelledby="handcrafted-title">
+        <div className="handcrafted-shell">
+          <p className="handcrafted-kicker">06 / HANDCRAFTED SKILLS</p>
+          <h2 id="handcrafted-title">Methods you can <em>inspect.</em></h2>
+          <p>Ten original Vibe Engineering growth procedures. Free to read, adapt and verify.</p>
+          <div className="handcrafted-grid">
+            {CONTAGIOUS_SKILLS.map((skill, index) => (
+              <a className="handcrafted-card" key={skill.id} href={`${REPO}/blob/main/skills/${skill.id}/SKILL.md`} target="_blank" rel="noreferrer">
+                <span>{String(index + 1).padStart(2, '0')} / GROWTH</span>
+                <h3>{skill.title}</h3><p>{skill.summary}</p><b>Read the skill ↗</b>
+              </a>
+            ))}
+          </div>
+          <a className="handcrafted-more" href="/api/v1/skills">Explore all skills ↗</a>
+        </div>
+      </section>
 
       <section className="open-source-close">
         <div className="close-mark"><Mark /></div>
