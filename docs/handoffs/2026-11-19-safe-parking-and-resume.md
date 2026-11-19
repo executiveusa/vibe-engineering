@@ -39,5 +39,13 @@
 ## Owner / agent authority
 Bambu -> Instinct -> Heisenberg -> Paperclip (only queue) -> workers (Hermes/Cosmos specs; CodeDen coding factory) -> independent judge. This handoff is not a new queue or standing automation. No unattended production changes.
 
+
+## Explicit residual risks (not cleared by merging this handoff)
+- **Release evidence risk:** No independently verified exact-head review/Judge SHIP or GitHub checks were established for the consolidation. A documentation merge is not a production release approval.
+- **Deployment drift risk:** Vercel/Netlify production builds are not verified against consolidated `main`; the two probed API paths returned 404 and canonical paths require source inspection.
+- **Open-branch risk:** Eleven original PRs remain open, including security/review changes and separately scoped Forge/StarNet work. They must not be bulk-merged or discarded.
+- **Automation risk:** The existing hourly **MASTER MODE Merge Gate** automation was previously configured to watch PR #85. Its live state and whether it has been paused or retargeted were **not verified**; check and update the existing automation before trusting future notifications. Do not create a duplicate loop.
+- **Rollback risk:** Previous production deployments exist, but a live rollback exercise has **not** been verified. Preserve them and test rollback before a release.
+
 ## Current release disposition
 **HOLD / PARKED SAFELY.** Code is merged in GitHub, but final production is not verified. No credentials or production settings were changed as part of this handoff. The existing live sites remain untouched.
